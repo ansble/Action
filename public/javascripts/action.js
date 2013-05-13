@@ -68,6 +68,8 @@ var action = {
 		}
 	}
 
+	, events: function()}{}
+
 	, eventStore: {}
 };
 
