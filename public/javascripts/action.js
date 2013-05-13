@@ -7,6 +7,7 @@ var action = {
 		//	4. once then silent listeners
 		//	5. constructor function for functions
 		//	6. trace function
+		//	7. move the proto mods into the constructor
 
 		var that = this;
 
