@@ -1,6 +1,5 @@
 //TODO list
 //	1. provide scoping for passed in functions
-//	3. add in emitterID
 //	4. once then silent listeners
 //	5. constructor function for functions
 //	6. trace function
