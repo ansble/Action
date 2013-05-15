@@ -3,12 +3,11 @@
 //	4. once then silent listeners
 //	5. constructor function for functions
 //	6. trace function
-//	7. move the proto mods into the constructor
 //	8. Private events module (local to the object)
 
 var action = function(){
 	var action = {
-		newFunction: function(functionIn){
+		eventMe: function(functionIn){
 			var returnFunction = functionIn
 				, localEvents = {};
 
@@ -30,12 +29,21 @@ var action = function(){
 					eventStack = action.eventStore[eventNameIn];
 
 					for(i = 0; i < eventStack.length; i ++){
-						eventStack[i](eventDataIn, this.emitterId);
+						if(typeof eventStack[i].scope !== 'undefined'){
+							eventStack[i].call.apply(eventStack[i].scope,[eventDataIn, this.emitterId]);
+						}else{
+							eventStack[i].call(eventDataIn, this.emitterId);
+						}
+
+						
+						if(eventStack[i].once){
+							this.silence(eventNameIn, eventStack[i].call, true);
+						}
 					}
 				}
 			};
 
-			returnFunction.listen = function(eventName, functionIn){
+			returnFunction.listen = function(eventName, functionIn, scope){
 				//check to see if we are getting an object or a number in the data
 				//	if it is just a number then we are dealing with the
 				//	emitterID only.
@@ -48,7 +56,7 @@ var action = function(){
 					eventStack = action.eventStore[eventName];
 
 					for(i = 0; i < eventStack.length; i ++){
-						if(eventStack[i] === functionIn){
+						if(eventStack[i].call === functionIn && eventStack[i].once === false){
 							newCheck = false;
 							break;
 						}
@@ -57,22 +65,66 @@ var action = function(){
 					console.log(newCheck);
 
 					if(newCheck){
-						eventStack.push(functionIn);
+						if(typeof scope !== 'undefined'){
+							eventStack.push({once: false, call: functionIn, scope: scope});
+						}else{
+							eventStack.push({once: false, call:functionIn});
+						}
 					}
 
 				} else{
 					//new event
 					action.eventStore[eventName] = []; //use an array to store functions
-					action.eventStore[eventName].push(functionIn);
+					if(typeof scope !== 'undefined'){
+						action.eventStore[eventName].push({once: false, call: functionIn, scope: scope});
+					}else{
+						action.eventStore[eventName].push({once: false, call: functionIn});
+					}
 				}
 			}
 
-			returnFunction.silence = function(eventName, functionIn){
+			returnFunction.listenOnce = function(eventName, functionIn, scope){
+				//same thing as .listen() but is only triggered once
+				var i
+					, newCheck = true
+					, eventStack;
+
+				if(typeof action.eventStore[eventName] !== 'undefined'){
+					//already exists check to see if the function is already bound
+					eventStack = action.eventStore[eventName];
+
+					for(i = 0; i < eventStack.length; i ++){
+						if(eventStack[i].call === functionIn && eventStack[i].once === true){
+							newCheck = false;
+							break;
+						}
+					}
+
+					console.log(newCheck);
+
+					if(newCheck){
+						eventStack.push({once:true, call: functionIn});
+					}
+
+				} else{
+					//new event
+					action.eventStore[eventName] = []; //use an array to store functions
+					action.eventStore[eventName].push({once:true, call: functionIn});
+				}
+			}
+
+			returnFunction.silence = function(eventName, functionIn, once){
 				var i;
 
-				for(i = 0; i < action.eventStore[eventName]; i ++){
-					if(functionIn === action.eventStore[eventName][i]){
-						action.eventStore[eventName].splice(i,1)
+				for(i = 0; i < action.eventStore[eventName].length; i ++){
+					if(typeof once === 'boolean'){
+						if(functionIn === action.eventStore[eventName][i].call && action.eventStore[eventName][i].once === once){
+							action.eventStore[eventName].splice(i,1)
+						}
+					} else {
+						if(functionIn === action.eventStore[eventName][i].call){
+							action.eventStore[eventName].splice(i,1)
+						}
 					}
 				}
 			}
@@ -83,7 +135,9 @@ var action = function(){
 		, eventStore: {}
 	};
 
-	action.events = action.newFunction(function(){})
+	//add an events hook for global dealing with events...
+	action.events = action.eventMe({});
 
+	//return the tweaked function
 	return action;
 }(this);

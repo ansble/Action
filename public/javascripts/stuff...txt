@@ -1,0 +1,11 @@
+stuff...
+
+Data Object for event Store
+store: {
+	'event:name': [
+		{
+			once: true/false
+			, call: function(){}
+		}
+	]
+}
