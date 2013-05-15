@@ -71,17 +71,17 @@ var action = function(){
 				}
 			};
 
-			returnObject.listen = function(eventName, functionIn, scope){
+			returnObject.listen = function(eventNameIn, functionIn, scopeIn, localFlagIn){
 				//check to see if we are getting an object or a number in the data
 				//	if it is just a number then we are dealing with the
 				//	emitterID only.
 				var i
 					, newCheck = true
-					, eventStack;
+					, eventStack = action.eventStore[eventNameIn]
+					, newEvent = action;
 
-				if(typeof action.eventStore[eventName] !== 'undefined'){
+				if(typeof eventStack !== 'undefined'){
 					//already exists check to see if the function is already bound
-					eventStack = action.eventStore[eventName];
 
 					for(i = 0; i < eventStack.length; i ++){
 						if(eventStack[i].call === functionIn && eventStack[i].once === false){
@@ -90,11 +90,9 @@ var action = function(){
 						}
 					}
 
-					console.log(newCheck);
-
 					if(newCheck){
-						if(typeof scope !== 'undefined'){
-							eventStack.push({once: false, call: functionIn, scope: scope});
+						if(typeof scopeIn !== 'undefined'){
+							eventStack.push({once: false, call: functionIn, scope: scopeIn});
 						}else{
 							eventStack.push({once: false, call:functionIn});
 						}
@@ -102,16 +100,16 @@ var action = function(){
 
 				} else{
 					//new event
-					action.eventStore[eventName] = []; //use an array to store functions
-					if(typeof scope !== 'undefined'){
-						action.eventStore[eventName].push({once: false, call: functionIn, scope: scope});
+					newEvent.eventStore[eventNameIn] = []; //use an array to store functions
+					if(typeof scopeIn !== 'undefined'){
+						newEvent.eventStore[eventNameIn].push({once: false, call: functionIn, scope: scopeIn});
 					}else{
-						action.eventStore[eventName].push({once: false, call: functionIn});
+						newEvent.eventStore[eventNameIn].push({once: false, call: functionIn});
 					}
 				}
 			}
 
-			returnObject.listenLocal = function(eventName, functionIn, scope){
+			returnObject.listenLocal = function(eventNameIn, functionIn, scopeIn){
 				//check to see if we are getting an object or a number in the data
 				//	if it is just a number then we are dealing with the
 				//	emitterID only.
@@ -119,9 +117,9 @@ var action = function(){
 					, newCheck = true
 					, eventStack;
 
-				if(typeof this.eventStore[eventName] !== 'undefined'){
+				if(typeof this.eventStore[eventNameIn] !== 'undefined'){
 					//already exists check to see if the function is already bound
-					eventStack = this.eventStore[eventName];
+					eventStack = this.eventStore[eventNameIn];
 
 					for(i = 0; i < eventStack.length; i ++){
 						if(eventStack[i].call === functionIn && eventStack[i].once === false){
@@ -130,11 +128,9 @@ var action = function(){
 						}
 					}
 
-					console.log(newCheck);
-
 					if(newCheck){
-						if(typeof scope !== 'undefined'){
-							eventStack.push({once: false, call: functionIn, scope: scope});
+						if(typeof scopeIn !== 'undefined'){
+							eventStack.push({once: false, call: functionIn, scope: scopeIn});
 						}else{
 							eventStack.push({once: false, call:functionIn});
 						}
@@ -142,24 +138,24 @@ var action = function(){
 
 				} else{
 					//new event
-					this.eventStore[eventName] = []; //use an array to store functions
-					if(typeof scope !== 'undefined'){
-						this.eventStore[eventName].push({once: false, call: functionIn, scope: scope});
+					this.eventStore[eventNameIn] = []; //use an array to store functions
+					if(typeof scopeIn !== 'undefined'){
+						this.eventStore[eventNameIn].push({once: false, call: functionIn, scope: scopeIn});
 					}else{
-						this.eventStore[eventName].push({once: false, call: functionIn});
+						this.eventStore[eventNameIn].push({once: false, call: functionIn});
 					}
 				}
 			}
 
-			returnObject.listenOnce = function(eventName, functionIn, scope){
+			returnObject.listenOnce = function(eventNameIn, functionIn, scopeIn){
 				//same thing as .listen() but is only triggered once
 				var i
 					, newCheck = true
 					, eventStack;
 
-				if(typeof action.eventStore[eventName] !== 'undefined'){
+				if(typeof action.eventStore[eventNameIn] !== 'undefined'){
 					//already exists check to see if the function is already bound
-					eventStack = action.eventStore[eventName];
+					eventStack = action.eventStore[eventNameIn];
 
 					for(i = 0; i < eventStack.length; i ++){
 						if(eventStack[i].call === functionIn && eventStack[i].once === true){
@@ -171,25 +167,25 @@ var action = function(){
 					console.log(newCheck);
 
 					if(newCheck){
-						eventStack.push({once:true, call: functionIn});
+						eventStack.push({once:true, call: functionIn, scope: scopeIn});
 					}
 
 				} else{
 					//new event
-					action.eventStore[eventName] = []; //use an array to store functions
-					action.eventStore[eventName].push({once:true, call: functionIn});
+					action.eventStore[eventNameIn] = []; //use an array to store functions
+					action.eventStore[eventNameIn].push({once:true, call: functionIn, scope: scopeIn});
 				}
 			}
 
-			returnObject.listenOnceLocal = function(eventName, functionIn, scope){
+			returnObject.listenOnceLocal = function(eventNameIn, functionIn, scopeIn){
 				//same thing as .listen() but is only triggered once
 				var i
 					, newCheck = true
 					, eventStack;
 
-				if(typeof this.eventStore[eventName] !== 'undefined'){
+				if(typeof this.eventStore[eventNameIn] !== 'undefined'){
 					//already exists check to see if the function is already bound
-					eventStack = this.eventStore[eventName];
+					eventStack = this.eventStore[eventNameIn];
 
 					for(i = 0; i < eventStack.length; i ++){
 						if(eventStack[i].call === functionIn && eventStack[i].once === true){
@@ -201,43 +197,43 @@ var action = function(){
 					console.log(newCheck);
 
 					if(newCheck){
-						eventStack.push({once:true, call: functionIn});
+						eventStack.push({once:true, call: functionIn, scope: scopeIn});
 					}
 
 				} else{
 					//new event
-					this.eventStore[eventName] = []; //use an array to store functions
-					this.eventStore[eventName].push({once:true, call: functionIn});
+					this.eventStore[eventNameIn] = []; //use an array to store functions
+					this.eventStore[eventNameIn].push({once:true, call: functionIn, scope: scopeIn});
 				}
 			}
 
-			returnObject.silence = function(eventName, functionIn, once){
+			returnObject.silence = function(eventNameIn, functionIn, onceIn){
 				var i;
 
-				for(i = 0; i < action.eventStore[eventName].length; i ++){
-					if(typeof once === 'boolean'){
-						if(functionIn === action.eventStore[eventName][i].call && action.eventStore[eventName][i].once === once){
-							action.eventStore[eventName].splice(i,1)
+				for(i = 0; i < action.eventStore[eventNameIn].length; i ++){
+					if(typeof onceIn === 'boolean'){
+						if(functionIn === action.eventStore[eventNameIn][i].call && action.eventStore[eventNameIn][i].once === onceIn){
+							action.eventStore[eventNameIn].splice(i,1)
 						}
 					} else {
-						if(functionIn === action.eventStore[eventName][i].call){
-							action.eventStore[eventName].splice(i,1)
+						if(functionIn === action.eventStore[eventNameIn][i].call){
+							action.eventStore[eventNameIn].splice(i,1)
 						}
 					}
 				}
 			}
 
-			returnObject.silenceLocal = function(eventName, functionIn, once){
+			returnObject.silenceLocal = function(eventNameIn, functionIn, onceIn){
 				var i;
 
-				for(i = 0; i < this.eventStore[eventName].length; i ++){
-					if(typeof once === 'boolean'){
-						if(functionIn === this.eventStore[eventName][i].call && this.eventStore[eventName][i].once === once){
-							this.eventStore[eventName].splice(i,1)
+				for(i = 0; i < this.eventStore[eventNameIn].length; i ++){
+					if(typeof onceIn === 'boolean'){
+						if(functionIn === this.eventStore[eventNameIn][i].call && this.eventStore[eventNameIn][i].once === onceIn){
+							this.eventStore[eventNameIn].splice(i,1)
 						}
 					} else {
-						if(functionIn === this.eventStore[eventName][i].call){
-							this.eventStore[eventName].splice(i,1)
+						if(functionIn === this.eventStore[eventNameIn][i].call){
+							this.eventStore[eventNameIn].splice(i,1)
 						}
 					}
 				}
@@ -251,7 +247,7 @@ var action = function(){
 
 		, eventStore: {}
 
-		, trace: function(emitterId){
+		, trace: function(emitterIdIn){
 			//log out the function that has the emitterId attached
 
 		}
