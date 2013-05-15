@@ -4,13 +4,13 @@
 
 var action = function(){
 	var action = {
-		eventMe: function(functionIn){
-			var returnFunction = functionIn
+		eventMe: function(objectIn){
+			var returnObject = objectIn
 				, localEvents = {};
 
-			returnFunction.emitterId = Math.ceil(Math.random() * 10000);
+			returnObject.emitterId = Math.ceil(Math.random() * 10000);
 
-			returnFunction.emit = function(eventNameIn, eventDataIn){
+			returnObject.emit = function(eventNameIn, eventDataIn){
 				//add the emitterID to this thing
 				var eventStack
 					, functionToCall
@@ -40,7 +40,7 @@ var action = function(){
 				}
 			};
 
-			returnFunction.listen = function(eventName, functionIn, scope){
+			returnObject.listen = function(eventName, functionIn, scope){
 				//check to see if we are getting an object or a number in the data
 				//	if it is just a number then we are dealing with the
 				//	emitterID only.
@@ -80,7 +80,7 @@ var action = function(){
 				}
 			}
 
-			returnFunction.listenOnce = function(eventName, functionIn, scope){
+			returnObject.listenOnce = function(eventName, functionIn, scope){
 				//same thing as .listen() but is only triggered once
 				var i
 					, newCheck = true
@@ -110,7 +110,7 @@ var action = function(){
 				}
 			}
 
-			returnFunction.silence = function(eventName, functionIn, once){
+			returnObject.silence = function(eventName, functionIn, once){
 				var i;
 
 				for(i = 0; i < action.eventStore[eventName].length; i ++){
@@ -126,7 +126,7 @@ var action = function(){
 				}
 			}
 
-			return returnFunction;
+			return returnObject;
 		}
 
 		, eventStore: {}

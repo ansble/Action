@@ -6,6 +6,7 @@ store: {
 		{
 			once: true/false
 			, call: function(){}
+			, scope: the this for this object
 		}
 	]
 }
