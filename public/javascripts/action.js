@@ -66,20 +66,34 @@ var action = function(){
 				}
 			};
 
-			returnObject.listen = function(eventNameIn, functionIn, scopeIn, localFlagIn){
-				//check to see if we are getting an object or a number in the data
-				//	if it is just a number then we are dealing with the
-				//	emitterID only.
+			returnObject.listen = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
 				var i
 					, newCheck = true
-					, eventStack = action.eventStore[eventNameIn]
-					, newEvent = action;
+
+					, eventName = eventNameIn
+					, handler = handlerIn
+					, scope = scopeIn
+					, local = localFlagIn
+
+					, eventStack
+					, newEvent;
+
+				if(typeof eventNameIn === 'object'){
+					//we have an object to split up dude
+					eventName = eventNameIn.eventName;
+					handler = eventNameIn.handler;
+					scope = eventNameIn.scope;
+					local = eventNameIn.local;
+				}
+
+				eventStack = (typeof local !== 'undefined' && local) ? this.eventStore[eventNameIn] : action.eventStore[eventNameIn];
+				newEvent = (typeof local !== 'undefined' && local) ? this : action;
 
 				if(typeof eventStack !== 'undefined'){
 					//already exists check to see if the function is already bound
 
 					for(i = 0; i < eventStack.length; i ++){
-						if(eventStack[i].call === functionIn && eventStack[i].once === false){
+						if(eventStack[i].call === handler && eventStack[i].once === false){
 							newCheck = false;
 							break;
 						}
@@ -87,9 +101,9 @@ var action = function(){
 
 					if(newCheck){
 						if(typeof scopeIn !== 'undefined'){
-							eventStack.push({once: false, call: functionIn, scope: scopeIn});
+							eventStack.push({once: false, call: handler, scope: scope});
 						}else{
-							eventStack.push({once: false, call:functionIn});
+							eventStack.push({once: false, call:handler});
 						}
 					}
 
@@ -97,52 +111,29 @@ var action = function(){
 					//new event
 					newEvent.eventStore[eventNameIn] = []; //use an array to store functions
 					if(typeof scopeIn !== 'undefined'){
-						newEvent.eventStore[eventNameIn].push({once: false, call: functionIn, scope: scopeIn});
+						newEvent.eventStore[eventNameIn].push({once: false, call: handler, scope: scope});
 					}else{
-						newEvent.eventStore[eventNameIn].push({once: false, call: functionIn});
+						newEvent.eventStore[eventNameIn].push({once: false, call: handler});
 					}
 				}
 			}
 
-			returnObject.listenLocal = function(eventNameIn, functionIn, scopeIn){
-				//check to see if we are getting an object or a number in the data
-				//	if it is just a number then we are dealing with the
-				//	emitterID only.
-				var i
-					, newCheck = true
-					, eventStack;
-
-				if(typeof this.eventStore[eventNameIn] !== 'undefined'){
-					//already exists check to see if the function is already bound
-					eventStack = this.eventStore[eventNameIn];
-
-					for(i = 0; i < eventStack.length; i ++){
-						if(eventStack[i].call === functionIn && eventStack[i].once === false){
-							newCheck = false;
-							break;
-						}
-					}
-
-					if(newCheck){
-						if(typeof scopeIn !== 'undefined'){
-							eventStack.push({once: false, call: functionIn, scope: scopeIn});
-						}else{
-							eventStack.push({once: false, call:functionIn});
-						}
-					}
-
-				} else{
-					//new event
-					this.eventStore[eventNameIn] = []; //use an array to store functions
-					if(typeof scopeIn !== 'undefined'){
-						this.eventStore[eventNameIn].push({once: false, call: functionIn, scope: scopeIn});
-					}else{
-						this.eventStore[eventNameIn].push({once: false, call: functionIn});
-					}
+			returnObject.listenLocal = function(eventNameIn, handlerIn, scopeIn){
+				//convenience function for local listens
+				if(typeof eventNameIn === 'object'){
+					eventNameIn.local = true;
+					this.listen(eventNameIn);
+				} else {
+					this.listen({
+						eventName: eventNameIn
+						, handler: handlerIn
+						, scope: scopeIn
+						, local: true
+					});
 				}
 			}
 
-			returnObject.listenOnce = function(eventNameIn, functionIn, scopeIn){
+			returnObject.listenOnce = function(eventNameIn, functionIn, scopeIn, localFlag){
 				//same thing as .listen() but is only triggered once
 				var i
 					, newCheck = true
@@ -158,8 +149,6 @@ var action = function(){
 							break;
 						}
 					}
-
-					console.log(newCheck);
 
 					if(newCheck){
 						eventStack.push({once:true, call: functionIn, scope: scopeIn});
@@ -188,8 +177,6 @@ var action = function(){
 							break;
 						}
 					}
-
-					console.log(newCheck);
 
 					if(newCheck){
 						eventStack.push({once:true, call: functionIn, scope: scopeIn});
@@ -273,6 +260,7 @@ var action = function(){
 			returnObject.silenceLocal = function(eventNameIn, handlerIn, onceIn, scopeIn){
 				//essentially a convenience function.
 				if(typeof eventNameIn === 'object'){
+					eventNameIn.local = true;
 					this.silence(eventNameIn);
 				}else{					
 					this.silence({

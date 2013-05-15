@@ -20,7 +20,11 @@ trace:
 console.logs out the emitter of the event by looking up it's emitterId
 Needs to have an emitterId registry, and search function...
 
-Calling silence function:
+
+SILENCE
+-----------------------------------------------------
+
+Calling the silence/silenceLocal function:
 -----------------------------------------------------
 object.silence('name:event')
 	or
@@ -34,13 +38,29 @@ object.silence('name:event', function(){}, scope, once, local)
 
 
 
-Passing an Object into the silence function:
+Passing an Object into the silence/silenceLocal function:
 -----------------------------------------------------
 object.silence({
 	eventName: 'name:event'
 	, handler: function(){alert('word')}
 	, scope: this
 	, once: true/false
+	, local: true/false
+})
+
+LISTEN
+-----------------------------------------------------
+
+Calling the listen function:
+-----------------------------------------------------
+
+
+Passing an Object into the listen function:
+-----------------------------------------------------
+object.listen({
+	eventName: 'name:event'
+	, handler: function(){}
+	, scope: this
 	, local: true/false
 })
 
@@ -51,4 +71,4 @@ TODO list
 	4. add object pass through for functions pass in an object with params instead of params
 	5. consider rearranging the params for silence
 	6. make sure that all the cases are handled in silence with the ability to pass in an object
-	7. merge listen and listenLocal
+	8. merge listenOnce and listenOnceLocal and add pass through object
