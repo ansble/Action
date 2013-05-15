@@ -10,3 +10,12 @@ store: {
 		}
 	]
 }
+
+local events:
+When triggered locally events only fire local listeners
+the only difference is what store they are placed in.
+The local store or the global store.
+
+trace:
+console.logs out the emitter of the event by looking up it's emitterId
+Needs to have an emitterId registry, and search function...
