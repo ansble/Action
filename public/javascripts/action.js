@@ -1,7 +1,4 @@
 //TODO list
-//	1. provide scoping for passed in functions
-//	4. once then silent listeners
-//	5. constructor function for functions
 //	6. trace function
 //	8. Private events module (local to the object)
 
@@ -133,6 +130,11 @@ var action = function(){
 		}
 
 		, eventStore: {}
+
+		, trace: function(emitterId){
+			//log out the function that has the emitterId attached
+
+		}
 	};
 
 	//add an events hook for global dealing with events...
