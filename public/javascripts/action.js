@@ -1,8 +1,3 @@
-//TODO list
-//	1. trace function
-//	2. Private events module (local to the object)
-//	3. simplify and combine common functional elements to reduce this
-
 var action = function(){
 	var action = {
 		eventMe: function(objectIn){
@@ -207,38 +202,59 @@ var action = function(){
 				}
 			}
 
-			returnObject.silence = function(eventNameIn, functionIn, onceIn){
-				var i;
+			returnObject.silence = function(eventNameIn, functionIn, onceIn, scopeIn, localFlag){
+				var i
+					, truthy = false
+					, store = (typeof localFlag === 'undefined' || !localFlag) ? action : this;
 
-				for(i = 0; i < action.eventStore[eventNameIn].length; i ++){
-					if(typeof onceIn === 'boolean'){
-						if(functionIn === action.eventStore[eventNameIn][i].call && action.eventStore[eventNameIn][i].once === onceIn){
-							action.eventStore[eventNameIn].splice(i,1)
+				if(typeof store.eventStore[eventNameIn] === 'undefined'){
+					//if there is no event with a name... return nothing
+					return;
+				}
+
+				//there is an event that matches... proceed
+				for(i = 0; i < store.eventStore[eventNameIn].length; i ++){
+					//reset this variable
+					truthy = false;
+
+					if(typeof functionIn !== 'undefined'){
+						//function is passed in
+						if(typeof scopeIn !== 'undefined'){
+							//scope is passed in...
+							if(typeof onceIn === 'boolean'){
+								// function + scope + once provides the match
+								truthy = (functionIn === store.eventStore[eventNameIn][i].call && scopeIn === store.eventStore[eventNameIn][i].scope && onceIn === store.eventStore[eventNameIn][i].once);
+							} else {
+								//function + scope provides the match
+								truthy = (functionIn === store.eventStore[eventNameIn][i].call && scopeIn === store.eventStore[eventNameIn][i].scope);
+							}
+						} else {
+							//function + once in for the match
+							if(typeof onceIn === 'boolean'){
+								truthy = (functionIn === store.eventStore[eventNameIn][i].call && store.eventStore[eventNameIn][i].once === onceIn);
+							} else {
+								truthy = (functionIn === store.eventStore[eventNameIn][i].call);
+							}
 						}
 					} else {
-						if(functionIn === action.eventStore[eventNameIn][i].call){
-							action.eventStore[eventNameIn].splice(i,1)
-						}
+						//no function unbind everything by resetting
+						store.eventStore[eventNameIn] = [];
+
+						//and exit
+						break;
 					}
+
+					if(truthy){
+						//remove this bad boy
+						store.eventStore[eventNameIn].splice(i,1);
+					}
+
 				}
 			}
 
-			returnObject.silenceLocal = function(eventNameIn, functionIn, onceIn){
-				var i;
-
-				for(i = 0; i < this.eventStore[eventNameIn].length; i ++){
-					if(typeof onceIn === 'boolean'){
-						if(functionIn === this.eventStore[eventNameIn][i].call && this.eventStore[eventNameIn][i].once === onceIn){
-							this.eventStore[eventNameIn].splice(i,1)
-						}
-					} else {
-						if(functionIn === this.eventStore[eventNameIn][i].call){
-							this.eventStore[eventNameIn].splice(i,1)
-						}
-					}
-				}
+			returnObject.silenceLocal = function(eventNameIn, functionIn, onceIn, scopeIn){
+				this.silence(eventNameIn, functionIn, onceIn, scopeIn, true);
 			}
-
 
 			returnObject.eventStore = {};
 

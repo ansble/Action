@@ -19,3 +19,8 @@ The local store or the global store.
 trace:
 console.logs out the emitter of the event by looking up it's emitterId
 Needs to have an emitterId registry, and search function...
+
+TODO list
+	1. trace function
+	2. Private events module (local to the object)
+	3. simplify and combine common functional elements to reduce this
