@@ -202,43 +202,61 @@ var action = function(){
 				}
 			}
 
-			returnObject.silence = function(eventNameIn, functionIn, onceIn, scopeIn, localFlag){
+			returnObject.silence = function(eventNameIn, handlerIn, onceIn, scopeIn, localFlagIn){
+				//localize variables
 				var i
 					, truthy = false
-					, store = (typeof localFlag === 'undefined' || !localFlag) ? action : this;
+					, eventName = eventNameIn
+					, handler = handlerIn
+					, once = onceIn
+					, scope = scopeIn
+					, localFlag = localFlagIn
+					, store;
 
-				if(typeof store.eventStore[eventNameIn] === 'undefined'){
+				if(typeof eventNameIn === 'object'){
+					// passed in a collection of params instead of params
+					eventName = eventNameIn.eventName;
+					handler = eventNameIn.handler;
+					once = eventNameIn.once;
+					scope = eventNameIn.scope;
+					localFlag = eventNameIn.local;
+				}
+
+				//local or global event store?
+				store = (typeof localFlag === 'undefined' || !localFlag) ? action : this;
+
+				if(typeof store.eventStore[eventName] === 'undefined'){
 					//if there is no event with a name... return nothing
 					return;
 				}
 
 				//there is an event that matches... proceed
-				for(i = 0; i < store.eventStore[eventNameIn].length; i ++){
+				for(i = 0; i < store.eventStore[eventName].length; i ++){
 					//reset this variable
 					truthy = false;
 
-					if(typeof functionIn !== 'undefined'){
+					if(typeof handler !== 'undefined'){
 						//function is passed in
-						if(typeof scopeIn !== 'undefined'){
+						if(typeof scope !== 'undefined'){
 							//scope is passed in...
-							if(typeof onceIn === 'boolean'){
+							if(typeof once === 'boolean'){
 								// function + scope + once provides the match
-								truthy = (functionIn === store.eventStore[eventNameIn][i].call && scopeIn === store.eventStore[eventNameIn][i].scope && onceIn === store.eventStore[eventNameIn][i].once);
+								truthy = (handler === store.eventStore[eventName][i].call && scope === store.eventStore[eventName][i].scope && once === store.eventStore[eventName][i].once);
 							} else {
 								//function + scope provides the match
-								truthy = (functionIn === store.eventStore[eventNameIn][i].call && scopeIn === store.eventStore[eventNameIn][i].scope);
+								truthy = (handler === store.eventStore[eventName][i].call && scope === store.eventStore[eventName][i].scope);
 							}
 						} else {
 							//function + once in for the match
-							if(typeof onceIn === 'boolean'){
-								truthy = (functionIn === store.eventStore[eventNameIn][i].call && store.eventStore[eventNameIn][i].once === onceIn);
+							if(typeof once === 'boolean'){
+								truthy = (handler === store.eventStore[eventName][i].call && store.eventStore[eventName][i].once === once);
 							} else {
-								truthy = (functionIn === store.eventStore[eventNameIn][i].call);
+								truthy = (handler === store.eventStore[eventName][i].call);
 							}
 						}
 					} else {
 						//no function unbind everything by resetting
-						store.eventStore[eventNameIn] = [];
+						store.eventStore[eventName] = [];
 
 						//and exit
 						break;
@@ -246,14 +264,25 @@ var action = function(){
 
 					if(truthy){
 						//remove this bad boy
-						store.eventStore[eventNameIn].splice(i,1);
+						store.eventStore[eventName].splice(i,1);
 					}
 
 				}
 			}
 
-			returnObject.silenceLocal = function(eventNameIn, functionIn, onceIn, scopeIn){
-				this.silence(eventNameIn, functionIn, onceIn, scopeIn, true);
+			returnObject.silenceLocal = function(eventNameIn, handlerIn, onceIn, scopeIn){
+				//essentially a convenience function.
+				if(typeof eventNameIn === 'object'){
+					this.silence(eventNameIn);
+				}else{					
+					this.silence({
+						eventName: eventNameIn
+						, handler: handlerIn
+						, once: onceIn
+						, scope: scopeIn
+						, local: true
+					});
+				}
 			}
 
 			returnObject.eventStore = {};

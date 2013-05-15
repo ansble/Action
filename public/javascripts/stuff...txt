@@ -20,7 +20,19 @@ trace:
 console.logs out the emitter of the event by looking up it's emitterId
 Needs to have an emitterId registry, and search function...
 
+Passing an Object into the silence function:
+-----------------------------------------------------
+object.silence({
+	eventName: 'name:event'
+	, handler: function(){alert('word')}
+	, scope: this
+	, once: true/false
+	, local: true/false
+})
+
 TODO list
 	1. trace function
 	2. Private events module (local to the object)
 	3. simplify and combine common functional elements to reduce this
+	4. add object pass through for functions
+		pass in an object with params instead of params
