@@ -66,7 +66,7 @@ var action = function(){
 				}
 			};
 
-			returnObject.listen = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
+			returnObject.listen = function(eventNameIn, handlerIn, scopeIn, onceIn, localFlagIn){
 				var i
 					, newCheck = true
 
@@ -74,6 +74,7 @@ var action = function(){
 					, handler = handlerIn
 					, scope = scopeIn
 					, local = localFlagIn
+					, once = onceIn
 
 					, eventStack
 					, newEvent;
@@ -83,6 +84,7 @@ var action = function(){
 					eventName = eventNameIn.eventName;
 					handler = eventNameIn.handler;
 					scope = eventNameIn.scope;
+					once = eventNameIn.once;
 					local = eventNameIn.local;
 				}
 
@@ -118,7 +120,7 @@ var action = function(){
 				}
 			}
 
-			returnObject.listenLocal = function(eventNameIn, handlerIn, scopeIn){
+			returnObject.listenLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
 				//convenience function for local listens
 				if(typeof eventNameIn === 'object'){
 					eventNameIn.local = true;
@@ -128,64 +130,73 @@ var action = function(){
 						eventName: eventNameIn
 						, handler: handlerIn
 						, scope: scopeIn
+						, once: onceIn
 						, local: true
 					});
 				}
 			}
 
-			returnObject.listenOnce = function(eventNameIn, functionIn, scopeIn, localFlag){
+			returnObject.listenOnce = function(eventNameIn, handlerIn, scopeIn, localFlag){
 				//same thing as .listen() but is only triggered once
 				var i
 					, newCheck = true
-					, eventStack;
+					, eventStack
+					, newEvent
 
-				if(typeof action.eventStore[eventNameIn] !== 'undefined'){
+					, eventName = eventNameIn
+					, handler = handlerIn
+					, scope = scopeIn
+					, localFlag = localFlag;
+
+				if(typeof eventNameIn === 'object'){
+					eventName = eventNameIn.eventName;
+					handler = eventNameIn.handler;
+					scope = eventNameIn.scope;
+					localFlag = eventNameIn.local;
+				}
+
+				if(typeof localFlag !== 'undefined' && localFlag){
+					//make it local!
+					eventStack = this.eventStore[eventName];
+					newEvent = this;
+				}else{
+					eventStack = action.eventStore[eventName];
+					newEvent = action;
+				}
+
+				if(typeof eventStack !== 'undefined'){
 					//already exists check to see if the function is already bound
-					eventStack = action.eventStore[eventNameIn];
 
 					for(i = 0; i < eventStack.length; i ++){
-						if(eventStack[i].call === functionIn && eventStack[i].once === true){
+						if(eventStack[i].call === handler && eventStack[i].once === true){
 							newCheck = false;
 							break;
 						}
 					}
 
 					if(newCheck){
-						eventStack.push({once:true, call: functionIn, scope: scopeIn});
+						eventStack.push({once:true, call: handler, scope: scope});
 					}
 
 				} else{
 					//new event
-					action.eventStore[eventNameIn] = []; //use an array to store functions
-					action.eventStore[eventNameIn].push({once:true, call: functionIn, scope: scopeIn});
+					newEvent.eventStore[eventNameIn] = []; //use an array to store functions
+					newEvent.eventStore[eventNameIn].push({once:true, call: handler, scope: scope});
 				}
 			}
 
-			returnObject.listenOnceLocal = function(eventNameIn, functionIn, scopeIn){
+			returnObject.listenOnceLocal = function(eventNameIn, handlerIn, scopeIn){
 				//same thing as .listen() but is only triggered once
-				var i
-					, newCheck = true
-					, eventStack;
-
-				if(typeof this.eventStore[eventNameIn] !== 'undefined'){
-					//already exists check to see if the function is already bound
-					eventStack = this.eventStore[eventNameIn];
-
-					for(i = 0; i < eventStack.length; i ++){
-						if(eventStack[i].call === functionIn && eventStack[i].once === true){
-							newCheck = false;
-							break;
-						}
-					}
-
-					if(newCheck){
-						eventStack.push({once:true, call: functionIn, scope: scopeIn});
-					}
-
-				} else{
-					//new event
-					this.eventStore[eventNameIn] = []; //use an array to store functions
-					this.eventStore[eventNameIn].push({once:true, call: functionIn, scope: scopeIn});
+				if(typeof eventNameIn === 'object'){
+					eventNameIn.local = true;
+					this.listenLocal(eventNameIn);
+				}else{					
+					this.listenLocal({
+						eventName: eventNameIn
+						, handler: handlerIn
+						, scope: scopeIn
+						, local: true
+					});
 				}
 			}
 

@@ -48,6 +48,8 @@ object.silence({
 	, local: true/false
 })
 
+
+
 LISTEN
 -----------------------------------------------------
 
@@ -61,6 +63,7 @@ object.listen({
 	eventName: 'name:event'
 	, handler: function(){}
 	, scope: this
+	, once: true/false
 	, local: true/false
 })
 
@@ -71,4 +74,3 @@ TODO list
 	4. add object pass through for functions pass in an object with params instead of params
 	5. consider rearranging the params for silence
 	6. make sure that all the cases are handled in silence with the ability to pass in an object
-	8. merge listenOnce and listenOnceLocal and add pass through object
