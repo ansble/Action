@@ -68,9 +68,11 @@ object.listen({
 })
 
 TODO list
-	1. trace function
-	2. Private events module (local to the object)
-	3. simplify and combine common functional elements to reduce this
-	4. add object pass through for functions pass in an object with params instead of params
-	5. consider rearranging the params for silence
-	6. make sure that all the cases are handled in silence with the ability to pass in an object
+	1. trace function and emitterId
+	2. simplify and combine common functional elements to reduce this
+	3. consider rearranging the params for silence
+	4. make sure that all the cases are handled in silence with the ability to pass in an object
+	5. prevent zombies
+	6. integrate the dependency injection system from SM
+	7. DOM rendering... maybe have this be up to the user what framework they use
+	8. merge emit and emitlocal to eliminate redundancies
