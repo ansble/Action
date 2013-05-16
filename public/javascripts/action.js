@@ -6,11 +6,18 @@ var action = function(){
 
 			returnObject.emitterId = Math.ceil(Math.random() * 10000);
 
-			returnObject.emit = function(eventNameIn, eventDataIn){
+			returnObject.emit = function(eventNameIn, eventDataIn, localFlag){
 				//add the emitterID to this thing
 				var eventStack
 					, functionToCall
-					, i;
+					, i
+					, isLocal = (typeof localFlag !== 'undefined' && localFlag);
+
+				if(isLocal){
+					eventStack = this.eventStore[eventNameIn];
+				} else {
+					eventStack = action.eventStore[eventNameIn];
+				}
 
 				if(typeof eventDataIn !== 'undefined'){
 					//we have some event data
@@ -18,9 +25,7 @@ var action = function(){
 				}
 
 				//emit the event
-				if(typeof action.eventStore[eventNameIn] !== 'undefined'){
-					eventStack = action.eventStore[eventNameIn];
-
+				if(typeof eventStack !== 'undefined'){
 					for(i = 0; i < eventStack.length; i ++){
 						if(typeof eventStack[i].scope !== 'undefined'){
 							eventStack[i].call.apply(eventStack[i].scope,[eventDataIn, this.emitterId]);
@@ -30,40 +35,18 @@ var action = function(){
 
 						
 						if(eventStack[i].once){
-							this.silence(eventNameIn, eventStack[i].call, true);
+							if(isLocal){
+								this.silenceLocal(eventNameIn, eventStack[i].call, true);
+							} else {
+								this.silence(eventNameIn, eventStack[i].call, true);
+							}
 						}
 					}
 				}
 			};
 
 			returnObject.emitLocal = function(eventNameIn, eventDataIn){
-				//add the emitterID to this thing
-				var eventStack
-					, functionToCall
-					, i;
-
-				if(typeof eventDataIn !== 'undefined'){
-					//we have some event data
-					eventData.payload = eventDataIn;
-				}
-
-				//emit the event
-				if(typeof this.eventStore[eventNameIn] !== 'undefined'){
-					eventStack = this.eventStore[eventNameIn];
-
-					for(i = 0; i < eventStack.length; i ++){
-						if(typeof eventStack[i].scope !== 'undefined'){
-							eventStack[i].call.apply(eventStack[i].scope,[eventDataIn, this.emitterId]);
-						}else{
-							eventStack[i].call(eventDataIn, this.emitterId);
-						}
-
-						
-						if(eventStack[i].once){
-							this.silence(eventNameIn, eventStack[i].call, true);
-						}
-					}
-				}
+				this.emit(eventNameIn, eventDataIn, true);
 			};
 
 			returnObject.listen = function(eventNameIn, handlerIn, scopeIn, onceIn, localFlagIn){

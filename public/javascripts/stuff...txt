@@ -75,4 +75,3 @@ TODO list
 	5. prevent zombies
 	6. integrate the dependency injection system from SM
 	7. DOM rendering... maybe have this be up to the user what framework they use
-	8. merge emit and emitlocal to eliminate redundancies
