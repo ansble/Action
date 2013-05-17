@@ -290,8 +290,11 @@ var action = function(){
 					for(key in attributeName){
 						if(attributeName.hasOwnProperty(key)){
 							//this attribute does not belong to the prototype. Good.
-							//	TODO: how about public functions they want 
+							//	TODO: what about public functions they want 
 							//		to add in the constructor?
+
+							//TODO: maybe make this do a deep copy to prevent
+							//	pass by reference or switch to clone()
 							attributes[key] = attributeName[key];
 							this.emitLocal('attribute:changed', key);
 						}

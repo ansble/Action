@@ -81,6 +81,8 @@ model: {
 	flatten: function() (returns just the attributes)
 	clear: function()
 	destroy: function()
+	fetch: function() (gets this thing form somwehere)
+
 }
 
 
@@ -94,4 +96,8 @@ TODO list
 	6. integrate the dependency injection system from SM
 	7. DOM rendering... maybe have this be up to the user what framework they use
 	8. a way to retrieve the model from the server if wanted
+
+Other TODOs exist in the app code
+
+Might need to write a new Testing framework to handle the wackiness of events...
 	
