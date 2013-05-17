@@ -67,6 +67,24 @@ object.listen({
 	, local: true/false
 })
 
+
+MODELS
+-----------------------------------------------------
+Models are responsible for getting themselves and for other operations that belong to them. They are encapsulated data holders. No rendering, just data. They have internal events that can be listened to (created, retrieved, updated, saved, destroyed) and they can trigger global events.
+
+model structure looks like:
+model: {
+	emitterID
+	attributes (private)
+	get: function()
+	set: function() (updates via an object or key value pair)
+	flatten: function() (returns just the attributes)
+	clear: function()
+	destroy: function()
+}
+
+
+
 TODO list
 	1. trace function and emitterId
 	2. simplify and combine common functional elements to reduce this
@@ -75,3 +93,5 @@ TODO list
 	5. prevent zombies
 	6. integrate the dependency injection system from SM
 	7. DOM rendering... maybe have this be up to the user what framework they use
+	8. a way to retrieve the model from the server if wanted
+	

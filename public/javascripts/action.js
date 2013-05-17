@@ -19,10 +19,10 @@ var action = function(){
 					eventStack = action.eventStore[eventNameIn];
 				}
 
-				if(typeof eventDataIn !== 'undefined'){
-					//we have some event data
-					eventData.payload = eventDataIn;
-				}
+				// if(typeof eventDataIn !== 'undefined'){
+				// 	//we have some event data
+				// 	eventData.payload = eventDataIn;
+				// }
 
 				//emit the event
 				if(typeof eventStack !== 'undefined'){
@@ -270,6 +270,83 @@ var action = function(){
 			returnObject.eventStore = {};
 
 			return returnObject;
+		}
+
+		, modelMe: function(objectIn){
+			//this is the module for creating a data model object
+			var newModel = this.eventMe({})
+				, attributes = {}
+				, changes = [];
+
+			newModel.get = function(attributeName){
+				return attributes[attributeName];
+			}
+
+			newModel.set = function(attributeName, attributeValue){
+				var key;
+
+				if(typeof attributeName === 'object'){
+					//well... this is an object... iterate and rock on
+					for(key in attributeName){
+						if(attributeName.hasOwnProperty(key)){
+							//this attribute does not belong to the prototype. Good.
+							//	TODO: how about public functions they want 
+							//		to add in the constructor?
+							attributes[key] = attributeName[key];
+							this.emitLocal('attribute:changed', key);
+						}
+					}
+				} else{
+					attributes[attributeName] = attributeValue;
+					this.emitLocal('attribute:changed', attributeName);
+				}
+			}
+
+			newModel.flatten = function(){
+				return attributes;
+			}
+
+			newModel.fetch = function(){
+				var requestUrl = this.get('url');
+
+				if(typeof requestUrl !== 'undefined'){
+
+				} else {
+					//TODO: probably should trigger some sort of error...
+					return false;
+				}
+			}
+
+			newModel.save = function(){
+				//TODO make this talk to a server with the URL
+				//TODO make it only mark the saved changes clear
+
+				//only do this on success...
+				changes = [];
+			}
+
+			newModel.getChanges = function(){
+				return changes;
+			}
+
+			newModel.clear = function(){
+				attributes = {};
+			}
+
+			newModel.destroy = function(){
+				//TODO not really working... should get rid of this thing
+				//	and all of its parameters
+				delete attributes;
+				delete this; 
+			}
+
+			newModel.set(objectIn); //set the inital attributes
+
+			newModel.listenLocal('attribute:changed', function(nameIn){
+				changes.push(nameIn);
+			}, this);
+
+			return newModel;
 		}
 
 		, eventStore: {}
