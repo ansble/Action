@@ -316,16 +316,23 @@ var action = function(){
 
 				} else {
 					//TODO: probably should trigger some sort of error...
-					return false;
+					throw new action.Error('http', 'No URL defined');
 				}
 			}
 
 			newModel.save = function(){
 				//TODO make this talk to a server with the URL
 				//TODO make it only mark the saved changes clear
+				var requestUrl = this.get('url');
 
-				//only do this on success...
-				changes = [];
+				if(typeof requestUrl !== 'undefined'){
+					
+					//only do this on success...
+					changes = [];
+				} else {
+					//TODO: probably should trigger some sort of error...
+					throw new action.Error('http', 'No URL defined');
+				}
 			}
 
 			newModel.getChanges = function(){
@@ -357,6 +364,13 @@ var action = function(){
 		, trace: function(emitterIdIn){
 			//log out the function that has the emitterId attached
 
+		}
+
+		, Error: function(typeIn, messageIn){
+			return {
+				type: typeIn
+				, message: messageIn
+			}
 		}
 	};
 
