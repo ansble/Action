@@ -53,12 +53,14 @@ var action = function(){
 				var i
 					, newCheck = true
 
+					//attribute holders and such
 					, eventName = eventNameIn
 					, handler = handlerIn
 					, scope = scopeIn
 					, local = localFlagIn
 					, once = onceIn
 
+					//variables for later
 					, eventStack
 					, newEvent;
 
@@ -84,21 +86,19 @@ var action = function(){
 						}
 					}
 
-					if(newCheck){
-						if(typeof scopeIn !== 'undefined'){
+					if(newCheck && typeof scopeIn !== 'undefined'){
 							eventStack.push({once: false, call: handler, scope: scope});
-						}else{
+					}else if(newCheck){
 							eventStack.push({once: false, call:handler});
-						}
 					}
 
-				} else{
+				} else {
 					//new event
-					newEvent.eventStore[eventNameIn] = []; //use an array to store functions
+					newEvent.eventStore[eventName] = []; //use an array to store functions
 					if(typeof scopeIn !== 'undefined'){
-						newEvent.eventStore[eventNameIn].push({once: false, call: handler, scope: scope});
+						newEvent.eventStore[eventName].push({once: false, call: handler, scope: scope});
 					}else{
-						newEvent.eventStore[eventNameIn].push({once: false, call: handler});
+						newEvent.eventStore[eventName].push({once: false, call: handler});
 					}
 				}
 			}
