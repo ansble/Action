@@ -267,6 +267,12 @@ var action = function(){
 				}
 			}
 
+			returnObject.listen('system:trace', function(emitterIDIn){
+				if(this.emitterId === emitterIDIn){
+					this.emit('system:addTraced', this);
+				}
+			}, returnObject);
+
 			returnObject.eventStore = {};
 
 			return returnObject;
@@ -323,6 +329,7 @@ var action = function(){
 			newModel.save = function(){
 				//TODO make this talk to a server with the URL
 				//TODO make it only mark the saved changes clear
+
 				var requestUrl = this.get('url');
 
 				if(typeof requestUrl !== 'undefined'){
@@ -363,7 +370,19 @@ var action = function(){
 
 		, trace: function(emitterIdIn){
 			//log out the function that has the emitterId attached
+			
+			//create the traced object/stack
+			action.traced = action.modelMe({
+				stack: []
+				, emitterId: emitterIdIn
+			});
 
+			action.traced.listen('system:addTraced', function(objectIn){
+				this.get('stack').push(objectIn);
+			}, action.traced);
+
+			//trigger the event that will cause the trace
+			action.events.emit('system:trace', emitterIdIn);
 		}
 
 		, Error: function(typeIn, messageIn){
@@ -376,6 +395,12 @@ var action = function(){
 
 	//add an events hook for global dealing with events...
 	action.events = action.eventMe({});
+
+	//global error handler y'all
+	window.onerror = function(error){
+		console.log('Error occured');
+		console.warn(error);
+	}
 
 	//return the tweaked function
 	return action;
