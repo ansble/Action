@@ -296,18 +296,24 @@ var action = function(){
 					for(key in attributeName){
 						if(attributeName.hasOwnProperty(key)){
 							//this attribute does not belong to the prototype. Good.
-							//	TODO: what about public functions they want 
-							//		to add in the constructor?
-
+							
 							//TODO: maybe make this do a deep copy to prevent
 							//	pass by reference or switch to clone()
-							attributes[key] = attributeName[key];
-							this.emitLocal('attribute:changed', key);
+							if(key !== 'destroy' && key !== 'fetch' && key !== 'save'){
+								attributes[key] = attributeName[key];
+								this.emitLocal('attribute:changed', key);
+							} else {
+								this[key] == attributeName[key];
+							}
 						}
 					}
 				} else{
-					attributes[attributeName] = attributeValue;
-					this.emitLocal('attribute:changed', attributeName);
+					if(attributeName !== 'destroy' && attributeName !== 'fetch' && attributeName !=== 'save'){
+						attributes[attributeName] = attributeValue;
+						this.emitLocal('attribute:changed', attributeName);
+					} else {
+						this[attributeName] == attributeValue;
+					}
 				}
 			}
 
@@ -329,7 +335,6 @@ var action = function(){
 			newModel.save = function(){
 				//TODO make this talk to a server with the URL
 				//TODO make it only mark the saved changes clear
-
 				var requestUrl = this.get('url');
 
 				if(typeof requestUrl !== 'undefined'){

@@ -82,7 +82,7 @@ model: {
 	clear: function()
 	destroy: function()
 	fetch: function() (gets this thing form somwehere)
-
+	save: function() (saves to server)
 }
 
 
@@ -102,6 +102,7 @@ TODO list
 	5. integrate the dependency injection system from SM
 	6. DOM rendering... maybe have this be up to the user what framework they use
 	7. a way to retrieve the model from the server if wanted
+	8. Global error handler...
 
 Other TODOs exist in the app code
 
