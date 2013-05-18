@@ -86,6 +86,13 @@ model: {
 }
 
 
+TRACE
+-----------------------------------------------------
+Trace provides a way to find out who is triggering an event. Every event emitter is assigned an emitterid that can be found by inspecting the object. It is included with all the events that the emitter triggers so that you can find out who is emitting the event if needed. You do this by using aciton.trace(emitterID).
+
+When you run the trace function the object that does the emitting is assigned to action.traced.stack.
+
+
 
 TODO list
 	1. simplify and combine common functional elements to reduce this
