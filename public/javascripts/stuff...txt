@@ -103,6 +103,7 @@ TODO list
 	6. DOM rendering... maybe have this be up to the user what framework they use
 	7. a way to retrieve the model from the server if wanted
 	8. Global error handler...
+	9. make model.destroy() work
 
 Other TODOs exist in the app code
 

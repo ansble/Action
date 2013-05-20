@@ -296,7 +296,7 @@ var action = function(){
 					for(key in attributeName){
 						if(attributeName.hasOwnProperty(key)){
 							//this attribute does not belong to the prototype. Good.
-							
+
 							//TODO: maybe make this do a deep copy to prevent
 							//	pass by reference or switch to clone()
 							if(key !== 'destroy' && key !== 'fetch' && key !== 'save'){
@@ -308,7 +308,7 @@ var action = function(){
 						}
 					}
 				} else{
-					if(attributeName !== 'destroy' && attributeName !== 'fetch' && attributeName !=== 'save'){
+					if(attributeName !== 'destroy' && attributeName !== 'fetch' && attributeName !== 'save'){
 						attributes[attributeName] = attributeValue;
 						this.emitLocal('attribute:changed', attributeName);
 					} else {
@@ -358,8 +358,18 @@ var action = function(){
 			newModel.destroy = function(){
 				//TODO not really working... should get rid of this thing
 				//	and all of its parameters
-				delete attributes;
-				delete this; 
+				var me = this;
+
+				setTimeout(function(){
+					delete me;
+				},0); // not quite working...
+
+				for(key in this){
+					delete this[key];
+				}
+
+				//TODO this still doesn't kill the attributes or changes
+				//	private data
 			}
 
 			newModel.set(objectIn); //set the inital attributes
