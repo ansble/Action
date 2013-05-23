@@ -53,12 +53,14 @@ var action = function(){
 				var i
 					, newCheck = true
 
+					//attribute holders and such
 					, eventName = eventNameIn
 					, handler = handlerIn
 					, scope = scopeIn
 					, local = localFlagIn
 					, once = onceIn
 
+					//variables for later
 					, eventStack
 					, newEvent;
 
@@ -84,21 +86,19 @@ var action = function(){
 						}
 					}
 
-					if(newCheck){
-						if(typeof scopeIn !== 'undefined'){
+					if(newCheck && typeof scopeIn !== 'undefined'){
 							eventStack.push({once: false, call: handler, scope: scope});
-						}else{
+					}else if(newCheck){
 							eventStack.push({once: false, call:handler});
-						}
 					}
 
-				} else{
+				} else {
 					//new event
-					newEvent.eventStore[eventNameIn] = []; //use an array to store functions
+					newEvent.eventStore[eventName] = []; //use an array to store functions
 					if(typeof scopeIn !== 'undefined'){
-						newEvent.eventStore[eventNameIn].push({once: false, call: handler, scope: scope});
+						newEvent.eventStore[eventName].push({once: false, call: handler, scope: scope});
 					}else{
-						newEvent.eventStore[eventNameIn].push({once: false, call: handler});
+						newEvent.eventStore[eventName].push({once: false, call: handler});
 					}
 				}
 			}
@@ -267,6 +267,12 @@ var action = function(){
 				}
 			}
 
+			returnObject.listen('system:trace', function(emitterIDIn){
+				if(this.emitterId === emitterIDIn){
+					this.emit('system:addTraced', this);
+				}
+			}, returnObject);
+
 			returnObject.eventStore = {};
 
 			return returnObject;
@@ -290,15 +296,24 @@ var action = function(){
 					for(key in attributeName){
 						if(attributeName.hasOwnProperty(key)){
 							//this attribute does not belong to the prototype. Good.
-							//	TODO: how about public functions they want 
-							//		to add in the constructor?
-							attributes[key] = attributeName[key];
-							this.emitLocal('attribute:changed', key);
+
+							//TODO: maybe make this do a deep copy to prevent
+							//	pass by reference or switch to clone()
+							if(key !== 'destroy' && key !== 'fetch' && key !== 'save'){
+								attributes[key] = attributeName[key];
+								this.emitLocal('attribute:changed', key);
+							} else {
+								this[key] == attributeName[key];
+							}
 						}
 					}
 				} else{
-					attributes[attributeName] = attributeValue;
-					this.emitLocal('attribute:changed', attributeName);
+					if(attributeName !== 'destroy' && attributeName !== 'fetch' && attributeName !== 'save'){
+						attributes[attributeName] = attributeValue;
+						this.emitLocal('attribute:changed', attributeName);
+					} else {
+						this[attributeName] == attributeValue;
+					}
 				}
 			}
 
@@ -313,16 +328,23 @@ var action = function(){
 
 				} else {
 					//TODO: probably should trigger some sort of error...
-					return false;
+					throw new action.Error('http', 'No URL defined');
 				}
 			}
 
 			newModel.save = function(){
 				//TODO make this talk to a server with the URL
 				//TODO make it only mark the saved changes clear
+				var requestUrl = this.get('url');
 
-				//only do this on success...
-				changes = [];
+				if(typeof requestUrl !== 'undefined'){
+					
+					//only do this on success...
+					changes = [];
+				} else {
+					//TODO: probably should trigger some sort of error...
+					throw new action.Error('http', 'No URL defined');
+				}
 			}
 
 			newModel.getChanges = function(){
@@ -336,8 +358,18 @@ var action = function(){
 			newModel.destroy = function(){
 				//TODO not really working... should get rid of this thing
 				//	and all of its parameters
-				delete attributes;
-				delete this; 
+				var me = this;
+
+				setTimeout(function(){
+					delete me;
+				},0); // not quite working...
+
+				for(key in this){
+					delete this[key];
+				}
+
+				//TODO this still doesn't kill the attributes or changes
+				//	private data
 			}
 
 			newModel.set(objectIn); //set the inital attributes
@@ -353,12 +385,37 @@ var action = function(){
 
 		, trace: function(emitterIdIn){
 			//log out the function that has the emitterId attached
+			
+			//create the traced object/stack
+			action.traced = action.modelMe({
+				stack: []
+				, emitterId: emitterIdIn
+			});
 
+			action.traced.listen('system:addTraced', function(objectIn){
+				this.get('stack').push(objectIn);
+			}, action.traced);
+
+			//trigger the event that will cause the trace
+			action.events.emit('system:trace', emitterIdIn);
+		}
+
+		, Error: function(typeIn, messageIn){
+			return {
+				type: typeIn
+				, message: messageIn
+			}
 		}
 	};
 
 	//add an events hook for global dealing with events...
 	action.events = action.eventMe({});
+
+	//global error handler y'all
+	window.onerror = function(error){
+		console.log('Error occured');
+		console.warn(error);
+	}
 
 	//return the tweaked function
 	return action;
