@@ -275,6 +275,10 @@ var action = function(){
 
             returnObject.eventStore = {};
 
+            if(typeof returnObject.init === 'function'){
+                returnObject.init.apply(returnObject);
+            }
+
             return returnObject;
         }
 
@@ -377,6 +381,10 @@ var action = function(){
             newModel.listenLocal('attribute:changed', function(nameIn){
                 changes.push(nameIn);
             }, this);
+
+            if(typeof newModel.get('init') === 'function'){
+                newModel.get('init').apply(newModel);
+            }
 
             return newModel;
         }
@@ -482,7 +490,7 @@ var action = function(){
                 , message: messageIn
             }
         }
-        
+
         , eventStore: {}
     };
 

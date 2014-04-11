@@ -165,3 +165,5 @@ pip-log.txt
 
 #node stuff
 node_modules/
+
+public/javascripts/built/
