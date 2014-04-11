@@ -383,7 +383,7 @@ var action = function(){
 
         , stateMe: function(objectIn){
             var returnObject = objectIn
-                , dependencies: function(requiredIn, callbackIn, context, argObject, customFetchName) {
+                , dependencies = function(requiredIn, callbackIn, context, argObject, customFetchName) {
                     var required = requiredIn //The array of dependencies
                         ,callback = callbackIn //The Callback Function
                         ,closureFunction;
@@ -459,8 +459,6 @@ var action = function(){
             return returnObject;
         }
 
-        , eventStore: {}
-
         , trace: function(emitterIdIn){
             //log out the function that has the emitterId attached
             
@@ -484,10 +482,12 @@ var action = function(){
                 , message: messageIn
             }
         }
+        
+        , eventStore: {}
     };
 
     //add an events hook for global dealing with events...
-    action.events = action.eventMe({});
+    action = action.eventMe(action);
 
     //global error handler y'all
     window.onerror = function(error){
