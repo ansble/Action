@@ -1,4 +1,6 @@
 var action = function(){
+    "use strict";
+
     var action = {
         eventMe: function(objectIn){
             var returnObject = objectIn
@@ -101,7 +103,7 @@ var action = function(){
                         newEvent.eventStore[eventName].push({once: false, call: handler});
                     }
                 }
-            }
+            };
 
             returnObject.listenLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
                 //convenience function for local listens
@@ -117,9 +119,9 @@ var action = function(){
                         , local: true
                     });
                 }
-            }
+            };
 
-            returnObject.listenOnce = function(eventNameIn, handlerIn, scopeIn, localFlag){
+            returnObject.listenOnce = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
                 //same thing as .listen() but is only triggered once
                 var i
                     , newCheck = true
@@ -129,7 +131,7 @@ var action = function(){
                     , eventName = eventNameIn
                     , handler = handlerIn
                     , scope = scopeIn
-                    , localFlag = localFlag;
+                    , localFlag = localFlagIn;
 
                 if(typeof eventNameIn === 'object'){
                     eventName = eventNameIn.eventName;
@@ -166,7 +168,7 @@ var action = function(){
                     newEvent.eventStore[eventNameIn] = []; //use an array to store functions
                     newEvent.eventStore[eventNameIn].push({once:true, call: handler, scope: scope});
                 }
-            }
+            };
 
             returnObject.listenOnceLocal = function(eventNameIn, handlerIn, scopeIn){
                 //same thing as .listen() but is only triggered once
@@ -181,7 +183,7 @@ var action = function(){
                         , local: true
                     });
                 }
-            }
+            };
 
             returnObject.silence = function(eventNameIn, handlerIn, onceIn, scopeIn, localFlagIn){
                 //localize variables
@@ -249,7 +251,7 @@ var action = function(){
                     }
 
                 }
-            }
+            };
 
             returnObject.silenceLocal = function(eventNameIn, handlerIn, onceIn, scopeIn){
                 //essentially a convenience function.
@@ -265,7 +267,58 @@ var action = function(){
                         , local: true
                     });
                 }
-            }
+            };
+
+            //Event Based state machine
+            this.requiredEvent = function(name, callback, context, fireMultipleIn){
+                var stateUpdate;
+
+                this._fireMultiple = (typeof fireMultipleIn !== 'undefined') ? fireMultipleIn : false;
+
+                //init some hidden storage if needed
+                if(typeof this.stateEvents === 'undefined'){
+                    this.stateEvents = {};
+                }
+
+                if(typeof this._triggeredStateReady === 'undefined'){
+                    this._triggeredStateReady = false;
+                }
+
+                this.stateEvents[name] = false;
+
+                stateUpdate = this.stateUpdate(name, this.stateEvents);
+
+                this.event(name, stateUpdate, this);
+                this.event(name, callback, context);
+            };
+
+            this.stateUpdate = function(nameIn, stateEventsIn){
+                var name = nameIn
+                    , stateEvents = stateEventsIn
+                    , that = this;
+
+                return function(){
+                    var truthy = true
+                        , key;
+
+                    if(typeof stateEvents[name] !== 'undefined'){
+                        stateEvents[name] = true;
+
+                        for(key in stateEvents){
+                            truthy = truthy && stateEvents[key];
+                        }
+
+                        if(truthy){
+                            if(!that._triggeredStateReady || that._fireMultiple){
+                                //feels like a little bit of a hack.
+                                //  lets the data finish propogating before triggering the call
+                                setTimeout(that.stateReady, 100);
+                                that._triggeredStateReady = true;
+                            }
+                        }
+                    }
+                };
+            };
 
             returnObject.listen('system:trace', function(emitterIDIn){
                 if(this.emitterId === emitterIDIn){
@@ -290,7 +343,7 @@ var action = function(){
 
             newModel.get = function(attributeName){
                 return attributes[attributeName];
-            }
+            };
 
             newModel.set = function(attributeName, attributeValue){
                 var key;
@@ -303,11 +356,11 @@ var action = function(){
 
                             //TODO: maybe make this do a deep copy to prevent
                             //  pass by reference or switch to clone()
-                            if(key !== 'destroy' && key !== 'fetch' && key !== 'save'){
+                            if(key !== 'destroy' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
                                 attributes[key] = attributeName[key];
                                 this.emitLocal('attribute:changed', key);
                             } else {
-                                this[key] == attributeName[key];
+                                this[key] = attributeName[key];
                             }
                         }
                     }
@@ -316,7 +369,7 @@ var action = function(){
                         attributes[attributeName] = attributeValue;
                         this.emitLocal('attribute:changed', attributeName);
                     } else {
-                        this[attributeName] == attributeValue;
+                        this[attributeName] = attributeValue;
                     }
                 }
             }
@@ -362,7 +415,8 @@ var action = function(){
             newModel.destroy = function(){
                 //TODO not really working... should get rid of this thing
                 //  and all of its parameters
-                var me = this;
+                var me = this
+                    , key;
 
                 setTimeout(function(){
                     delete me;
@@ -382,8 +436,8 @@ var action = function(){
                 changes.push(nameIn);
             }, this);
 
-            if(typeof newModel.get('init') === 'function'){
-                newModel.get('init').apply(newModel);
+            if(typeof newModel.init === 'function'){
+                newModel.init.apply(newModel);
             }
 
             return newModel;
