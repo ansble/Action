@@ -14,3 +14,4 @@ So there are a variety of things that need to be completed for Action! to be rea
 0. Build out the save function for models
 0. Add events into the error handler
 0. Figure out how views really work... 
+0. Consider web components
