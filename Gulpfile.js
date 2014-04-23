@@ -4,12 +4,16 @@ var gulp = require('gulp')
     , concat = require('gulp-concat');
 
 gulp.task('default', ['localBuild'], function(){
+    'use strict';
+
     gulp.watch(['public/javascripts/app.js', 'public/javascripts/components/**/*.js'], function(){
         gulp.run('localBuild');
     });
 });
 
 gulp.task('localBuild', function(){
+    'use strict';
+    
     gulp.src(['public/javascripts/app.js', './public/javascripts/components/**/*.js','!./public/javascripts/components/**/*_test.js'])
         .pipe(concat('app.js'))
         .pipe(gulp.dest('public/javascripts/built/'));
