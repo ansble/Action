@@ -1,5 +1,5 @@
 var action = function(){
-    "use strict";
+    'use strict';
 
     var action = {
         eventMe: function(objectIn){
