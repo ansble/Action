@@ -6,7 +6,11 @@ var action = function(){
             var returnObject = objectIn
                 , localEvents = {};
 
+            //set an emitter id for troubleshooting
             returnObject.emitterId = Math.ceil(Math.random() * 10000);
+
+            //create the lcoal event Store
+            returnObject.eventStore = {};
 
             returnObject.emit = function(eventNameIn, eventDataIn, localFlag){
                 //add the emitterID to this thing
@@ -270,7 +274,7 @@ var action = function(){
             };
 
             //Event Based state machine
-            this.requiredEvent = function(name, callback, context, fireMultipleIn){
+            returnObject.requiredEvent = function(name, callback, context, fireMultipleIn){
                 var stateUpdate;
 
                 this._fireMultiple = (typeof fireMultipleIn !== 'undefined') ? fireMultipleIn : false;
@@ -292,7 +296,7 @@ var action = function(){
                 this.event(name, callback, context);
             };
 
-            this.stateUpdate = function(nameIn, stateEventsIn){
+            returnObject.stateUpdate = function(nameIn, stateEventsIn){
                 var name = nameIn
                     , stateEvents = stateEventsIn
                     , that = this;
@@ -326,8 +330,7 @@ var action = function(){
                 }
             }, returnObject);
 
-            returnObject.eventStore = {};
-
+            //execute the init function if it exists
             if(typeof returnObject.init === 'function'){
                 returnObject.init.apply(returnObject);
             }
