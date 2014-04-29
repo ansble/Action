@@ -353,24 +353,6 @@ var action = function(){
             return returnObject;
         }
 
-        ,clone: function(objectIn, cloneMe){
-            var key;
-
-            for(key in cloneMe){
-                if(cloneMe.hasOwnProperty(key)){
-                    //good to copy this one...
-                    if (typeof cloneMe[key] === 'object'){
-                        //set up the object for iteration later
-                        objectIn[key] = (Array.isArray(cloneMe[key])) ? [] : {};
-
-                        action.clone(objectIn[key], cloneMe[key]);
-                    }else{
-                        objectIn[key] = cloneMe[key];
-                    }
-                }
-            }
-        }
-
         , modelMe: function(objectIn){
             //this is the module for creating a data model object
             var that = this
@@ -517,6 +499,24 @@ var action = function(){
                 type: typeIn
                 , message: messageIn
                 , createdBy: objectIn
+            }
+        }
+
+        , clone: function(objectIn, cloneMe){
+            var key;
+
+            for(key in cloneMe){
+                if(cloneMe.hasOwnProperty(key)){
+                    //good to copy this one...
+                    if (typeof cloneMe[key] === 'object'){
+                        //set up the object for iteration later
+                        objectIn[key] = (Array.isArray(cloneMe[key])) ? [] : {};
+
+                        action.clone(objectIn[key], cloneMe[key]);
+                    }else{
+                        objectIn[key] = cloneMe[key];
+                    }
+                }
             }
         }
 
