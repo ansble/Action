@@ -405,8 +405,7 @@ var action = function(){
                 if(typeof requestUrl !== 'undefined'){
 
                 } else {
-                    //TODO: probably should trigger some sort of error...
-                    throw new action.Error('http', 'No URL defined');
+                    action.emit('global:error', new action.Error('http', 'No URL defined', that));
                 }
             }
 
@@ -421,8 +420,7 @@ var action = function(){
                     //only do this on success...
                     changes = [];
                 } else {
-                    //TODO: probably should trigger some sort of error...
-                    throw new action.Error('http', 'No URL defined');
+                    action.emit('global:error', new action.Error('http', 'No URL defined', that));
                 }
             }
 
@@ -465,29 +463,31 @@ var action = function(){
             return newModel;
         }
 
-        , trace: function(emitterIdIn){
-            //log out the function that has the emitterId attached
+        //TODO: figure out if this is needed since the global:error...
+        // , trace: function(emitterIdIn){
+        //     //log out the function that has the emitterId attached
             
-            //create the traced object/stack
-            action.traced = action.modelMe({
-                stack: []
-                , emitterId: emitterIdIn
-            });
+        //     //create the traced object/stack
+        //     action.traced = action.modelMe({
+        //         stack: []
+        //         , emitterId: emitterIdIn
+        //     });
 
-            action.traced.listen('system:addTraced', function(objectIn){
-                var that = this;
+        //     action.traced.listen('system:addTraced', function(objectIn){
+        //         var that = this;
 
-                that.get('stack').push(objectIn);
-            }, action.traced);
+        //         that.get('stack').push(objectIn);
+        //     }, action.traced);
 
-            //trigger the event that will cause the trace
-            action.events.emit('system:trace', emitterIdIn);
-        }
+        //     //trigger the event that will cause the trace
+        //     action.emit('system:trace', emitterIdIn);
+        // }
 
-        , Error: function(typeIn, messageIn){
+        , Error: function(typeIn, messageIn, objectIn){
             return {
                 type: typeIn
                 , message: messageIn
+                , createdBy: objectIn
             }
         }
 
@@ -497,11 +497,18 @@ var action = function(){
     //add an events hook for global dealing with events...
     action = action.eventMe(action);
 
-    //global error handler y'all
-    window.onerror = function(error){
-        console.log('Error occured');
-        console.warn(error);
-    }
+    action.listen('global:error', function(errorIn) {
+        console.log('An Error occured in an event emitted by: ' + errorIn.createdBy.emitterId);
+        action.trace(errorIn.createdBy.emitterId);
+        throw errorIn;
+    });
+
+    // //global error handler y'all
+    // //REMOVE FOR PROD or modify for your own needs
+    // window.onerror = function(error){
+    //     console.log('Error occured');
+    //     console.warn(error);
+    // }
 
     //return the tweaked function
     return action;

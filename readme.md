@@ -14,11 +14,11 @@ So there are a variety of things that need to be completed for Action! to be rea
 0. Add events into the error handler
 0. Figure out how views really work... 
 0. Consider web components
-0. Add emitter IDs to every time an event gets emitted for debugging work
 0. create a prod branch and a debug branch (prod probably doesn't need the extra weight of the call stack and emitterid stuff)
 
 ###Done
 0. state machine support
+0. Add emitter IDs to every time an event gets emitted for debugging work
 
 
 #### Release Names
