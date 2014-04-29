@@ -5,15 +5,17 @@ So there are a variety of things that need to be completed for Action! to be rea
 
 ###TODOs before RC
 0. Tooling for troubleshooting events
-0. state machine support
 0. dependency resolution integration with state machines
 0. ajax resolution/integration for models
 0. Figure out the testing side of event driven FED in Action
 0. Clone/ Deep Copy in the set functions
-0. Revise teh destroy function to make it really do what it needs to
+0. Revise the destroy function to make it really do what it needs to
 0. Build out the save function for models
 0. Add events into the error handler
 0. Figure out how views really work... 
 0. Consider web components
 0. Add emitter IDs to every time an event gets emitted for debugging work
 0. create a prod branch and a debug branch (prod probably doesn't need the extra weight of the call stack and emitterid stuff)
+
+###Done
+0. state machine support

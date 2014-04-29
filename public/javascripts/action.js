@@ -14,13 +14,14 @@ var action = function(){
 
             returnObject.emit = function(eventNameIn, eventDataIn, localFlag){
                 //add the emitterID to this thing
-                var eventStack
+                var that = this
+                    , eventStack
                     , functionToCall
                     , i
                     , isLocal = (typeof localFlag !== 'undefined' && localFlag);
 
                 if(isLocal){
-                    eventStack = this.eventStore[eventNameIn];
+                    eventStack = that.eventStore[eventNameIn];
                 } else {
                     eventStack = action.eventStore[eventNameIn];
                 }
@@ -34,17 +35,17 @@ var action = function(){
                 if(typeof eventStack !== 'undefined'){
                     for(i = 0; i < eventStack.length; i ++){
                         if(typeof eventStack[i].scope !== 'undefined'){
-                            eventStack[i].call.apply(eventStack[i].scope,[eventDataIn, this.emitterId]);
+                            eventStack[i].call.apply(eventStack[i].scope,[eventDataIn, that.emitterId]);
                         }else{
-                            eventStack[i].call(eventDataIn, this.emitterId);
+                            eventStack[i].call(eventDataIn, that.emitterId);
                         }
 
                         
                         if(eventStack[i].once){
                             if(isLocal){
-                                this.silenceLocal(eventNameIn, eventStack[i].call, true);
+                                that.silenceLocal(eventNameIn, eventStack[i].call, true);
                             } else {
-                                this.silence(eventNameIn, eventStack[i].call, true);
+                                that.silence(eventNameIn, eventStack[i].call, true);
                             }
                         }
                     }
@@ -52,11 +53,14 @@ var action = function(){
             };
 
             returnObject.emitLocal = function(eventNameIn, eventDataIn){
-                this.emit(eventNameIn, eventDataIn, true);
+                var that = this;
+
+                that.emit(eventNameIn, eventDataIn, true);
             };
 
             returnObject.listen = function(eventNameIn, handlerIn, scopeIn, onceIn, localFlagIn){
-                var i
+                var that = this
+                    , i
                     , newCheck = true
 
                     //attribute holders and such
@@ -79,8 +83,8 @@ var action = function(){
                     local = eventNameIn.local;
                 }
 
-                eventStack = (typeof local !== 'undefined' && local) ? this.eventStore[eventNameIn] : action.eventStore[eventNameIn];
-                newEvent = (typeof local !== 'undefined' && local) ? this : action;
+                eventStack = (typeof local !== 'undefined' && local) ? that.eventStore[eventNameIn] : action.eventStore[eventNameIn];
+                newEvent = (typeof local !== 'undefined' && local) ? that : action;
 
                 if(typeof eventStack !== 'undefined'){
                     //already exists check to see if the function is already bound
@@ -110,12 +114,14 @@ var action = function(){
             };
 
             returnObject.listenLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
+                var that = this;
+
                 //convenience function for local listens
                 if(typeof eventNameIn === 'object'){
                     eventNameIn.local = true;
-                    this.listen(eventNameIn);
+                    that.listen(eventNameIn);
                 } else {
-                    this.listen({
+                    that.listen({
                         eventName: eventNameIn
                         , handler: handlerIn
                         , scope: scopeIn
@@ -127,7 +133,8 @@ var action = function(){
 
             returnObject.listenOnce = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
                 //same thing as .listen() but is only triggered once
-                var i
+                var that = this
+                    , i
                     , newCheck = true
                     , eventStack
                     , newEvent
@@ -146,8 +153,8 @@ var action = function(){
 
                 if(typeof localFlag !== 'undefined' && localFlag){
                     //make it local!
-                    eventStack = this.eventStore[eventName];
-                    newEvent = this;
+                    eventStack = that.eventStore[eventName];
+                    newEvent = that;
                 }else{
                     eventStack = action.eventStore[eventName];
                     newEvent = action;
@@ -175,12 +182,14 @@ var action = function(){
             };
 
             returnObject.listenOnceLocal = function(eventNameIn, handlerIn, scopeIn){
+                var that = this;
+
                 //same thing as .listen() but is only triggered once
                 if(typeof eventNameIn === 'object'){
                     eventNameIn.local = true;
-                    this.listenLocal(eventNameIn);
+                    that.listenLocal(eventNameIn);
                 }else{                  
-                    this.listenLocal({
+                    that.listenLocal({
                         eventName: eventNameIn
                         , handler: handlerIn
                         , scope: scopeIn
@@ -191,7 +200,8 @@ var action = function(){
 
             returnObject.silence = function(eventNameIn, handlerIn, onceIn, scopeIn, localFlagIn){
                 //localize variables
-                var i
+                var that = this
+                    , i
                     , truthy = false
                     , eventName = eventNameIn
                     , handler = handlerIn
@@ -210,7 +220,7 @@ var action = function(){
                 }
 
                 //local or global event store?
-                store = (typeof localFlag === 'undefined' || !localFlag) ? action : this;
+                store = (typeof localFlag === 'undefined' || !localFlag) ? action : that;
 
                 if(typeof store.eventStore[eventName] === 'undefined'){
                     //if there is no event with a name... return nothing
@@ -258,12 +268,14 @@ var action = function(){
             };
 
             returnObject.silenceLocal = function(eventNameIn, handlerIn, onceIn, scopeIn){
+                var that = this;
+
                 //essentially a convenience function.
                 if(typeof eventNameIn === 'object'){
                     eventNameIn.local = true;
-                    this.silence(eventNameIn);
+                    that.silence(eventNameIn);
                 }else{                  
-                    this.silence({
+                    that.silence({
                         eventName: eventNameIn
                         , handler: handlerIn
                         , once: onceIn
@@ -275,25 +287,26 @@ var action = function(){
 
             //Event Based state machine
             returnObject.requiredEvent = function(name, callback, context, fireMultipleIn){
-                var stateUpdate;
+                var that = this
+                    , stateUpdate;
 
-                this._fireMultiple = (typeof fireMultipleIn !== 'undefined') ? fireMultipleIn : false;
+                that._fireMultiple = (typeof fireMultipleIn !== 'undefined') ? fireMultipleIn : false;
 
                 //init some hidden storage if needed
-                if(typeof this.stateEvents === 'undefined'){
-                    this.stateEvents = {};
+                if(typeof that.stateEvents === 'undefined'){
+                    that.stateEvents = {};
                 }
 
-                if(typeof this._triggeredStateReady === 'undefined'){
-                    this._triggeredStateReady = false;
+                if(typeof that._triggeredStateReady === 'undefined'){
+                    that._triggeredStateReady = false;
                 }
 
-                this.stateEvents[name] = false;
+                that.stateEvents[name] = false;
 
-                stateUpdate = this.stateUpdate(name, this.stateEvents);
+                stateUpdate = that.stateUpdate(name, that.stateEvents);
 
-                this.event(name, stateUpdate, this);
-                this.event(name, callback, context);
+                that.listen(name, stateUpdate, that);
+                that.listen(name, callback, context);
             };
 
             returnObject.stateUpdate = function(nameIn, stateEventsIn){
@@ -324,9 +337,17 @@ var action = function(){
                 };
             };
 
+            returnObject.stateReady = function(){
+                //this is a default action when all required events have been completed.
+                //  needs to be overridden if you want to do something real
+                console.log('ready!');
+            };
+
             returnObject.listen('system:trace', function(emitterIDIn){
-                if(this.emitterId === emitterIDIn){
-                    this.emit('system:addTraced', this);
+                var that = this;
+
+                if(that.emitterId === emitterIDIn){
+                    that.emit('system:addTraced', that);
                 }
             }, returnObject);
 
@@ -340,7 +361,8 @@ var action = function(){
 
         , modelMe: function(objectIn){
             //this is the module for creating a data model object
-            var newModel = this.eventMe({})
+            var that = this
+                , newModel = that.eventMe({})
                 , attributes = {}
                 , changes = [];
 
@@ -349,7 +371,8 @@ var action = function(){
             };
 
             newModel.set = function(attributeName, attributeValue){
-                var key;
+                var that = this
+                    , key;
 
                 if(typeof attributeName === 'object'){
                     //well... this is an object... iterate and rock on
@@ -361,18 +384,18 @@ var action = function(){
                             //  pass by reference or switch to clone()
                             if(key !== 'destroy' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
                                 attributes[key] = attributeName[key];
-                                this.emitLocal('attribute:changed', key);
+                                that.emitLocal('attribute:changed', key);
                             } else {
-                                this[key] = attributeName[key];
+                                that[key] = attributeName[key];
                             }
                         }
                     }
                 } else{
                     if(attributeName !== 'destroy' && attributeName !== 'fetch' && attributeName !== 'save'){
                         attributes[attributeName] = attributeValue;
-                        this.emitLocal('attribute:changed', attributeName);
+                        that.emitLocal('attribute:changed', attributeName);
                     } else {
-                        this[attributeName] = attributeValue;
+                        that[attributeName] = attributeValue;
                     }
                 }
             }
@@ -382,7 +405,8 @@ var action = function(){
             }
 
             newModel.fetch = function(){
-                var requestUrl = this.get('url');
+                var that = this
+                    , requestUrl = that.get('url');
 
                 if(typeof requestUrl !== 'undefined'){
 
@@ -395,7 +419,8 @@ var action = function(){
             newModel.save = function(){
                 //TODO make this talk to a server with the URL
                 //TODO make it only mark the saved changes clear
-                var requestUrl = this.get('url');
+                var that = this
+                    , requestUrl = that.get('url');
 
                 if(typeof requestUrl !== 'undefined'){
                     
@@ -418,15 +443,15 @@ var action = function(){
             newModel.destroy = function(){
                 //TODO not really working... should get rid of this thing
                 //  and all of its parameters
-                var me = this
+                var that = this
                     , key;
 
                 setTimeout(function(){
-                    delete me;
+                    // delete me;
                 },0); // not quite working...
 
-                for(key in this){
-                    delete this[key];
+                for(key in that){
+                    // delete this[key];
                 }
 
                 //TODO this still doesn't kill the attributes or changes
@@ -437,7 +462,7 @@ var action = function(){
 
             newModel.listenLocal('attribute:changed', function(nameIn){
                 changes.push(nameIn);
-            }, this);
+            }, this); //maybe eliminate this 'this'
 
             if(typeof newModel.init === 'function'){
                 newModel.init.apply(newModel);
@@ -446,83 +471,83 @@ var action = function(){
             return newModel;
         }
 
-        , stateMe: function(objectIn){
-            var returnObject = objectIn
-                , dependencies = function(requiredIn, callbackIn, context, argObject, customFetchName) {
-                    var required = requiredIn //The array of dependencies
-                        ,callback = callbackIn //The Callback Function
-                        ,closureFunction;
+        // , stateMe: function(objectIn){
+        //     var returnObject = objectIn
+        //         , dependencies = function(requiredIn, callbackIn, context, argObject, customFetchName) {
+        //             var required = requiredIn //The array of dependencies
+        //                 ,callback = callbackIn //The Callback Function
+        //                 ,closureFunction;
 
-                    if (typeof context === 'undefined') {
-                        context = this;
-                    }
+        //             if (typeof context === 'undefined') {
+        //                 context = this;
+        //             }
 
-                    //Sanity Checks!
-                    if (typeof callback !== 'function') {
-                        console.warn('Pass in a Callback Function please...');
-                        return false;
-                    }
+        //             //Sanity Checks!
+        //             if (typeof callback !== 'function') {
+        //                 console.warn('Pass in a Callback Function please...');
+        //                 return false;
+        //             }
 
-                    if (!required instanceof Array) {
-                        if (typeof required === 'object') {
-                            required = [required];
-                        } else {
-                            console.warn('Pass in an array please...');
-                            return false;
-                        }
-                    }
-                    //End Sanity Checks!
+        //             if (!required instanceof Array) {
+        //                 if (typeof required === 'object') {
+        //                     required = [required];
+        //                 } else {
+        //                     console.warn('Pass in an array please...');
+        //                     return false;
+        //                 }
+        //             }
+        //             //End Sanity Checks!
 
-                    closureFunction = function() {
-                        var truthy = true
-                            , index
-                            , r;
+        //             closureFunction = function() {
+        //                 var truthy = true
+        //                     , index
+        //                     , r;
 
-                        this._calledBack = 0;
+        //                 this._calledBack = 0;
 
-                        for (index = 0; index < required.length; index++) {
-                            if (required[index].isError()) {
-                                //throw 'Error fetching dependency';
-                            } else if (!required[index].isReady() && !required[index].isPending() && typeof customFetchName === 'string') {
-                                //this object is not ready or pending...
-                                required[index][customFetchName](argObject);
-                            } else if (!required[index].isReady() && !required[index].isPending()) {
-                                //this object is not ready or pending...
-                                required[index].fetch(argObject);
-                            }
+        //                 for (index = 0; index < required.length; index++) {
+        //                     if (required[index].isError()) {
+        //                         //throw 'Error fetching dependency';
+        //                     } else if (!required[index].isReady() && !required[index].isPending() && typeof customFetchName === 'string') {
+        //                         //this object is not ready or pending...
+        //                         required[index][customFetchName](argObject);
+        //                     } else if (!required[index].isReady() && !required[index].isPending()) {
+        //                         //this object is not ready or pending...
+        //                         required[index].fetch(argObject);
+        //                     }
 
-                            truthy = truthy && required[index].isReady();
-                        }
+        //                     truthy = truthy && required[index].isReady();
+        //                 }
 
-                        if (truthy) {
-                            //everything is ready!!!!
-                            //banish our listeners first
-                            for (r = 0; r < required.length; r++) {
-                                //r for romeo
-                                required[r].off('statusChange', closureFunction, context);
-                            }
+        //                 if (truthy) {
+        //                     //everything is ready!!!!
+        //                     //banish our listeners first
+        //                     for (r = 0; r < required.length; r++) {
+        //                         //r for romeo
+        //                         required[r].off('statusChange', closureFunction, context);
+        //                     }
 
-                            //  trigger that callback ->
-                            this._calledBack++;
-                            if (this._calledBack <= 1) {
-                                callback.call(context, {}, {});
-                            }
+        //                     //  trigger that callback ->
+        //                     this._calledBack++;
+        //                     if (this._calledBack <= 1) {
+        //                         callback.call(context, {}, {});
+        //                     }
 
-                        }
-                    };
+        //                 }
+        //             };
 
-                    for (var i = 0; i < required.length; i++) {
-                        required[i].update(undefined);
-                        required[i].on('statusChange', closureFunction, context);
-                    }
+        //             for (var i = 0; i < required.length; i++) {
+        //                 required[i].update(undefined);
+        //                 required[i].on('statusChange', closureFunction, context);
+        //             }
 
-                    closureFunction();
-                };
+        //             closureFunction();
+        //         };
 
-            returnObject.dependencies = dependencies;
+        //     returnObject.dependencies = dependencies;
 
-            return returnObject;
-        }
+        //     return returnObject;
+        // }
 
         , trace: function(emitterIdIn){
             //log out the function that has the emitterId attached
@@ -534,7 +559,9 @@ var action = function(){
             });
 
             action.traced.listen('system:addTraced', function(objectIn){
-                this.get('stack').push(objectIn);
+                var that = this;
+
+                that.get('stack').push(objectIn);
             }, action.traced);
 
             //trigger the event that will cause the trace
