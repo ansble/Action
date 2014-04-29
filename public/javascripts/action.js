@@ -13,7 +13,6 @@ var action = function(){
             returnObject.eventStore = {};
 
             returnObject.emit = function(eventNameIn, eventDataIn, localFlag){
-                //add the emitterID to this thing
                 var that = this
                     , eventStack
                     , functionToCall
@@ -39,14 +38,9 @@ var action = function(){
                         }else{
                             eventStack[i].call(eventDataIn, that.emitterId);
                         }
-
                         
                         if(eventStack[i].once){
-                            if(isLocal){
-                                that.silenceLocal(eventNameIn, eventStack[i].call, true);
-                            } else {
-                                that.silence(eventNameIn, eventStack[i].call, true);
-                            }
+                            that.silenceLocal(eventNameIn, eventStack[i].call, true, isLocal);
                         }
                     }
                 }
