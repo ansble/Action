@@ -353,6 +353,24 @@ var action = function(){
             return returnObject;
         }
 
+        ,clone: function(objectIn, cloneMe){
+            var key;
+
+            for(key in cloneMe){
+                if(cloneMe.hasOwnProperty(key)){
+                    //good to copy this one...
+                    if (typeof cloneMe[key] === 'object'){
+                        //set up the object for iteration later
+                        objectIn[key] = (Array.isArray(cloneMe[key])) ? [] : {};
+
+                        action.clone(objectIn[key], cloneMe[key]);
+                    }else{
+                        objectIn[key] = cloneMe[key];
+                    }
+                }
+            }
+        }
+
         , modelMe: function(objectIn){
             //this is the module for creating a data model object
             var that = this
@@ -377,7 +395,12 @@ var action = function(){
                             //TODO: maybe make this do a deep copy to prevent
                             //  pass by reference or switch to clone()
                             if(key !== 'destroy' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
-                                attributes[key] = attributeName[key];
+                                if(typeof attributeValue === 'object'){
+                                    attributes[attributeName] = (Array.isArray(attributeName[key])) ? [] : {};
+                                    action.clone(attributes[attributeName], attributeName[key]);
+                                }else{
+                                    attributes[key] = attributeName[key];
+                                }
                                 that.emitLocal('attribute:changed', key);
                             } else {
                                 that[key] = attributeName[key];
@@ -386,7 +409,13 @@ var action = function(){
                     }
                 } else{
                     if(attributeName !== 'destroy' && attributeName !== 'fetch' && attributeName !== 'save'){
-                        attributes[attributeName] = attributeValue;
+                        if(typeof attributeValue === 'object'){
+                            attributes[attributeName] = (Array.isArray(attributeValue)) ? [] : {};
+                            action.clone(attributes[attributeName], attributeValue);
+                        }else{
+                            attributes[attributeName] = attributeValue;
+                        }
+
                         that.emitLocal('attribute:changed', attributeName);
                     } else {
                         that[attributeName] = attributeValue;
