@@ -4,6 +4,8 @@ var gulp = require('gulp')
     , concat = require('gulp-concat')
     , uglify = require('gulp-uglify')
     , rename = require('gulp-rename')
+    , zip = require('gulp-zip')
+    , jshint = require('gulp-jshint')
 
     , pkg = require('./package.json');
 
@@ -20,10 +22,12 @@ gulp.task('localBuild', function(){
     
     gulp.src(['public/javascripts/app.js', './public/javascripts/components/**/*.js','!./public/javascripts/components/**/*_test.js'])
         .pipe(concat('app.js'))
+        .pipe(jshint())
+        .pipe(jshint.reporter('default'))
         .pipe(gulp.dest('public/javascripts/built/'));
 });
 
-gulp.task('publish', function(){
+gulp.task('generateForPublish', function(){
     'use strict';
 
     gulp.src('public/javascripts/action.js')
@@ -32,6 +36,14 @@ gulp.task('publish', function(){
         .pipe(uglify())
         .pipe(rename('action-v' + pkg.version + '.min.js'))
         .pipe(gulp.dest('packages/' + pkg.version + '/'));
+});
+
+gulp.task('publish', ['generateForPublish'], function(){
+    'use strict';
+
+     // gulp.src(['packages/' + pkg.version + '/*.js'])
+     //    .pipe(zip('action.zip'))
+     //    .pipe(gulp.dest('packages/' + pkg.version + '/'));
 });
 
 // gulp.task('default', function () {

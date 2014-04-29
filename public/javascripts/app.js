@@ -4,6 +4,8 @@ angLee = action.modelMe({
     , role: 'Director'
 
     , init: function(){
+        'use strict';
+
         var that = this;
 
         that.listen('cast:movie', function () {
@@ -15,10 +17,14 @@ angLee = action.modelMe({
     }
 
     , castingCall: function(){
+        'use strict';
+
         this.emit('actor:cast');
     }
 
     , castingSelection: function(){
+        'use strict';
+
         this.emit('actor:choose');
     }
 });
@@ -27,6 +33,8 @@ currentActor = action.eventMe({
     actors: []
 
     , init: function(){
+        'use strict';
+
         var that = this;
 
         that.listen('actor:me', function(actor){
@@ -51,5 +59,7 @@ currentActor = action.eventMe({
 });
 
 action.listen('actor:change', function(actor){
+    'use strict';
+    
     $('.currentActorName').text(actor.get('name'));
 });

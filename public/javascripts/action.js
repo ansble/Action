@@ -40,7 +40,7 @@ var action = function(){
                         }
                         
                         if(eventStack[i].once){
-                            that.silenceLocal(eventNameIn, eventStack[i].call, true, isLocal);
+                            that.silence(eventNameIn, eventStack[i].call, true, isLocal);
                         }
                     }
                 }
