@@ -19,3 +19,9 @@ So there are a variety of things that need to be completed for Action! to be rea
 
 ###Done
 0. state machine support
+
+
+#### Release Names
+We'll use these guys as release names: http://en.wikipedia.org/wiki/List_of_action_film_actors
+
+in order from top left - down the column then on to the next column. If we run out we'll add more names to the list :-)
