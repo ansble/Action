@@ -414,9 +414,22 @@ var action = function(){
                     , requestUrl = that.get('url');
 
                 if(typeof requestUrl !== 'undefined'){
-
+                    //make the request for the model
+                    $.ajax({
+                        type: 'get'
+                        , url: requestUrl
+                        , success: function(data, status){
+                            if(status){
+                                that.emit('global:error', new action.Error('http', 'Error in request', that));
+                            }
+                            that.emit(that.get('dataEvent'), data);
+                        }
+                        , error: function(xhr, errorType, error){
+                            that.emit('global:error', new action.Error('http', 'Error in request', that));
+                        }
+                    });
                 } else {
-                    action.emit('global:error', new action.Error('http', 'No URL defined', that));
+                    that.emit('global:error', new action.Error('http', 'No URL defined', that));
                 }
             }
 
@@ -424,17 +437,38 @@ var action = function(){
                 //TODO make this talk to a server with the URL
                 //TODO make it only mark the saved changes clear
                 var that = this
-                    , requestUrl = that.get('url');
+                    , requestUrl = that.get('url')
+                    , id = that.get('id')
+                    , type = (typeof id === 'undefined') ? 'post' : 'put';
 
                 if(typeof requestUrl !== 'undefined'){
-                    
-                    //only do this on success...
-                    changes = [];
+                    $.ajax({
+                        type: type
+                        , url: requestUrl + '/' + id
+                        , data: that.flatten()
+                        , success: function(data, status){
+                            //only do this on success...
+                            that.clearChanges();
+
+                            //update the model with stuff from the server
+                            that.set(data);
+
+                            //emit the data event for this model to refresh everyone's values
+                            that.emit(that.get('dataEvent'), data);
+                        }
+                        , error: function(){
+                            that.emit('global:error', new action.Error('http', 'Error in request', that));
+                        }
+                    });
                 } else {
                     action.emit('global:error', new action.Error('http', 'No URL defined', that));
                 }
             }
 
+            newModel.clearChanges = function(){
+                changes = [];
+            }
+            
             newModel.getChanges = function(){
                 return changes;
             }
