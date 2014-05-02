@@ -562,10 +562,14 @@ var action = function(){
 
     action.listen('global:error', function(errorIn) {
         console.group('An Error occured in an event emitted by: ' + errorIn.createdBy.emitterId);
-        console.log('Whole object:');
+        console.log('The Whole Enchilada (object):');
         console.dir(errorIn.createdBy);
-        console.log('Attributes:');
-        console.dir(errorIn.createdBy.flatten());
+
+        if(typeof errorIn.createdBy.flatten === 'function'){
+            console.log('Just the Lettuce (attributes):');
+            console.dir(errorIn.createdBy.flatten());
+        }
+
         console.groupEnd();
         // action.trace(errorIn.createdBy.emitterId);
         // throw errorIn;
