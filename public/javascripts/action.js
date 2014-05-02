@@ -561,9 +561,14 @@ var action = function(){
     action = action.eventMe(action);
 
     action.listen('global:error', function(errorIn) {
-        console.log('An Error occured in an event emitted by: ' + errorIn.createdBy.emitterId);
-        action.trace(errorIn.createdBy.emitterId);
-        throw errorIn;
+        console.group('An Error occured in an event emitted by: ' + errorIn.createdBy.emitterId);
+        console.log('Whole object:');
+        console.dir(errorIn.createdBy);
+        console.log('Attributes:');
+        console.dir(errorIn.createdBy.flatten());
+        console.groupEnd();
+        // action.trace(errorIn.createdBy.emitterId);
+        // throw errorIn;
     });
 
     // //global error handler y'all
