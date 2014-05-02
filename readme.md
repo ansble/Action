@@ -7,7 +7,7 @@ So there are a variety of things that need to be completed for Action! to be rea
 0. dependency resolution integration with state machines
 0. Figure out the testing side of event driven FED in Action
 0. Revise the destroy function to make it really do what it needs to
-0. Figure out how views really work... 
+0. Figure out how views really work... (https://github.com/twitter/hogan.js)
 0. Consider web components
 
 ###TODOs generally
