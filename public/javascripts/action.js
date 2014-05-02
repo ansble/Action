@@ -572,7 +572,7 @@ var action = function(){
             console.log('It says: ' + errorIn.message);
         }
         
-        console.log('The Whole Enchilada (object):');
+        console.log('The Whole Enchilada (object that caused this mess):');
         console.dir(errorIn.createdBy);
 
         if(typeof errorIn.createdBy.flatten === 'function'){
