@@ -425,7 +425,7 @@ var action = function(){
                             that.emit(that.get('dataEvent'), data);
                         }
                         , error: function(xhr, errorType, error){
-                            that.emit('global:error', new action.Error('http', 'Error in request', that));
+                            that.emit('global:error', new action.Error('http', 'Error in request type: ' + errorType, that, error));
                         }
                     });
                 } else {
@@ -528,11 +528,12 @@ var action = function(){
         //     action.emit('system:trace', emitterIdIn);
         // }
 
-        , Error: function(typeIn, messageIn, objectIn){
+        , Error: function(typeIn, messageIn, objectIn, errorObjectIn){
             return {
                 type: typeIn
                 , message: messageIn
                 , createdBy: objectIn
+                , errorObject: errorObjectIn
             }
         }
 
@@ -562,12 +563,26 @@ var action = function(){
 
     action.listen('global:error', function(errorIn) {
         console.group('An Error occured in an event emitted by: ' + errorIn.createdBy.emitterId);
+        console.log('It was a ' + errorIn.type + 'error.');
+        
+        if(typeof errorIn.errorObject === 'string'){
+            console.log('It says: ' + errorIn.errorObject);
+            console.log('and: ' + errorIn.message);
+        } else {
+            console.log('It says: ' + errorIn.message);
+        }
+        
         console.log('The Whole Enchilada (object):');
         console.dir(errorIn.createdBy);
 
         if(typeof errorIn.createdBy.flatten === 'function'){
             console.log('Just the Lettuce (attributes):');
             console.dir(errorIn.createdBy.flatten());
+        }
+
+        if(typeof errorIn.errorObject === 'object'){
+            console.log('Oh look an Error Object!:');
+            console.dir(errorIn.errorObject);
         }
 
         console.groupEnd();
