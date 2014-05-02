@@ -590,13 +590,6 @@ var action = function(){
         // throw errorIn;
     });
 
-    // //global error handler y'all
-    // //REMOVE FOR PROD or modify for your own needs
-    // window.onerror = function(error){
-    //     console.log('Error occured');
-    //     console.warn(error);
-    // }
-
     //return the tweaked function
     return action;
 }(this);
