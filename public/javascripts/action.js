@@ -562,7 +562,7 @@ var action = function(){
     action = action.eventMe(action);
 
     action.listen('global:error', function(errorIn) {
-        console.group('An Error occured in an event emitted by: ' + errorIn.createdBy.emitterId);
+        console.group('An Error occured in an object with emitterid: ' + errorIn.createdBy.emitterId);
         console.log('It was a ' + errorIn.type + 'error.');
         
         if(typeof errorIn.errorObject === 'string'){
