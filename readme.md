@@ -15,6 +15,7 @@ So there are a variety of things that need to be completed for Action! to be rea
 0. update documentation
 0. example app
 0. simplify model set function?
+0. make the error output even prettier! https://developers.google.com/chrome-developer-tools/docs/console-api#consoleerrorobject_object
 
 ###Done
 0. Tooling for troubleshooting events
