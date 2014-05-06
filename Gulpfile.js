@@ -31,9 +31,12 @@ gulp.task('generateForPublish', function(){
     'use strict';
 
     gulp.src('public/javascripts/action.js')
+        .pipe(gulp.dest('packages/latest/'))
         .pipe(rename('action-v' + pkg.version + '.js'))
         .pipe(gulp.dest('packages/' + pkg.version + '/'))
         .pipe(uglify())
+        .pipe(rename('action.min.js'))
+        .pipe(gulp.dest('packages/latest/'))
         .pipe(rename('action-v' + pkg.version + '.min.js'))
         .pipe(gulp.dest('packages/' + pkg.version + '/'));
 });
