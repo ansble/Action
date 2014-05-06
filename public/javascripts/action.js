@@ -294,8 +294,8 @@ var action = function(){
 
                 stateUpdate = that.stateUpdate(name, that.stateEvents);
 
-                that.listen(name, stateUpdate, that);
                 that.listen(name, callback, context);
+                that.listen(name, stateUpdate, that);
             };
 
             returnObject.stateUpdate = function(nameIn, stateEventsIn){
@@ -318,7 +318,7 @@ var action = function(){
                             if(!that._triggeredStateReady || that._fireMultiple){
                                 //feels like a little bit of a hack.
                                 //  lets the data finish propogating before triggering the call
-                                setTimeout(that.stateReady, 100);
+                                setTimeout(that.stateReady.apply(that), 100);
                                 that._triggeredStateReady = true;
                             }
                         }
@@ -336,7 +336,8 @@ var action = function(){
                 var that = this;
 
                 if(that.emitterId === emitterIDIn){
-                    that.emit('system:addTraced', that);
+                    // that.emit('system:addTraced', that);
+                    action.traced = that;
                 }
             }, returnObject);
 
@@ -414,7 +415,7 @@ var action = function(){
                         type: 'get'
                         , url: requestUrl
                         , success: function(data, status){
-                            if(status){
+                            if(status !== 'success'){
                                 that.emit('global:error', new action.Error('http', 'Error in request', that));
                             }
                             that.emit(that.get('dataEvent'), data);
