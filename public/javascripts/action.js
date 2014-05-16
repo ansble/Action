@@ -1,3 +1,5 @@
+//TODO routing and pushstate
+//  view rendering on routing events
 var action = function(){
     'use strict';
 
@@ -356,6 +358,8 @@ var action = function(){
                 , attributes = {}
                 , changes = [];
 
+            newModel.super = {};
+
             newModel.get = function(attributeName){
                 return attributes[attributeName];
             };
@@ -381,6 +385,16 @@ var action = function(){
                                 }
                                 that.emitLocal('attribute:changed', key);
                             } else {
+                                if(typeof that[key] === 'function'){
+                                    //wrap the super version in a closure so that we can 
+                                    //  still execute it correctly
+                                    that.super[key] = (function(me){ 
+                                            var that = me; 
+
+                                            return me[key];
+                                        })(that);
+                                }
+
                                 that[key] = attributeName[key];
                             }
                         }
@@ -396,6 +410,15 @@ var action = function(){
 
                         that.emitLocal('attribute:changed', attributeName);
                     } else {
+                        if(typeof that[attributeName] === 'function'){
+                            //wrap the super version in a closure so that we can 
+                            //  still execute it correctly
+                            that.super[attributeName] = (function(me){ 
+                                    var that = me; 
+
+                                    return me[attributeName];
+                                })(that);
+                        }
                         that[attributeName] = attributeValue;
                     }
                 }
@@ -405,7 +428,7 @@ var action = function(){
                 return attributes;
             }
 
-            newModel.fetch = function(){
+            newModel.fetch = function(setVariableName){
                 var that = this
                     , requestUrl = that.get('url');
 
@@ -419,6 +442,11 @@ var action = function(){
                                 that.emit('global:error', new action.Error('http', 'Error in request', that));
                             }
                             that.emit(that.get('dataEvent'), data);
+                            if(typeof setVariableName === 'string'){
+                                that.set(setVariableName, data);
+                            }else{
+                                that.set(data);
+                            }
                         }
                         , error: function(xhr, errorType, error){
                             that.emit('global:error', new action.Error('http', 'Error in request type: ' + errorType, that, error));
