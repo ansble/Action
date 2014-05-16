@@ -388,11 +388,7 @@ var action = function(){
                                 if(typeof that[key] === 'function'){
                                     //wrap the super version in a closure so that we can 
                                     //  still execute it correctly
-                                    that.super[key] = (function(me){ 
-                                            var that = me; 
-
-                                            return me[key];
-                                        })(that);
+                                    that.super[key] = that[key].bind(that);
                                 }
 
                                 that[key] = attributeName[key];
@@ -413,11 +409,7 @@ var action = function(){
                         if(typeof that[attributeName] === 'function'){
                             //wrap the super version in a closure so that we can 
                             //  still execute it correctly
-                            that.super[attributeName] = (function(me){ 
-                                    var that = me; 
-
-                                    return me[attributeName];
-                                })(that);
+                            that.super[attributeName] = that[attributeName].bind(that);
                         }
                         that[attributeName] = attributeValue;
                     }
