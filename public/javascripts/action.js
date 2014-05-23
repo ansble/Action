@@ -420,13 +420,46 @@ var action = function(){
                 return attributes;
             }
 
-            newModel.fetch = function(setVariableName){
+            newModel.fetch = function(setVariableName, successFunction, errorFunction){
                 var that = this
-                    , requestUrl = that.get('url');
+                    , requestUrl = that.get('url')
+                    , useLocal = action.useLocalCache;
 
                 if(typeof requestUrl !== 'undefined'){
                     //make the request for the model
-                    $.ajax({
+                    if(useLocal){
+                        window.localforage.getItem(window.btoa(that.get('url')), function(data){
+                            if(data === null){
+                                //this doesn't exist locally...
+                                that.ajaxGet(setVariableName, function(dataIn){
+                                    var localData = dataIn
+                                        , articleId = that.get('url');
+
+                                    window.localforage.setItem(window.btoa(articleId), localData, function(){
+                                        console.log('data done');
+                                    });
+                                });
+                            }else{
+                                //it does exist!
+                                that.emit(that.get('dataEvent'), data);
+                            }
+                        });
+                    } else {
+                        that.ajaxGet(setVariableName, successFunction);
+                    }
+                } else {
+                    that.emit('global:error', new action.Error('http', 'No URL defined', that));
+                    if(typeof errorFunction === 'function'){
+                        errorFunction.apply(that);
+                    }
+                }
+            };
+
+            newModel.ajaxGet = function(setVariableName, successFunction){
+                var that = this
+                    , requestUrl = that.get('url');
+
+                $.ajax({
                         type: 'get'
                         , url: requestUrl
                         , success: function(data, status){
@@ -439,15 +472,16 @@ var action = function(){
                             }else{
                                 that.set(data);
                             }
+
+                            if(typeof successFunction === 'function'){
+                                successFunction.apply(that, [data]);
+                            }
                         }
                         , error: function(xhr, errorType, error){
                             that.emit('global:error', new action.Error('http', 'Error in request type: ' + errorType, that, error));
                         }
                     });
-                } else {
-                    that.emit('global:error', new action.Error('http', 'No URL defined', that));
-                }
-            }
+            };
 
             newModel.save = function(){
                 //TODO make this talk to a server with the URL
