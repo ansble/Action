@@ -31,3 +31,16 @@ So there are a variety of things that need to be completed for Action! to be rea
 We'll use these guys as release names: http://en.wikipedia.org/wiki/List_of_action_film_actors
 
 in order from top left - down the column then on to the next column. If we run out we'll add more names to the list :-)
+
+##Documentation
+###Browser Support
+0. IE 9+
+0. Chrome
+0. Firefox
+0. Opera?
+
+###Dependencies
+There are a few dependencies for Action to be a fully useful framework. They are (with the reasons for them):
+0. Zepto, jQuery, or jQlite. (Action uses the jQuery syntax to wrap it's ajax and DOM manipulation)
+0. localForage (If you want to use the local cache. It will automatically cache all of your ajax requests in local storage and pull from them all subsequent times they are requested)
+0. Handlebars (a templating library)
