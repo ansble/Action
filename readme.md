@@ -41,6 +41,5 @@ in order from top left - down the column then on to the next column. If we run o
 
 ###Dependencies
 There are a few dependencies for Action to be a fully useful framework. They are (with the reasons for them):
-0. Zepto, jQuery, or jQlite. (Action uses the jQuery syntax to wrap it's ajax and DOM manipulation)
 0. localForage (If you want to use the local cache. It will automatically cache all of your ajax requests in local storage and pull from them all subsequent times they are requested)
 0. Handlebars (a templating library)
