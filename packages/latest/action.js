@@ -1,3 +1,7 @@
+/****************************************
+Action! v0.4.0 Akshay Kumar 
+https://github.com/designfrontier/Action 
+****************************************/
 //TODO routing and pushstate
 //  view rendering on routing events
 var action = function(){

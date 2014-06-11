@@ -6,6 +6,7 @@ var gulp = require('gulp')
     , rename = require('gulp-rename')
     , zip = require('gulp-zip')
     , jshint = require('gulp-jshint')
+    , header = require('gulp-header')
 
     , pkg = require('./package.json');
 
@@ -29,12 +30,15 @@ gulp.task('localBuild', function(){
 
 gulp.task('generateForPublish', function(){
     'use strict';
+    var headerText = '/****************************************\nAction! v' + pkg.version + ' ' + pkg.releaseName + ' \nhttps://github.com/designfrontier/Action \n****************************************/\n';
 
     gulp.src('public/javascripts/action.js')
+        .pipe(header(headerText))
         .pipe(gulp.dest('packages/latest/'))
         .pipe(rename('action-v' + pkg.version + '.js'))
         .pipe(gulp.dest('packages/' + pkg.version + '/'))
         .pipe(uglify())
+        .pipe(header(headerText))
         .pipe(rename('action.min.js'))
         .pipe(gulp.dest('packages/latest/'))
         .pipe(rename('action-v' + pkg.version + '.min.js'))
@@ -44,9 +48,6 @@ gulp.task('generateForPublish', function(){
 gulp.task('publish', ['generateForPublish'], function(){
     'use strict';
 
-     // gulp.src(['packages/' + pkg.version + '/*.js'])
-     //    .pipe(zip('action.zip'))
-     //    .pipe(gulp.dest('packages/' + pkg.version + '/'));
 });
 
 // gulp.task('default', function () {
