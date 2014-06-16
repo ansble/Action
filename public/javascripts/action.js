@@ -373,9 +373,6 @@ var action = function(){
                     for(key in attributeName){
                         if(attributeName.hasOwnProperty(key)){
                             //this attribute does not belong to the prototype. Good.
-
-                            //TODO: maybe make this do a deep copy to prevent
-                            //  pass by reference or switch to clone()
                             if(key !== 'destroy' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
                                 if(typeof attributeValue === 'object'){
                                     attributes[attributeName] = (Array.isArray(attributeName[key])) ? [] : {};
