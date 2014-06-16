@@ -385,7 +385,7 @@ var action = function(){
                                 }
                                 that.emitLocal('attribute:changed', key);
                             } else {
-                                if(typeof that[key] === 'function' && !that.super[key]){
+                                if(typeof that[key] === 'function'){
                                     //wrap the super version in a closure so that we can 
                                     //  still execute it correctly
                                     that.super[key] = that[key].bind(that);
@@ -420,77 +420,34 @@ var action = function(){
                 return attributes;
             }
 
-            newModel.fetch = function(setVariableName, successFunction, errorFunction, flushCache){
+            newModel.fetch = function(setVariableName){
                 var that = this
-                    , requestUrl = that.get('url')
-                    , useLocal = action.useLocalCache && !flushCache;
+                    , requestUrl = that.get('url');
 
                 if(typeof requestUrl !== 'undefined'){
                     //make the request for the model
-                    if(useLocal){
-                        window.localforage.getItem(window.btoa(that.get('url')), function(data){
-                            if(data === null){
-                                //this doesn't exist locally...
-                                that.ajaxGet(setVariableName, function(dataIn){
-                                    var localData = dataIn
-                                        , articleId = that.get('url');
-
-                                    window.localforage.setItem(window.btoa(articleId), localData, function(){
-                                        // console.log('data done');
-                                    });
-                                });
-                            }else{
-                                //it does exist!
-                                that.emit(that.get('dataEvent'), data);
-                            }
-                        });
-                    } else {
-                        that.ajaxGet(setVariableName, successFunction);
-                    }
-                } else {
-                    that.emit('global:error', new action.Error('http', 'No URL defined', that));
-                    if(typeof errorFunction === 'function'){
-                        errorFunction.apply(that);
-                    }
-                }
-            };
-
-            newModel.ajaxGet = function(setVariableName, successFunction){
-                var that = this
-                    , requestUrl = that.get('url')// + '?' + Date.now()
-
-                    , oReq = new XMLHttpRequest();
-
-                oReq.onload = function(){
-                            var data = JSON.parse(this.responseText);
-
-                            //TODO: make the statuses more generic
-                            if(this.status === 200 || this.status === 302){
-                                that.emit(that.get('dataEvent'), data);
-
-                                if(typeof setVariableName === 'string'){
-                                    that.set(setVariableName, data);
-                                }else{
-                                    that.set(data);
-                                }
-
-                                if(typeof successFunction === 'function'){
-                                    successFunction.apply(that, [data]);
-                                }
-                            }else if(this.status === 400){
-
-                            }else if(this.status === 500){
+                    $.ajax({
+                        type: 'get'
+                        , url: requestUrl
+                        , success: function(data, status){
+                            if(status !== 'success'){
                                 that.emit('global:error', new action.Error('http', 'Error in request', that));
                             }
-                        };
-
-                oReq.onerror = function(xhr, errorType, error){
+                            that.emit(that.get('dataEvent'), data);
+                            if(typeof setVariableName === 'string'){
+                                that.set(setVariableName, data);
+                            }else{
+                                that.set(data);
+                            }
+                        }
+                        , error: function(xhr, errorType, error){
                             that.emit('global:error', new action.Error('http', 'Error in request type: ' + errorType, that, error));
-                        };
-
-                oReq.open('get', requestUrl, true);
-                oReq.send();
-            };
+                        }
+                    });
+                } else {
+                    that.emit('global:error', new action.Error('http', 'No URL defined', that));
+                }
+            }
 
             newModel.save = function(){
                 //TODO make this talk to a server with the URL
@@ -498,45 +455,27 @@ var action = function(){
                 var that = this
                     , requestUrl = that.get('url')
                     , id = that.get('id')
-                    , type = (typeof id === 'undefined') ? 'post' : 'put'
-
-                    , oReq = new XMLHttpRequest();
+                    , type = (typeof id === 'undefined') ? 'post' : 'put';
 
                 if(typeof requestUrl !== 'undefined'){
-                    oReq.onload = function(){
-                        if(this.status === 200 || this.status === 302){
+                    $.ajax({
+                        type: type
+                        , url: requestUrl + '/' + id
+                        , data: that.flatten()
+                        , success: function(data, status){
+                            //only do this on success...
                             that.clearChanges();
-                            that.set(data);
-                            that.emit(that.get('dataEvent'), data);
 
-                        }else if(this.status === 500 || this.status === 400){
+                            //update the model with stuff from the server
+                            that.set(data);
+
+                            //emit the data event for this model to refresh everyone's values
+                            that.emit(that.get('dataEvent'), data);
+                        }
+                        , error: function(){
                             that.emit('global:error', new action.Error('http', 'Error in request', that));
                         }
-                    };
-
-                    oReq.submittedData = that.flatten();
-
-                    oReq.open(type, requestUrl, true);
-                    oReq.send();
-
-                    // $.ajax({
-                    //     type: type
-                    //     , url: requestUrl + '/' + id
-                    //     , data: that.flatten()
-                    //     , success: function(data, status){
-                    //         //only do this on success...
-                    //         that.clearChanges();
-
-                    //         //update the model with stuff from the server
-                    //         that.set(data);
-
-                    //         //emit the data event for this model to refresh everyone's values
-                    //         that.emit(that.get('dataEvent'), data);
-                    //     }
-                    //     , error: function(){
-                    //         that.emit('global:error', new action.Error('http', 'Error in request', that));
-                    //     }
-                    // });
+                    });
                 } else {
                     action.emit('global:error', new action.Error('http', 'No URL defined', that));
                 }

@@ -25,11 +25,6 @@ var action = function(){
                     eventStack = action.eventStore[eventNameIn];
                 }
 
-                // if(typeof eventDataIn !== 'undefined'){
-                //  //we have some event data
-                //  eventData.payload = eventDataIn;
-                // }
-
                 //emit the event
                 if(typeof eventStack !== 'undefined'){
                     for(i = 0; i < eventStack.length; i ++){

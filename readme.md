@@ -7,7 +7,7 @@ So there are a variety of things that need to be completed for Action! to be rea
 0. dependency resolution integration with state machines
 0. Figure out the testing side of event driven FED in Action
 0. Revise the destroy function to make it really do what it needs to
-0. Figure out how views really work... 
+0. Figure out how views really work... (https://github.com/twitter/hogan.js)
 0. Consider web components
 
 ###TODOs generally
@@ -15,6 +15,7 @@ So there are a variety of things that need to be completed for Action! to be rea
 0. update documentation
 0. example app
 0. simplify model set function?
+0. make the error output even prettier! https://developers.google.com/chrome-developer-tools/docs/console-api#consoleerrorobject_object
 
 ###Done
 0. Tooling for troubleshooting events
@@ -30,3 +31,15 @@ So there are a variety of things that need to be completed for Action! to be rea
 We'll use these guys as release names: http://en.wikipedia.org/wiki/List_of_action_film_actors
 
 in order from top left - down the column then on to the next column. If we run out we'll add more names to the list :-)
+
+##Documentation
+###Browser Support
+0. IE 9+
+0. Chrome
+0. Firefox
+0. Opera?
+
+###Dependencies
+There are a few dependencies for Action to be a fully useful framework. They are (with the reasons for them):
+0. localForage (If you want to use the local cache. It will automatically cache all of your ajax requests in local storage and pull from them all subsequent times they are requested)
+0. Handlebars (a templating library)
