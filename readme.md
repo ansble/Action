@@ -8,6 +8,7 @@ Need data? Ask for it. Need to do something with that data? Listen for when it i
 So there are a variety of things that need to be completed for Action! to be ready for primetime. Some of them are basic (getting statemachine working), others are more complex (build tooling for troubleshooting event stacks). I am going to keep them here and make this a living document.
 
 ###TODOs before RC
+0. make the destroy function silence all events registered by the object it is called on
 0. dependency resolution integration with state machines
 0. Figure out the testing side of event driven FED in Action
 0. Revise the destroy function to make it really do what it needs to
