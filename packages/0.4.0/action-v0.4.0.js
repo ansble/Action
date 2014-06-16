@@ -389,7 +389,7 @@ var action = function(){
                                 }
                                 that.emitLocal('attribute:changed', key);
                             } else {
-                                if(typeof that[key] === 'function'){
+                                if(typeof that[key] === 'function' && !that.super[key]){
                                     //wrap the super version in a closure so that we can 
                                     //  still execute it correctly
                                     that.super[key] = that[key].bind(that);
