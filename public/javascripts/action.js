@@ -586,6 +586,33 @@ var action = function(){
             return newModel;
         }
 
+        , routeMe: function(objectIn){
+            var that = this
+                , routeModel = that.modelMe(objectIn)
+
+                , init = function(){
+                    var that = this
+                        , atags = document.querySelectorAll('a')
+                        , i = 0;
+
+                    for(i = 0; i < atags.length; i++){
+                        atags[i].addEventListener('click', function(e){
+                           var location = this.attributes.href.textContent;
+
+                            if(typeof that.get(location) !== 'undefined'){
+                                //trigger the route
+                                that.emit('navigate', location);
+                                e.preventDefault();
+                            }
+                        });
+                    }
+                };
+
+                init();
+
+            return routeModel;
+        }
+
         //TODO: figure out if this is needed since the global:error...
         // , trace: function(emitterIdIn){
         //     //log out the function that has the emitterId attached
