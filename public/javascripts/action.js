@@ -35,7 +35,7 @@ var action = function(){
                         }else{
                             eventStack[i].call(eventDataIn, that.emitterId);
                         }
-                        
+
                         if(eventStack[i].once){
                             that.silence(eventNameIn, eventStack[i].call, true, isLocal);
                         }
@@ -179,7 +179,7 @@ var action = function(){
                 if(typeof eventNameIn === 'object'){
                     eventNameIn.local = true;
                     that.listenLocal(eventNameIn);
-                }else{                  
+                }else{
                     that.listenLocal({
                         eventName: eventNameIn
                         , handler: handlerIn
@@ -265,7 +265,7 @@ var action = function(){
                 if(typeof eventNameIn === 'object'){
                     eventNameIn.local = true;
                     that.silence(eventNameIn);
-                }else{                  
+                }else{
                     that.silence({
                         eventName: eventNameIn
                         , handler: handlerIn
@@ -373,9 +373,6 @@ var action = function(){
                     for(key in attributeName){
                         if(attributeName.hasOwnProperty(key)){
                             //this attribute does not belong to the prototype. Good.
-
-                            //TODO: maybe make this do a deep copy to prevent
-                            //  pass by reference or switch to clone()
                             if(key !== 'destroy' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
                                 if(typeof attributeValue === 'object'){
                                     attributes[attributeName] = (Array.isArray(attributeName[key])) ? [] : {};
@@ -386,7 +383,7 @@ var action = function(){
                                 that.emitLocal('attribute:changed', key);
                             } else {
                                 if(typeof that[key] === 'function' && !that.super[key]){
-                                    //wrap the super version in a closure so that we can 
+                                    //wrap the super version in a closure so that we can
                                     //  still execute it correctly
                                     that.super[key] = that[key].bind(that);
                                 }
@@ -407,7 +404,7 @@ var action = function(){
                         that.emitLocal('attribute:changed', attributeName);
                     } else {
                         if(typeof that[attributeName] === 'function'){
-                            //wrap the super version in a closure so that we can 
+                            //wrap the super version in a closure so that we can
                             //  still execute it correctly
                             that.super[attributeName] = that[attributeName].bind(that);
                         }
@@ -545,7 +542,7 @@ var action = function(){
             newModel.clearChanges = function(){
                 changes = [];
             }
-            
+
             newModel.getChanges = function(){
                 return changes;
             }
@@ -558,18 +555,22 @@ var action = function(){
                 //TODO not really working... should get rid of this thing
                 //  and all of its parameters
                 var that = this
-                    , key;
+                    , events = that.eventStore
+                    , key
+                    , i;
 
-                setTimeout(function(){
-                    // delete me;
-                },0); // not quite working...
+                //TODO: make this iterate over the events that have been
+                //  registered by this object and silence them
+                //  otherwise zombies.
 
-                for(key in that){
-                    // delete this[key];
-                }
-
-                //TODO this still doesn't kill the attributes or changes
-                //  private data
+                // for(key in events){
+                //     for(i = 0; i < events[key].length; i++){
+                //         that.silence(key, events[key][i].call,events[key][i].once)
+                //     }
+                //     // if(that.hasOwnProperty(key)){
+                //     //     delete that[key];
+                //     // }
+                // }
             }
 
             newModel.set(objectIn); //set the inital attributes
@@ -585,10 +586,37 @@ var action = function(){
             return newModel;
         }
 
+        , routeMe: function(objectIn){
+            var that = this
+                , routeModel = that.modelMe(objectIn)
+
+                , init = function(){
+                    var that = this
+                        , atags = document.querySelectorAll('a')
+                        , i = 0;
+
+                    for(i = 0; i < atags.length; i++){
+                        atags[i].addEventListener('click', function(e){
+                           var location = this.attributes.href.textContent;
+
+                            if(typeof that.get(location) !== 'undefined'){
+                                //trigger the route
+                                that.emit('navigate', location);
+                                e.preventDefault();
+                            }
+                        });
+                    }
+                };
+
+                init();
+
+            return routeModel;
+        }
+
         //TODO: figure out if this is needed since the global:error...
         // , trace: function(emitterIdIn){
         //     //log out the function that has the emitterId attached
-            
+
         //     //create the traced object/stack
         //     action.traced = action.modelMe({
         //         stack: []
@@ -641,14 +669,14 @@ var action = function(){
     action.listen('global:error', function(errorIn) {
         console.group('An Error occured in an object with emitterid: ' + errorIn.createdBy.emitterId);
         console.log('It was a ' + errorIn.type + 'error.');
-        
+
         if(typeof errorIn.errorObject === 'string'){
             console.log('It says: ' + errorIn.errorObject);
             console.log('and: ' + errorIn.message);
         } else {
             console.log('It says: ' + errorIn.message);
         }
-        
+
         console.log('The Whole Enchilada (object that caused this mess):');
         console.dir(errorIn.createdBy);
 
@@ -665,6 +693,10 @@ var action = function(){
         console.groupEnd();
         // action.trace(errorIn.createdBy.emitterId);
         // throw errorIn;
+    });
+
+    document.addEventListener("DOMContentLoaded", function(){
+        action.emit('dom:ready');
     });
 
     //return the tweaked function
