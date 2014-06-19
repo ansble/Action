@@ -1,3 +1,7 @@
+/****************************************
+Action! v0.4.1 Akshay Kumar 
+https://github.com/designfrontier/Action 
+****************************************/
 //TODO routing and pushstate
 //  view rendering on routing events
 var action = function(){
@@ -35,7 +39,7 @@ var action = function(){
                         }else{
                             eventStack[i].call(eventDataIn, that.emitterId);
                         }
-
+                        
                         if(eventStack[i].once){
                             that.silence(eventNameIn, eventStack[i].call, true, isLocal);
                         }
@@ -179,7 +183,7 @@ var action = function(){
                 if(typeof eventNameIn === 'object'){
                     eventNameIn.local = true;
                     that.listenLocal(eventNameIn);
-                }else{
+                }else{                  
                     that.listenLocal({
                         eventName: eventNameIn
                         , handler: handlerIn
@@ -265,7 +269,7 @@ var action = function(){
                 if(typeof eventNameIn === 'object'){
                     eventNameIn.local = true;
                     that.silence(eventNameIn);
-                }else{
+                }else{                  
                     that.silence({
                         eventName: eventNameIn
                         , handler: handlerIn
@@ -373,6 +377,9 @@ var action = function(){
                     for(key in attributeName){
                         if(attributeName.hasOwnProperty(key)){
                             //this attribute does not belong to the prototype. Good.
+
+                            //TODO: maybe make this do a deep copy to prevent
+                            //  pass by reference or switch to clone()
                             if(key !== 'destroy' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
                                 if(typeof attributeValue === 'object'){
                                     attributes[attributeName] = (Array.isArray(attributeName[key])) ? [] : {};
@@ -383,7 +390,7 @@ var action = function(){
                                 that.emitLocal('attribute:changed', key);
                             } else {
                                 if(typeof that[key] === 'function' && !that.super[key]){
-                                    //wrap the super version in a closure so that we can
+                                    //wrap the super version in a closure so that we can 
                                     //  still execute it correctly
                                     that.super[key] = that[key].bind(that);
                                 }
@@ -404,7 +411,7 @@ var action = function(){
                         that.emitLocal('attribute:changed', attributeName);
                     } else {
                         if(typeof that[attributeName] === 'function'){
-                            //wrap the super version in a closure so that we can
+                            //wrap the super version in a closure so that we can 
                             //  still execute it correctly
                             that.super[attributeName] = that[attributeName].bind(that);
                         }
@@ -542,7 +549,7 @@ var action = function(){
             newModel.clearChanges = function(){
                 changes = [];
             }
-
+            
             newModel.getChanges = function(){
                 return changes;
             }
@@ -555,22 +562,18 @@ var action = function(){
                 //TODO not really working... should get rid of this thing
                 //  and all of its parameters
                 var that = this
-                    , events = that.eventStore
-                    , key
-                    , i;
+                    , key;
 
-                //TODO: make this iterate over the events that have been
-                //  registered by this object and silence them
-                //  otherwise zombies.
+                setTimeout(function(){
+                    // delete me;
+                },0); // not quite working...
 
-                // for(key in events){
-                //     for(i = 0; i < events[key].length; i++){
-                //         that.silence(key, events[key][i].call,events[key][i].once)
-                //     }
-                //     // if(that.hasOwnProperty(key)){
-                //     //     delete that[key];
-                //     // }
-                // }
+                for(key in that){
+                    // delete this[key];
+                }
+
+                //TODO this still doesn't kill the attributes or changes
+                //  private data
             }
 
             newModel.set(objectIn); //set the inital attributes
@@ -588,35 +591,136 @@ var action = function(){
 
         , routeMe: function(objectIn){
             var that = this
-                , routeModel = that.modelMe(objectIn)
+                , routes = {}
+                , events = that.eventMe({})
+
+                , cleanupArray = function(arr){
+                    var rtnArr = []
+                        , i;
+
+                    for(i = 0; i < arr.length; i++){
+                        if(arr[i] !== ''){
+                            rtnArr.push(arr[i]);
+                        }
+                    }
+
+                    return rtnArr;
+                }
+
+                , convertRouteObj = function(routes){
+                    var routeArr = {}
+                        , key
+                        , tempKey
+                        , i
+                        , route
+                        , currentLocation = routeArr;
+
+                    for(key in routes){
+                        tempKey = key.split('/');
+
+                        //remove the empyt one
+                        tempKey = cleanupArray(tempKey);
+
+                        currentLocation = routeArr;
+
+                        for(i = 0; i < tempKey.length; i++){
+                            route = tempKey[i];
+                            if(route === '*'){
+                                route = '_all_';
+                            }
+
+                            if(typeof currentLocation[route] === 'undefined'){
+                                currentLocation[route] = {};
+                            }
+
+                            if(typeof currentLocation[route]['handler-event'] === 'undefined'){
+                                currentLocation[route]['handler-event'] = routes[key];
+                            }
+
+                            currentLocation = currentLocation[route];                            
+                        }
+                    }
+
+                    return routeArr;
+                }
+
+                , getRouteHandlerEvent = function(route){
+                    var routeArr = route.split('/')
+                        , i = 0
+                        , currentLocation = routes
+                        , eventToEmit;
+
+                    //removing leading blank element
+                    routeArr = cleanupArray(routeArr);
+
+                    for(i = 0; i < routeArr.length; i++){
+                        if(typeof currentLocation[routeArr[i]] !== 'undefined'){
+                            if(typeof currentLocation[routeArr[i]]['handler-event'] !== 'undefined'){
+                                eventToEmit = currentLocation[routeArr[i]]['handler-event'];
+                            }
+
+                            currentLocation = currentLocation[routeArr[i]];
+                        }else{
+                            eventToEmit = currentLocation['_all_']['handler-event'];
+                            break;
+                        }
+                    }
+
+                    return eventToEmit;
+                }
 
                 , init = function(){
                     var that = this
                         , atags = document.querySelectorAll('a')
+                        , body = document
                         , i = 0;
 
-                    for(i = 0; i < atags.length; i++){
-                        atags[i].addEventListener('click', function(e){
-                           var location = this.attributes.href.textContent;
+                    //setup the routes
+                    routes = convertRouteObj(objectIn);
 
-                            if(typeof that.get(location) !== 'undefined'){
-                                //trigger the route
-                                that.emit('navigate', location);
-                                e.preventDefault();
-                            }
-                        });
-                    }
+                    body.addEventListener('click', function(e){
+                       // var location = this.attributes.href.textContent;
+                        var elem = e.toElement
+                            , location;
+
+                        if(elem.tagName.toLowerCase() === 'a'){
+                            location = elem.attributes.href.textContent;
+
+                            //check for a route that matches
+
+
+                            console.log(getRouteHandlerEvent(location));
+                        }
+                        // if(typeof that.get(location) !== 'undefined'){
+                        //     //trigger the route
+                        //     that.emit('navigate', location);
+                            e.preventDefault();
+                        // }
+                    });
+
+                    // for(i = 0; i < atags.length; i++){
+                    //     atags[i].addEventListener('click', function(e){
+                    //        var location = this.attributes.href.textContent;
+                    //        console.log(location);
+                    //        alert('h');
+                    //         if(typeof that.get(location) !== 'undefined'){
+                    //             //trigger the route
+                    //             that.emit('navigate', location);
+                    //             e.preventDefault();
+                    //         }
+                    //     });
+                    // }
                 };
 
                 init();
 
-            return routeModel;
+            return {};
         }
 
         //TODO: figure out if this is needed since the global:error...
         // , trace: function(emitterIdIn){
         //     //log out the function that has the emitterId attached
-
+            
         //     //create the traced object/stack
         //     action.traced = action.modelMe({
         //         stack: []
@@ -669,14 +773,14 @@ var action = function(){
     action.listen('global:error', function(errorIn) {
         console.group('An Error occured in an object with emitterid: ' + errorIn.createdBy.emitterId);
         console.log('It was a ' + errorIn.type + 'error.');
-
+        
         if(typeof errorIn.errorObject === 'string'){
             console.log('It says: ' + errorIn.errorObject);
             console.log('and: ' + errorIn.message);
         } else {
             console.log('It says: ' + errorIn.message);
         }
-
+        
         console.log('The Whole Enchilada (object that caused this mess):');
         console.dir(errorIn.createdBy);
 
