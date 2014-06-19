@@ -799,6 +799,10 @@ var action = function(){
         // throw errorIn;
     });
 
+    document.addEventListener("DOMContentLoaded", function(){
+        action.emit('dom:ready');
+    });
+
     //return the tweaked function
     return action;
 }(this);
