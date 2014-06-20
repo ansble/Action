@@ -608,7 +608,7 @@ var action = function(){
                     //TODO: write this out/figure it out
                 };
             }
-//daniel
+            
             newView.listen('state:change', function(stateID){
                 var that = this;
 
