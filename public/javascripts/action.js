@@ -427,7 +427,7 @@ var action = function(){
             newModel.fetch = function(setVariableName, successFunction, errorFunction, flushCache){
                 var that = this
                     , requestUrl = that.get('url')
-                    , useLocal = action.useLocalCache && !flushCache;
+                    , useLocal = that.get('cacheLocal') && action.useLocalCache && !flushCache;
 
                 if(typeof requestUrl !== 'undefined'){
                     //make the request for the model
@@ -580,7 +580,11 @@ var action = function(){
 
             newModel.listenLocal('attribute:changed', function(nameIn){
                 changes.push(nameIn);
-            }, this); //maybe eliminate this 'this'
+            }, newModel); //maybe eliminate this 'this'
+
+            newModel.listen(newModel.get('requestEvent'), function(){
+                this.fetch();
+            }, newModel);
 
             if(typeof newModel.init === 'function'){
                 newModel.init.apply(newModel);
@@ -589,94 +593,42 @@ var action = function(){
             return newModel;
         }
 
+        , viewMe : function(objectIn){
+            var that = this
+                , newView = that.eventMe(objectIn);
+
+            if(typeof newView.render === 'undefined'){
+                throw 'render is required for a view';
+            }
+
+            newView.stateReady = function(){newView.render.apply(newView);};
+
+            if(typeof newView.destroy === 'undefined'){
+                newView.destroy = function(){
+                    //TODO: write this out/figure it out
+                };
+            }
+
+            newView.listen('state:change', function(stateID){
+                var that = this;
+
+                if(stateID === that.stateEvent || stateID.replace('/', '') === that.stateEvent){
+                    that.activate.call(that);
+                }
+            }, newView);
+
+            return newView;
+        }
+
         , routeMe: function(objectIn){
             var that = this
-                , routes = {}
                 , events = that.eventMe({})
-
-                , cleanupArray = function(arr){
-                    var rtnArr = []
-                        , i;
-
-                    for(i = 0; i < arr.length; i++){
-                        if(arr[i] !== ''){
-                            rtnArr.push(arr[i]);
-                        }
-                    }
-
-                    return rtnArr;
-                }
-
-                , convertRouteObj = function(routes){
-                    var routeArr = {}
-                        , key
-                        , tempKey
-                        , i
-                        , route
-                        , currentLocation = routeArr;
-
-                    for(key in routes){
-                        tempKey = key.split('/');
-
-                        //remove the empyt one
-                        tempKey = cleanupArray(tempKey);
-
-                        currentLocation = routeArr;
-
-                        for(i = 0; i < tempKey.length; i++){
-                            route = tempKey[i];
-                            if(route === '*'){
-                                route = '_all_';
-                            }
-
-                            if(typeof currentLocation[route] === 'undefined'){
-                                currentLocation[route] = {};
-                            }
-
-                            if(typeof currentLocation[route]['handler-event'] === 'undefined'){
-                                currentLocation[route]['handler-event'] = routes[key];
-                            }
-
-                            currentLocation = currentLocation[route];                            
-                        }
-                    }
-
-                    return routeArr;
-                }
-
-                , getRouteHandlerEvent = function(route){
-                    var routeArr = route.split('/')
-                        , i = 0
-                        , currentLocation = routes
-                        , eventToEmit;
-
-                    //removing leading blank element
-                    routeArr = cleanupArray(routeArr);
-
-                    for(i = 0; i < routeArr.length; i++){
-                        if(typeof currentLocation[routeArr[i]] !== 'undefined'){
-                            if(typeof currentLocation[routeArr[i]]['handler-event'] !== 'undefined'){
-                                eventToEmit = currentLocation[routeArr[i]]['handler-event'];
-                            }
-
-                            currentLocation = currentLocation[routeArr[i]];
-                        }else{
-                            eventToEmit = currentLocation['_all_']['handler-event'];
-                            break;
-                        }
-                    }
-
-                    return eventToEmit;
-                }
 
                 , init = function(){
                     var that = this
                         , atags = document.querySelectorAll('a')
                         , body = document
                         , i = 0;
-
-                    //setup the routes
-                    routes = convertRouteObj(objectIn);
 
                     body.addEventListener('click', function(e){
                        // var location = this.attributes.href.textContent;
@@ -686,30 +638,11 @@ var action = function(){
                         if(elem.tagName.toLowerCase() === 'a'){
                             location = elem.attributes.href.textContent;
 
-                            //check for a route that matches
-
-
-                            console.log(getRouteHandlerEvent(location));
-                        }
-                        // if(typeof that.get(location) !== 'undefined'){
-                        //     //trigger the route
-                        //     that.emit('navigate', location);
+                            //emit the state:event
+                            events.emit('state:change', location);
                             e.preventDefault();
-                        // }
+                        }
                     });
-
-                    // for(i = 0; i < atags.length; i++){
-                    //     atags[i].addEventListener('click', function(e){
-                    //        var location = this.attributes.href.textContent;
-                    //        console.log(location);
-                    //        alert('h');
-                    //         if(typeof that.get(location) !== 'undefined'){
-                    //             //trigger the route
-                    //             that.emit('navigate', location);
-                    //             e.preventDefault();
-                    //         }
-                    //     });
-                    // }
                 };
 
                 init();
@@ -770,6 +703,11 @@ var action = function(){
     //add an events hook for global dealing with events...
     action = action.eventMe(action);
 
+    //this is the template manager event system
+    action.listen('template:get', function(templateID){
+        action.emit('template:set:' + templateID, action.templates[templateID]);
+    });
+
     action.listen('global:error', function(errorIn) {
         console.group('An Error occured in an object with emitterid: ' + errorIn.createdBy.emitterId);
         console.log('It was a ' + errorIn.type + 'error.');
@@ -797,10 +735,6 @@ var action = function(){
         console.groupEnd();
         // action.trace(errorIn.createdBy.emitterId);
         // throw errorIn;
-    });
-
-    document.addEventListener("DOMContentLoaded", function(){
-        action.emit('dom:ready');
     });
 
     //return the tweaked function
