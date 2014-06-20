@@ -601,7 +601,19 @@ var action = function(){
                 throw 'render is required for a view';
             }
 
-            newView.stateReady = function(){newView.render.apply(newView);};
+            newView.stateReady = function(){
+                newView.render.apply(newView);
+            };
+
+            //require event for the data
+            newView.requiredEvent('data:set:' + newView.dataID, function(dataIn){
+                this.viewData = dataIn;
+            }, newView);
+
+            //required event for the template
+            newView.requiredEvent('template:set:' + newView.templateID, function(templateIn){
+                this.template = templateIn;
+            }, newView);
 
             if(typeof newView.destroy === 'undefined'){
                 newView.destroy = function(){
@@ -613,7 +625,8 @@ var action = function(){
                 var that = this;
 
                 if(stateID === that.stateEvent || stateID.replace('/', '') === that.stateEvent){
-                    that.activate.call(that);
+                    that.emit('template:get', that.templateID);
+                    that.emit('data:get:' + that.dataID);
                 }
             }, newView);
 
@@ -638,9 +651,13 @@ var action = function(){
                         if(elem.tagName.toLowerCase() === 'a'){
                             location = elem.attributes.href.textContent;
 
-                            //emit the state:event
-                            events.emit('state:change', location);
-                            e.preventDefault();
+                            if(location.match(/http:/)){
+                                return {};
+                            }else{
+                                //emit the state:event
+                                events.emit('state:change', location);
+                                e.preventDefault();
+                            }
                         }
                     });
                 };
