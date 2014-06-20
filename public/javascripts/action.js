@@ -609,6 +609,8 @@ var action = function(){
                 };
             }
 
+            //somethign for testing
+
             newView.listen('state:change', function(stateID){
                 var that = this;
 
