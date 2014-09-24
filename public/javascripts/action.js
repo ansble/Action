@@ -1,10 +1,6 @@
-/****************************************
-Action! v0.4.1 Akshay Kumar 
-https://github.com/designfrontier/Action 
-****************************************/
 //TODO routing and pushstate
 //  view rendering on routing events
-var action = function(){
+(function(exports){
     'use strict';
 
     var action = {
@@ -39,7 +35,7 @@ var action = function(){
                         }else{
                             eventStack[i].call(eventDataIn, that.emitterId);
                         }
-                        
+
                         if(eventStack[i].once){
                             that.silence(eventNameIn, eventStack[i].call, true, isLocal);
                         }
@@ -183,7 +179,7 @@ var action = function(){
                 if(typeof eventNameIn === 'object'){
                     eventNameIn.local = true;
                     that.listenLocal(eventNameIn);
-                }else{                  
+                }else{
                     that.listenLocal({
                         eventName: eventNameIn
                         , handler: handlerIn
@@ -269,7 +265,7 @@ var action = function(){
                 if(typeof eventNameIn === 'object'){
                     eventNameIn.local = true;
                     that.silence(eventNameIn);
-                }else{                  
+                }else{
                     that.silence({
                         eventName: eventNameIn
                         , handler: handlerIn
@@ -390,7 +386,7 @@ var action = function(){
                                 that.emitLocal('attribute:changed', key);
                             } else {
                                 if(typeof that[key] === 'function' && !that.super[key]){
-                                    //wrap the super version in a closure so that we can 
+                                    //wrap the super version in a closure so that we can
                                     //  still execute it correctly
                                     that.super[key] = that[key].bind(that);
                                 }
@@ -411,7 +407,7 @@ var action = function(){
                         that.emitLocal('attribute:changed', attributeName);
                     } else {
                         if(typeof that[attributeName] === 'function'){
-                            //wrap the super version in a closure so that we can 
+                            //wrap the super version in a closure so that we can
                             //  still execute it correctly
                             that.super[attributeName] = that[attributeName].bind(that);
                         }
@@ -549,7 +545,7 @@ var action = function(){
             newModel.clearChanges = function(){
                 changes = [];
             }
-            
+
             newModel.getChanges = function(){
                 return changes;
             }
@@ -670,7 +666,7 @@ var action = function(){
         //TODO: figure out if this is needed since the global:error...
         // , trace: function(emitterIdIn){
         //     //log out the function that has the emitterId attached
-            
+
         //     //create the traced object/stack
         //     action.traced = action.modelMe({
         //         stack: []
@@ -728,14 +724,14 @@ var action = function(){
     action.listen('global:error', function(errorIn) {
         console.group('An Error occured in an object with emitterid: ' + errorIn.createdBy.emitterId);
         console.log('It was a ' + errorIn.type + 'error.');
-        
+
         if(typeof errorIn.errorObject === 'string'){
             console.log('It says: ' + errorIn.errorObject);
             console.log('and: ' + errorIn.message);
         } else {
             console.log('It says: ' + errorIn.message);
         }
-        
+
         console.log('The Whole Enchilada (object that caused this mess):');
         console.dir(errorIn.createdBy);
 
@@ -755,5 +751,5 @@ var action = function(){
     });
 
     //return the tweaked function
-    return action;
-}(this);
+    exports = action;
+})(typeof exports === 'undefined' ? this['action'] = {} : exports);
