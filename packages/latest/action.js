@@ -1,10 +1,10 @@
 /****************************************
-Action! v0.4.2 Akshay Kumar 
-https://github.com/designfrontier/Action 
+Action! v0.4.2 Akshay Kumar
+https://github.com/designfrontier/Action
 ****************************************/
 //TODO routing and pushstate
 //  view rendering on routing events
-var action = function(){
+var action = (function(){
     'use strict';
 
     var action = {
@@ -567,14 +567,14 @@ var action = function(){
                 //  registered by this object and silence them
                 //  otherwise zombies.
 
-                // for(key in events){
-                //     for(i = 0; i < events[key].length; i++){
-                //         that.silence(key, events[key][i].call,events[key][i].once)
-                //     }
-                //     // if(that.hasOwnProperty(key)){
-                //     //     delete that[key];
-                //     // }
-                // }
+                for(key in events){
+                    for(i = 0; i < events[key].length; i++){
+                        that.silence(key, events[key][i].call,events[key][i].once)
+                    }
+                    // if(that.hasOwnProperty(key)){
+                    //     delete that[key];
+                    // }
+                }
             }
 
             newModel.set(objectIn); //set the inital attributes
@@ -699,10 +699,13 @@ var action = function(){
         // throw errorIn;
     });
 
-    document.addEventListener("DOMContentLoaded", function(){
-        action.emit('dom:ready');
-    });
+    //handle node bro
+    if(typeof document !== 'undefined'){
+        document.addEventListener("DOMContentLoaded", function(){
+            action.emit('dom:ready');
+        });
+    }
 
     //return the tweaked function
     return action;
-}(this);
+})(this);
