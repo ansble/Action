@@ -1,6 +1,6 @@
 //TODO routing and pushstate
 //  view rendering on routing events
-(function(exports){
+(function(){
     'use strict';
 
     var action = {
@@ -751,5 +751,11 @@
     });
 
     //return the tweaked function
-    exports = action;
-})(typeof exports === 'undefined' ? this['action'] = {} : exports);
+    if (typeof module !== 'undefined') {
+        // node environment it seems... module.exports this
+        module.exports = action;
+    } else {
+        //looks like a browser put it in the window scope
+        window.action = action;  
+    }
+})();
