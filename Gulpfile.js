@@ -7,6 +7,10 @@ var gulp = require('gulp')
     , zip = require('gulp-zip')
     , jshint = require('gulp-jshint')
     , header = require('gulp-header')
+    , traceur = require('gulp-traceur')
+    , browserify = require('gulp-browserify')
+    , es6 = require('gulp-es6-transpiler')
+
 
     , pkg = require('./package.json');
 
@@ -16,6 +20,16 @@ gulp.task('default', ['localBuild'], function(){
     gulp.watch(['public/javascripts/app.js', 'public/javascripts/components/**/*.js'], function(){
         gulp.run('localBuild');
     });
+});
+
+gulp.task('es6build', function() {
+    'use strict';
+
+    gulp.src('src/action.*.js')
+        // .pipe(traceur({modules:'commonjs'}))
+        // .pipe(concat('action.js'))
+        .pipe(es6())
+        .pipe(gulp.dest('public/javascripts/es6'));
 });
 
 gulp.task('localBuild', function(){
