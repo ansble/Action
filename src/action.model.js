@@ -166,10 +166,9 @@ var modelMe = function(objectIn){
                     }
                 };
 
-                oReq.submittedData = that.flatten();
-
                 oReq.open(type, requestUrl, true);
-                oReq.send();
+                oReq.setRequestHeader('Content-type', 'application/json');
+                oReq.send(JSON.stringify(that.flatten()));
 
                 // $.ajax({
                 //     type: type
