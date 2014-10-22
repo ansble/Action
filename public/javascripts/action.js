@@ -18,28 +18,21 @@
                 var that = this
                     , eventStack
                     , functionToCall
-                    , i
-                    , isLocal = (typeof localFlag !== 'undefined' && localFlag);
-
-                if(isLocal){
-                    eventStack = that.eventStore[eventNameIn];
-                } else {
-                    eventStack = action.eventStore[eventNameIn];
-                }
+                    , eventStack = (typeof localFlag !== 'undefined' && localFlag) ? that.eventStore[eventNameIn] : action.eventStore[eventNameIn];
 
                 //emit the event
                 if(typeof eventStack !== 'undefined'){
-                    for(i = 0; i < eventStack.length; i ++){
-                        if(typeof eventStack[i].scope !== 'undefined'){
-                            eventStack[i].call.apply(eventStack[i].scope,[eventDataIn, that.emitterId]);
+                    eventStack.forEach(function (listener) {
+                        if(typeof listener.scope !== 'undefined'){
+                            listener.call.apply(listener.scope,[eventDataIn, that.emitterId]);
                         }else{
-                            eventStack[i].call(eventDataIn, that.emitterId);
+                            listener.call(eventDataIn, that.emitterId);
                         }
 
-                        if(eventStack[i].once){
-                            that.silence(eventNameIn, eventStack[i].call, true, isLocal);
+                        if(listener.once){
+                            that.silence(eventNameIn, listener.call, true, isLocal);
                         }
-                    }
+                    });
                 }
             };
 
@@ -79,13 +72,12 @@
 
                 if(typeof eventStack !== 'undefined'){
                     //already exists check to see if the function is already bound
-
-                    for(i = 0; i < eventStack.length; i ++){
-                        if(eventStack[i].call === handler && eventStack[i].once === false){
+                    eventStack.some(function (listener) {
+                        if(listener.call.toString() === handler.toString() && listener.once === false){
                             newCheck = false;
-                            break;
+                            return true;
                         }
-                    }
+                    });
 
                     if(newCheck && typeof scopeIn !== 'undefined'){
                             eventStack.push({once: false, call: handler, scope: scope});
@@ -125,7 +117,6 @@
             returnObject.listenOnce = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
                 //same thing as .listen() but is only triggered once
                 var that = this
-                    , i
                     , newCheck = true
                     , eventStack
                     , newEvent
@@ -154,12 +145,12 @@
                 if(typeof eventStack !== 'undefined'){
                     //already exists check to see if the function is already bound
 
-                    for(i = 0; i < eventStack.length; i ++){
-                        if(eventStack[i].call === handler && eventStack[i].once === true){
+                    eventStack.some(function (listener) {
+                        if(listener.call.toString() === handler.toString() && listener.once === true){
                             newCheck = false;
-                            break;
+                            return true;
                         }
-                    }
+                    });
 
                     if(newCheck){
                         eventStack.push({once:true, call: handler, scope: scope});
@@ -338,8 +329,7 @@
                 var that = this;
 
                 if(that.emitterId === emitterIDIn){
-                    // that.emit('system:addTraced', that);
-                    action.traced = that;
+                    that.emit('system:addTraced', that);
                 }
             }, returnObject);
 
@@ -719,6 +709,12 @@
     //this is the template manager event system
     action.listen('template:get', function(templateID){
         action.emit('template:set:' + templateID, action.templates[templateID]);
+    });
+
+    action.listen('system:addTraced', function(objIn){
+        //TODO: make this prettier
+        console.log('TRACED OBJECT!!!');
+        console.log(objIn);
     });
 
     action.listen('global:error', function(errorIn) {

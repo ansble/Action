@@ -1,5 +1,5 @@
-var eventMe = require('./action.events');
-var utils = require('./action.utils');
+import { eventMe } from './action.events';
+import { clone, Error } from './action.utils';
 
 var modelMe = function(objectIn){
         'use strict';
@@ -31,7 +31,7 @@ var modelMe = function(objectIn){
                         if(key !== 'destroy' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
                             if(typeof attributeValue === 'object'){
                                 attributes[attributeName] = (Array.isArray(attributeName[key])) ? [] : {};
-                                utils.clone(attributes[attributeName], attributeName[key]);
+                                clone(attributes[attributeName], attributeName[key]);
                             }else{
                                 attributes[key] = attributeName[key];
                             }
@@ -51,7 +51,7 @@ var modelMe = function(objectIn){
                 if(attributeName !== 'destroy' && attributeName !== 'fetch' && attributeName !== 'save'){
                     if(typeof attributeValue === 'object'){
                         attributes[attributeName] = (Array.isArray(attributeValue)) ? [] : {};
-                        utils.clone(attributes[attributeName], attributeValue);
+                        clone(attributes[attributeName], attributeValue);
                     }else{
                         attributes[attributeName] = attributeValue;
                     }
@@ -100,7 +100,7 @@ var modelMe = function(objectIn){
                     that.ajaxGet(setVariableName, successFunction);
                 }
             } else {
-                that.emit('global:error', new utils.Error('http', 'No URL defined', that));
+                that.emit('global:error', new Error('http', 'No URL defined', that));
                 if(typeof errorFunction === 'function'){
                     errorFunction.apply(that);
                 }
@@ -132,12 +132,12 @@ var modelMe = function(objectIn){
                         }else if(this.status === 400){
 
                         }else if(this.status === 500){
-                            that.emit('global:error', new utils.Error('http', 'Error in request', that));
+                            that.emit('global:error', new Error('http', 'Error in request', that));
                         }
                     };
 
             oReq.onerror = function(xhr, errorType, error){
-                        that.emit('global:error', new utils.Error('http', 'Error in request type: ' + errorType, that, error));
+                        that.emit('global:error', new Error('http', 'Error in request type: ' + errorType, that, error));
                     };
 
             oReq.open('get', requestUrl, true);
@@ -162,13 +162,14 @@ var modelMe = function(objectIn){
                         that.emit(that.get('dataEvent'), data);
 
                     }else if(this.status === 500 || this.status === 400){
-                        that.emit('global:error', new utils.Error('http', 'Error in request', that));
+                        that.emit('global:error', new Error('http', 'Error in request', that));
                     }
                 };
 
+                oReq.submittedData = that.flatten();
+
                 oReq.open(type, requestUrl, true);
-                oReq.setRequestHeader('Content-type', 'application/json');
-                oReq.send(JSON.stringify(that.flatten()));
+                oReq.send();
 
                 // $.ajax({
                 //     type: type
@@ -189,7 +190,7 @@ var modelMe = function(objectIn){
                 //     }
                 // });
             } else {
-                action.emit('global:error', new utils.Error('http', 'No URL defined', that));
+                action.emit('global:error', new Error('http', 'No URL defined', that));
             }
         }
 
@@ -240,4 +241,4 @@ var modelMe = function(objectIn){
         return newModel;
     };
 
-module.exports = modelMe;
+export { modelMe }

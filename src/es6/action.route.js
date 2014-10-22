@@ -1,6 +1,8 @@
 import { eventMe } from './action.events';
 
 var routeMe = function(objectIn){
+        'use strict';
+        
         var that = this
             , events = that.eventMe({})
 

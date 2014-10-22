@@ -1,6 +1,8 @@
 import { eventMe } from './action.events';
 
 var viewMe = function(objectIn){
+    'use strict';
+    
     var that = this
         , newView = eventMe(objectIn);
 

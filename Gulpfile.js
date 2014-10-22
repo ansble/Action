@@ -7,9 +7,10 @@ var gulp = require('gulp')
     , zip = require('gulp-zip')
     , jshint = require('gulp-jshint')
     , header = require('gulp-header')
-    , traceur = require('gulp-traceur')
     , browserify = require('gulp-browserify')
     , es6 = require('gulp-es6-transpiler')
+    , es6Mod = require('gulp-es6-module-transpiler')
+    , stylish = require('jshint-stylish')
 
 
     , pkg = require('./package.json');
@@ -22,13 +23,19 @@ gulp.task('default', ['localBuild'], function(){
     });
 });
 
-gulp.task('es6build', function() {
-    'use strict';
+gulp.task('build', function () {
 
-    gulp.src('src/action.*.js')
-        // .pipe(traceur({modules:'commonjs'}))
+    gulp.src('src/es6/action.shell.js')
+        .pipe(jshint({
+            esnext: true
+        }))
+        .pipe(jshint.reporter(stylish))
+        .pipe(es6Mod({
+            moduleName: 'action'
+            , 'global': 'action'
+            , type: 'amd'
+        }))
         // .pipe(concat('action.js'))
-        .pipe(es6())
         .pipe(gulp.dest('public/javascripts/es6'));
 });
 

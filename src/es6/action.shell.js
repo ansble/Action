@@ -4,20 +4,26 @@ import { routeMe } from './action.route';
 import { clone, Error } from './action.utils';
 import { viewMe } from './action.view';
 
-var action = eventMe({
+var action = {
 	eventStore: {}
 	, eventMe: eventMe
 	, routeMe: routeMe
 	, viewMe: viewMe
 	, clone: clone
-	, Error: error
-});
+	, Error: Error
+};
+
+action = eventMe(action);
 
 action.listen('template:get', function(templateID){
+    'use strict';
+
     action.emit('template:set:' + templateID, action.templates[templateID]);
 });
 
 action.listen('global:error', function(errorIn) {
+    'use strict';
+    
     console.group('An Error occured in an object with emitterid: ' + errorIn.createdBy.emitterId);
     console.log('It was a ' + errorIn.type + 'error.');
 
@@ -45,6 +51,5 @@ action.listen('global:error', function(errorIn) {
     // action.trace(errorIn.createdBy.emitterId);
     // throw errorIn;
 });
-
 
 export { action }

@@ -1,6 +1,6 @@
 {
   "name": "action",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "releaseName": "Angelina Jolie",
   "private": true,
   "scripts": {
@@ -11,6 +11,7 @@
     "ejs": "*"
   },
   "devDependencies": {
+    "browserify": "^6.1.0",
     "chai": "^1.9.1",
     "gulp": "^3.6.0",
     "gulp-browserify": "^0.5.0",
@@ -23,10 +24,10 @@
     "gulp-mocha": "^1.1.0",
     "gulp-plumber": "^0.6.0",
     "gulp-rename": "^1.2.0",
-    "gulp-traceur": "^0.13.0",
     "gulp-uglify": "^0.2.1",
     "gulp-watch": "^0.5.4",
     "gulp-zip": "^0.3.4",
+    "jshint-stylish": "^1.0.0",
     "karma": "^0.12.23",
     "karma-chai": "^0.1.0",
     "karma-mocha": "^0.1.9",

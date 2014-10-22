@@ -1,3 +1,5 @@
+import { action } from './action.shell';
+
  var eventMe = function(objectIn){
     'use strict';
 
@@ -12,31 +14,21 @@
 
     returnObject.emit = function(eventNameIn, eventDataIn, localFlag){
         var that = this
-            , eventStack
             , functionToCall
-            , i
-            , isLocal = (typeof localFlag !== 'undefined' && localFlag);
-
-        if(isLocal){
-            eventStack = that.eventStore[eventNameIn];
-        } else {
-            eventStack = action.eventStore[eventNameIn];
-        }
+            , eventStack = (typeof local !== 'undefined' && local) ? that.eventStore[eventNameIn] : action.eventStore[eventNameIn];
 
         //emit the event
-        if(typeof eventStack !== 'undefined'){
-            for(i = 0; i < eventStack.length; i ++){
-                if(typeof eventStack[i].scope !== 'undefined'){
-                    eventStack[i].call.apply(eventStack[i].scope,[eventDataIn, that.emitterId]);
-                }else{
-                    eventStack[i].call(eventDataIn, that.emitterId);
-                }
-
-                if(eventStack[i].once){
-                    that.silence(eventNameIn, eventStack[i].call, true, isLocal);
-                }
+        eventStack.forEach(function (listener) {
+            if(typeof listener.scope !== 'undefined'){
+                listener.call.apply(listener.scope,[eventDataIn, that.emitterId]);
+            }else{
+                listener.call(eventDataIn, that.emitterId);
             }
-        }
+
+            if(listener.once){
+                that.silence(eventNameIn, listener.call, true, isLocal);
+            }
+        });
     };
 
     returnObject.emitLocal = function(eventNameIn, eventDataIn){

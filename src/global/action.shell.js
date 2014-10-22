@@ -1,23 +1,30 @@
-var eventMe = require('./action.events')
-	, viewMe = require('./action.view')
-	, modelMe = require('./action.model')
-	, utils = require('./action.utils')
-	, routeMe = require('./action.route')
+import { eventMe } from './action.events';
+import { modelMe } from './action.model';
+import { routeMe } from './action.route';
+import { clone, Error } from './action.utils';
+import { viewMe } from './action.view';
 
-	, action = ['!'] = 📣 = eventMe({
-		eventStore: {}
-		, eventMe: eventMe
-		, routeMe: routeMe
-		, viewMe: viewMe
-		, clone: utils.clone
-		, Error: utils.Error
-	});
+var action = {
+	eventStore: {}
+	, eventMe: eventMe
+	, routeMe: routeMe
+	, viewMe: viewMe
+    , modelMe: modelMe
+	, clone: clone
+	, Error: Error
+};
 
-📣.listen('template:get', function(templateID){
-    📣.emit('template:set:' + templateID, 📣.templates[templateID]);
+action = eventMe(action);
+
+action.listen('template:get', function(templateID){
+    'use strict';
+
+    action.emit('template:set:' + templateID, action.templates[templateID]);
 });
 
-📣.listen('global:error', function(errorIn) {
+action.listen('global:error', function(errorIn) {
+    'use strict';
+    
     console.group('An Error occured in an object with emitterid: ' + errorIn.createdBy.emitterId);
     console.log('It was a ' + errorIn.type + 'error.');
 
@@ -42,8 +49,8 @@ var eventMe = require('./action.events')
     }
 
     console.groupEnd();
-    // 📣.trace(errorIn.createdBy.emitterId);
+    // action.trace(errorIn.createdBy.emitterId);
     // throw errorIn;
 });
 
-module.exports = 📣;
+window.action = action;
