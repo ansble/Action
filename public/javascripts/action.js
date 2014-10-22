@@ -653,26 +653,6 @@
             return {};
         }
 
-        //TODO: figure out if this is needed since the global:error...
-        // , trace: function(emitterIdIn){
-        //     //log out the function that has the emitterId attached
-
-        //     //create the traced object/stack
-        //     action.traced = action.modelMe({
-        //         stack: []
-        //         , emitterId: emitterIdIn
-        //     });
-
-        //     action.traced.listen('system:addTraced', function(objectIn){
-        //         var that = this;
-
-        //         that.get('stack').push(objectIn);
-        //     }, action.traced);
-
-        //     //trigger the event that will cause the trace
-        //     action.emit('system:trace', emitterIdIn);
-        // }
-
         , Error: function(typeIn, messageIn, objectIn, errorObjectIn){
             return {
                 type: typeIn
