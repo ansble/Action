@@ -12,6 +12,8 @@ var gulp = require('gulp')
     , es6Mod = require('gulp-es6-module-transpiler')
     , stylish = require('jshint-stylish')
 
+    , karma = require('gulp-karma')
+
 
     , pkg = require('./package.json');
 
@@ -70,6 +72,15 @@ gulp.task('publish', ['generateForPublish'], function(){
     'use strict';
 
 });
+
+gulp.task('test', function (done) {
+  gulp.src(['public/javascripts/action*.js'])
+        .pipe(karma({
+            configFile: 'karma.conf.js'
+            , action: 'watch'
+        }));
+});
+
 
 // gulp.task('default', function () {
 //     watch({ glob: ['public/javascripts/app.js', 'public/javascripts/components/**/*.js'], emitOnGlob: false })

@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "browserify": "^6.1.0",
-    "chai": "^1.9.1",
+    "chai": "^1.9.2",
     "gulp": "^3.6.0",
     "gulp-browserify": "^0.5.0",
     "gulp-concat": "^2.2.0",
@@ -28,9 +28,13 @@
     "gulp-watch": "^0.5.4",
     "gulp-zip": "^0.3.4",
     "jshint-stylish": "^1.0.0",
-    "karma": "^0.12.23",
+    "karma": "^0.12.24",
     "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^0.1.5",
     "karma-mocha": "^0.1.9",
-    "mocha": "^1.21.4"
+    "karma-phantomjs-launcher": "^0.1.4",
+    "karma-spec-reporter": "0.0.13",
+    "mocha": "^2.0.0",
+    "phantomjs": "^1.9.11"
   }
 }
