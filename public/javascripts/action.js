@@ -319,11 +319,13 @@
                 };
             };
 
-            returnObject.stateReady = function(){
-                //this is a default action when all required events have been completed.
-                //  needs to be overridden if you want to do something real
-                console.log('ready!');
-            };
+            if(typeof returnObject.stateReady === 'undefined'){
+                returnObject.stateReady = function(){
+                    //this is a default action when all required events have been completed.
+                    //  needs to be overridden if you want to do something real
+                    console.log('ready!');
+                };
+            }
 
             returnObject.listen('system:trace', function(emitterIDIn){
                 var that = this;
