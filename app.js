@@ -6,7 +6,8 @@
 var express = require('express')
   , routes = require('./routes')
   , http = require('http')
-  , path = require('path');
+  , path = require('path')
+  , portfinder = require('portfinder');
 
 var app = express();
 
@@ -29,6 +30,12 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+portfinder.basePort = process.env.PORT || 3000;
+portfinder.getPort(function (err, port) {
+
+	app.set('port', port);
+
+	http.createServer(app).listen(app.get('port'), function () {
+	  console.log('Express server listening on port ' + app.get('port'));
+	});
 });
