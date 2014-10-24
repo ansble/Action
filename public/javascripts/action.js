@@ -6,7 +6,8 @@
     var action = {
         eventMe: function(objectIn){
             var returnObject = objectIn
-                , localEvents = {};
+                , localEvents = {}
+                , myEvents = [];
 
             //set an emitter id for troubleshooting
             returnObject.emitterId = Math.ceil(Math.random() * 10000);
@@ -98,6 +99,8 @@
                         newEvent.eventStore[eventName].push({once: once, call: handler, local: local});
                     }
                 }
+
+                myEvents.push({name: eventName, once: once, call: handler, scope: scope, local:local});
             };
 
             returnObject.listenLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
@@ -194,17 +197,17 @@
                             //scope is passed in...
                             if(typeof once === 'boolean'){
                                 // function + scope + once provides the match
-                                truthy = (handler === store.eventStore[eventName][i].call && scope === store.eventStore[eventName][i].scope && once === store.eventStore[eventName][i].once);
+                                truthy = (handler.toString() === store.eventStore[eventName][i].call.toString() && scope === store.eventStore[eventName][i].scope && once === store.eventStore[eventName][i].once);
                             } else {
                                 //function + scope provides the match
-                                truthy = (handler === store.eventStore[eventName][i].call && scope === store.eventStore[eventName][i].scope);
+                                truthy = (handler.toString() === store.eventStore[eventName][i].call.toString() && scope === store.eventStore[eventName][i].scope);
                             }
                         } else {
                             //function + once in for the match
                             if(typeof once === 'boolean'){
-                                truthy = (handler === store.eventStore[eventName][i].call && store.eventStore[eventName][i].once === once);
+                                truthy = (handler.toString() === store.eventStore[eventName][i].call.toString() && store.eventStore[eventName][i].once === once);
                             } else {
-                                truthy = (handler === store.eventStore[eventName][i].call);
+                                truthy = (handler.toString() === store.eventStore[eventName][i].call.toString());
                             }
                         }
                     } else {
@@ -218,8 +221,13 @@
                     if(truthy){
                         //remove this bad boy
                         store.eventStore[eventName].splice(i,1);
-                    }
 
+                        myEvents.some(function(listener){
+                            if(listener === {name: eventName, call: handler, scope, scope, once: once, local: local}){
+
+                            }
+                        });
+                    }
                 }
             };
 
@@ -287,6 +295,13 @@
 
                 that.listen(name, callback, context);
                 that.listen(name, stateUpdate(name, that.stateEvents), that);
+            };
+
+            returnObject.tearDown = function(){
+                //this needs to destroy the listeners... which is important
+                //  TODO: make this real
+
+                // myEvents = [];
             };
 
             if(typeof returnObject.stateReady === 'undefined'){
@@ -534,7 +549,9 @@
                 //  private data
             }
 
-            newModel.set(objectIn); //set the inital attributes
+            if(typeof objectIn.data !== 'undefined'){
+                newModel.set(objectIn.data); //set the inital attributes
+            }
 
             newModel.listenLocal('attribute:changed', function(nameIn){
                 changes.push(nameIn);

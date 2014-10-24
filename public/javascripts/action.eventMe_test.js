@@ -193,4 +193,194 @@ describe('The Event Module: eventMe', function(){
 
 		assert.strictEqual(evntObj.sam, 1);
 	});
+
+	it('should return itself by event if it\'s emitterid is emitted with the system:trace event', function(){
+		var evntObj = action.eventMe({})
+			, emitterid = evntObj.emitterId
+			, emitObj = {};
+
+		//noop console.log()
+		console.log = function(){};
+
+		action.listen('system:addTraced', function(objIn){
+			emitObj = objIn;
+		});
+
+		action.emit('system:trace', emitterid);
+		assert.strictEqual(evntObj, emitObj);
+	});
+
+	it('should not return itself by event if a different emitterid is emitted with the system:trace event', function(){
+		var evntObj = action.eventMe({})
+			, notMyEmitter = 1234
+			, emitObj = {};
+
+		//noop console.log()
+		console.log = function(){};
+
+		action.listen('system:addTraced', function(objIn){
+			emitObj = objIn;
+		});
+
+		action.emit('system:trace', notMyEmitter);
+		assert.notStrictEqual(evntObj, emitObj);
+	});
+
+	it('should silence all of a global event through silence when passed the event', function(){
+		var text = 0;
+
+		console.log = function(textIn){
+			text++;
+		};
+		
+		action.listen('show:me', function(){
+			console.log('show');
+		});
+
+		action.listen('show:me', function(){
+			console.log('show it');
+		});
+
+		action.emit('show:me');
+		assert.strictEqual(text, 2);
+
+		action.silence('show:me');
+
+		action.emit('show:me');
+		assert.strictEqual(text, 2);
+	});
+
+	it('should silence all of a local event through silence when passed the event', function(){
+		var text = 0
+			, evntObj = action.eventMe({});
+
+		console.log = function(textIn){
+			text++;
+		};
+		
+		evntObj.listenLocal('show:me', function(){
+			console.log('show');
+		});
+
+		evntObj.listenLocal('show:me', function(){
+			console.log('show it');
+		});
+
+		evntObj.emitLocal('show:me');
+		assert.strictEqual(text, 2);
+
+		evntObj.silenceLocal('show:me');
+
+		evntObj.emitLocal('show:me');
+		assert.strictEqual(text, 2);
+	});
+
+	it('should silence only a specific function in a global event stack through silence when passed the event and function', function(){
+		var text = 0
+			, evntObj = action.eventMe({});
+
+		console.log = function(textIn){
+			text++;
+		};
+		
+		evntObj.listen('show:me', function(){
+			console.log('show');
+		});
+
+		evntObj.listen('show:me', function(){
+			console.log('show it');
+		});
+
+		evntObj.emit('show:me');
+		assert.strictEqual(text, 2);
+
+		evntObj.silence('show:me', function(){
+			console.log('show it');
+		});
+
+		evntObj.emit('show:me');
+		assert.strictEqual(text, 3);
+	});
+
+	it('should silence only a specific function in a local event stack through silence when passed the event and function', function(){
+		var text = 0
+			, evntObj = action.eventMe({});
+
+		console.log = function(textIn){
+			text++;
+		};
+		
+		evntObj.listenLocal('show:me', function(){
+			console.log('show');
+		});
+
+		evntObj.listenLocal('show:me', function(){
+			console.log('show it');
+		});
+
+		evntObj.emitLocal('show:me');
+		assert.strictEqual(text, 2);
+
+		evntObj.silenceLocal('show:me', function(){
+			console.log('show it');
+		});
+
+		evntObj.emitLocal('show:me');
+		assert.strictEqual(text, 3);
+	});
+
+	it('should silence only a specific function in a global event stack through silence when passed the event, function and scope', function(){
+		var text = 0
+			, evntObj = action.eventMe({})
+			, scope = {};
+
+		console.log = function(textIn){
+			text++;
+		};
+		
+		evntObj.listen('show:me', function(){
+			console.log('show');
+		}, scope);
+
+		evntObj.listen('show:me', function(){
+			console.log('show it');
+		});
+
+		evntObj.emit('show:me');
+		assert.strictEqual(text, 2);
+
+		evntObj.silence('show:me', function(){
+			console.log('show it');
+		}, scope);
+
+		evntObj.emit('show:me');
+		assert.strictEqual(text, 3);
+	});
+
+	it('should silence only a specific function in a local event stack through silence when passed the event, function and scope', function(){
+		var text = 0
+			, evntObj = action.eventMe({});
+
+		console.log = function(textIn){
+			text++;
+		};
+		
+		evntObj.listenLocal('show:me', function(){
+			console.log('show');
+		});
+
+		evntObj.listenLocal('show:me', function(){
+			console.log('show it');
+		});
+
+		evntObj.emitLocal('show:me');
+		assert.strictEqual(text, 2);
+
+		evntObj.silenceLocal('show:me', function(){
+			console.log('show it');
+		});
+
+		evntObj.emitLocal('show:me');
+		assert.strictEqual(text, 4);
+	});
 });
