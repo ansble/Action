@@ -29,7 +29,13 @@
                         }
 
                         if(listener.once){
-                            that.silence(eventNameIn, listener.call, true, localFlag);
+                            that.silence({
+                                eventName: eventNameIn
+                                , scope: listener.scope
+                                , handler: listener.call
+                                , once: listener.once
+                                , local: listener.local
+                            });
                         }
                     });
                 }
@@ -148,7 +154,7 @@
                 }
             };
 
-            returnObject.silence = function(eventNameIn, handlerIn, onceIn, scopeIn, localFlagIn){
+            returnObject.silence = function(eventNameIn, handlerIn, onceIn, localFlagIn, scopeIn){
                 //localize variables
                 var that = this
                     , i
