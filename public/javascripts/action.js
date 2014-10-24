@@ -244,7 +244,33 @@
             //Event Based state machine
             returnObject.requiredEvent = function(name, callback, context, fireMultipleIn){
                 var that = this
-                    , stateUpdate;
+                    
+                    , stateUpdate = function(nameIn, stateEventsIn){
+                        var name = nameIn
+                            , stateEvents = stateEventsIn;
+
+                        return function(){
+                            var truthy = true
+                                , key;
+
+                            if(typeof stateEvents[name] !== 'undefined'){
+                                stateEvents[name] = true;
+
+                                for(key in stateEvents){
+                                    truthy = truthy && stateEvents[key];
+                                }
+
+                                if(truthy){
+                                    if(!that._triggeredStateReady || that._fireMultiple){
+                                        //feels like a little bit of a hack.
+                                        //  lets the data finish propogating before triggering the call
+                                        setTimeout(that.stateReady.apply(that), 100);
+                                        that._triggeredStateReady = true;
+                                    }
+                                }
+                            }
+                        };
+                    };
 
                 that._fireMultiple = (typeof fireMultipleIn !== 'undefined') ? fireMultipleIn : false;
 
@@ -259,38 +285,8 @@
 
                 that.stateEvents[name] = false;
 
-                stateUpdate = that.stateUpdate(name, that.stateEvents);
-
                 that.listen(name, callback, context);
-                that.listen(name, stateUpdate, that);
-            };
-
-            returnObject.stateUpdate = function(nameIn, stateEventsIn){
-                var name = nameIn
-                    , stateEvents = stateEventsIn
-                    , that = this;
-
-                return function(){
-                    var truthy = true
-                        , key;
-
-                    if(typeof stateEvents[name] !== 'undefined'){
-                        stateEvents[name] = true;
-
-                        for(key in stateEvents){
-                            truthy = truthy && stateEvents[key];
-                        }
-
-                        if(truthy){
-                            if(!that._triggeredStateReady || that._fireMultiple){
-                                //feels like a little bit of a hack.
-                                //  lets the data finish propogating before triggering the call
-                                setTimeout(that.stateReady.apply(that), 100);
-                                that._triggeredStateReady = true;
-                            }
-                        }
-                    }
-                };
+                that.listen(name, stateUpdate(name, that.stateEvents), that);
             };
 
             if(typeof returnObject.stateReady === 'undefined'){

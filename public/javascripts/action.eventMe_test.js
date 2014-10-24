@@ -33,7 +33,6 @@ describe('The Event Module: eventMe', function(){
 		assert.isFunction(evnt.silenceLocal);
 		assert.isFunction(evnt.requiredEvent);
 		assert.isFunction(evnt.stateReady);
-		assert.isFunction(evnt.stateUpdate);
 		assert.isObject(evnt.eventStore);
 	});
 
