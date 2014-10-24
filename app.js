@@ -29,6 +29,7 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', routes.index);
+app.get('/es6', routes.es6);
 
 portfinder.basePort = process.env.PORT || 3000;
 portfinder.getPort(function (err, port) {

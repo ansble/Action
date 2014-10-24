@@ -16,30 +16,22 @@
 
             returnObject.emit = function(eventNameIn, eventDataIn, localFlag){
                 var that = this
-                    , eventStack
                     , functionToCall
-                    , i
-                    , isLocal = (typeof localFlag !== 'undefined' && localFlag);
-
-                if(isLocal){
-                    eventStack = that.eventStore[eventNameIn];
-                } else {
-                    eventStack = action.eventStore[eventNameIn];
-                }
+                    , eventStack = (typeof localFlag !== 'undefined' && localFlag) ? that.eventStore[eventNameIn] : action.eventStore[eventNameIn];
 
                 //emit the event
                 if(typeof eventStack !== 'undefined'){
-                    for(i = 0; i < eventStack.length; i ++){
-                        if(typeof eventStack[i].scope !== 'undefined'){
-                            eventStack[i].call.apply(eventStack[i].scope,[eventDataIn, that.emitterId]);
+                    eventStack.forEach(function (listener) {
+                        if(typeof listener.scope !== 'undefined'){
+                            listener.call.apply(listener.scope,[eventDataIn, that.emitterId]);
                         }else{
-                            eventStack[i].call(eventDataIn, that.emitterId);
+                            listener.call(eventDataIn, that.emitterId);
                         }
 
-                        if(eventStack[i].once){
-                            that.silence(eventNameIn, eventStack[i].call, true, isLocal);
+                        if(listener.once){
+                            that.silence(eventNameIn, listener.call, true, localFlag);
                         }
-                    }
+                    });
                 }
             };
 
@@ -51,7 +43,6 @@
 
             returnObject.listen = function(eventNameIn, handlerIn, scopeIn, onceIn, localFlagIn){
                 var that = this
-                    , i
                     , newCheck = true
 
                     //attribute holders and such
@@ -70,36 +61,35 @@
                     eventName = eventNameIn.eventName;
                     handler = eventNameIn.handler;
                     scope = eventNameIn.scope;
-                    once = eventNameIn.once;
-                    local = eventNameIn.local;
+                    once = (typeof eventNameIn.once !== 'undefined') ? eventNameIn.once : false;
+                    local = (typeof eventNameIn.local !== 'undefined') ? eventNameIn.local : false;
                 }
 
-                eventStack = (typeof local !== 'undefined' && local) ? that.eventStore[eventNameIn] : action.eventStore[eventNameIn];
+                eventStack = (typeof local !== 'undefined' && local) ? that.eventStore[eventName] : action.eventStore[eventName];
                 newEvent = (typeof local !== 'undefined' && local) ? that : action;
 
                 if(typeof eventStack !== 'undefined'){
                     //already exists check to see if the function is already bound
-
-                    for(i = 0; i < eventStack.length; i ++){
-                        if(eventStack[i].call === handler && eventStack[i].once === false){
+                    eventStack.some(function (listener) {
+                        if(listener.call.toString() === handler.toString() && listener.once === false){
                             newCheck = false;
-                            break;
+                            return true;
                         }
-                    }
+                    });
 
-                    if(newCheck && typeof scopeIn !== 'undefined'){
-                            eventStack.push({once: false, call: handler, scope: scope});
+                    if(newCheck && typeof scope !== 'undefined'){
+                            eventStack.push({once: once, call: handler, scope: scope, local: local});
                     }else if(newCheck){
-                            eventStack.push({once: false, call:handler});
+                            eventStack.push({once: once, call:handler, local: local});
                     }
 
                 } else {
                     //new event
                     newEvent.eventStore[eventName] = []; //use an array to store functions
-                    if(typeof scopeIn !== 'undefined'){
-                        newEvent.eventStore[eventName].push({once: false, call: handler, scope: scope});
+                    if(typeof scope !== 'undefined'){
+                        newEvent.eventStore[eventName].push({once: once, call: handler, scope: scope, local: local});
                     }else{
-                        newEvent.eventStore[eventName].push({once: false, call: handler});
+                        newEvent.eventStore[eventName].push({once: once, call: handler, local: local});
                     }
                 }
             };
@@ -124,51 +114,18 @@
 
             returnObject.listenOnce = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
                 //same thing as .listen() but is only triggered once
-                var that = this
-                    , i
-                    , newCheck = true
-                    , eventStack
-                    , newEvent
-
-                    , eventName = eventNameIn
-                    , handler = handlerIn
-                    , scope = scopeIn
-                    , localFlag = localFlagIn;
+                var that = this;
 
                 if(typeof eventNameIn === 'object'){
-                    eventName = eventNameIn.eventName;
-                    handler = eventNameIn.handler;
-                    scope = eventNameIn.scope;
-                    localFlag = eventNameIn.local;
-                }
-
-                if(typeof localFlag !== 'undefined' && localFlag){
-                    //make it local!
-                    eventStack = that.eventStore[eventName];
-                    newEvent = that;
+                    eventNameIn.once = true;
+                    that.listen(eventNameIn);
                 }else{
-                    eventStack = action.eventStore[eventName];
-                    newEvent = action;
-                }
-
-                if(typeof eventStack !== 'undefined'){
-                    //already exists check to see if the function is already bound
-
-                    for(i = 0; i < eventStack.length; i ++){
-                        if(eventStack[i].call === handler && eventStack[i].once === true){
-                            newCheck = false;
-                            break;
-                        }
-                    }
-
-                    if(newCheck){
-                        eventStack.push({once:true, call: handler, scope: scope});
-                    }
-
-                } else{
-                    //new event
-                    newEvent.eventStore[eventNameIn] = []; //use an array to store functions
-                    newEvent.eventStore[eventNameIn].push({once:true, call: handler, scope: scope});
+                    that.listen({
+                        eventName: eventNameIn
+                        , handler: handlerIn
+                        , scope: scopeIn
+                        , once: true
+                    });
                 }
             };
 
@@ -178,13 +135,15 @@
                 //same thing as .listen() but is only triggered once
                 if(typeof eventNameIn === 'object'){
                     eventNameIn.local = true;
-                    that.listenLocal(eventNameIn);
+                    eventNameIn.once = true;
+                    that.listen(eventNameIn);
                 }else{
-                    that.listenLocal({
+                    that.listen({
                         eventName: eventNameIn
                         , handler: handlerIn
                         , scope: scopeIn
                         , local: true
+                        , once: true
                     });
                 }
             };
@@ -328,18 +287,19 @@
                 };
             };
 
-            returnObject.stateReady = function(){
-                //this is a default action when all required events have been completed.
-                //  needs to be overridden if you want to do something real
-                console.log('ready!');
-            };
+            if(typeof returnObject.stateReady === 'undefined'){
+                returnObject.stateReady = function(){
+                    //this is a default action when all required events have been completed.
+                    //  needs to be overridden if you want to do something real
+                    console.log('ready!');
+                };
+            }
 
             returnObject.listen('system:trace', function(emitterIDIn){
                 var that = this;
 
                 if(that.emitterId === emitterIDIn){
-                    // that.emit('system:addTraced', that);
-                    action.traced = that;
+                    that.emit('system:addTraced', that);
                 }
             }, returnObject);
 
@@ -663,26 +623,6 @@
             return {};
         }
 
-        //TODO: figure out if this is needed since the global:error...
-        // , trace: function(emitterIdIn){
-        //     //log out the function that has the emitterId attached
-
-        //     //create the traced object/stack
-        //     action.traced = action.modelMe({
-        //         stack: []
-        //         , emitterId: emitterIdIn
-        //     });
-
-        //     action.traced.listen('system:addTraced', function(objectIn){
-        //         var that = this;
-
-        //         that.get('stack').push(objectIn);
-        //     }, action.traced);
-
-        //     //trigger the event that will cause the trace
-        //     action.emit('system:trace', emitterIdIn);
-        // }
-
         , Error: function(typeIn, messageIn, objectIn, errorObjectIn){
             return {
                 type: typeIn
@@ -693,21 +633,16 @@
         }
 
         , clone: function(objectIn, cloneMe){
-            var key;
+            cloneMe.getOwnPropertyNames().forEach(function (key) {
+                if (typeof cloneMe[key] === 'object'){
+                    //set up the object for iteration later
+                    objectIn[key] = (Array.isArray(cloneMe[key])) ? [] : {};
 
-            for(key in cloneMe){
-                if(cloneMe.hasOwnProperty(key)){
-                    //good to copy this one...
-                    if (typeof cloneMe[key] === 'object'){
-                        //set up the object for iteration later
-                        objectIn[key] = (Array.isArray(cloneMe[key])) ? [] : {};
-
-                        action.clone(objectIn[key], cloneMe[key]);
-                    }else{
-                        objectIn[key] = cloneMe[key];
-                    }
+                    action.clone(objectIn[key], cloneMe[key]);
+                }else{
+                    objectIn[key] = cloneMe[key];
                 }
-            }
+            });
         }
 
         , eventStore: {}
@@ -719,6 +654,12 @@
     //this is the template manager event system
     action.listen('template:get', function(templateID){
         action.emit('template:set:' + templateID, action.templates[templateID]);
+    });
+
+    action.listen('system:addTraced', function(objIn){
+        //TODO: make this prettier
+        console.log('TRACED OBJECT!!!');
+        console.log(objIn);
     });
 
     action.listen('global:error', function(errorIn) {

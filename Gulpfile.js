@@ -7,6 +7,13 @@ var gulp = require('gulp')
     , zip = require('gulp-zip')
     , jshint = require('gulp-jshint')
     , header = require('gulp-header')
+    , browserify = require('gulp-browserify')
+    , es6 = require('gulp-es6-transpiler')
+    , es6Mod = require('gulp-es6-module-transpiler')
+    , stylish = require('jshint-stylish')
+
+    , karma = require('gulp-karma')
+
 
     , pkg = require('./package.json');
 
@@ -16,6 +23,22 @@ gulp.task('default', ['localBuild'], function(){
     gulp.watch(['public/javascripts/app.js', 'public/javascripts/components/**/*.js'], function(){
         gulp.run('localBuild');
     });
+});
+
+gulp.task('build', function () {
+
+    gulp.src('src/es6/action.shell.js')
+        .pipe(jshint({
+            esnext: true
+        }))
+        .pipe(jshint.reporter(stylish))
+        .pipe(es6Mod({
+            moduleName: 'action'
+            , 'global': 'action'
+            , type: 'amd'
+        }))
+        // .pipe(concat('action.js'))
+        .pipe(gulp.dest('public/javascripts/es6'));
 });
 
 gulp.task('localBuild', function(){
@@ -49,6 +72,15 @@ gulp.task('publish', ['generateForPublish'], function(){
     'use strict';
 
 });
+
+gulp.task('test', function (done) {
+  gulp.src(['public/javascripts/action*.js'])
+        .pipe(karma({
+            configFile: 'karma.conf.js'
+            , action: 'watch'
+        }));
+});
+
 
 // gulp.task('default', function () {
 //     watch({ glob: ['public/javascripts/app.js', 'public/javascripts/components/**/*.js'], emitOnGlob: false })
