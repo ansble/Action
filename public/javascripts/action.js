@@ -16,7 +16,6 @@
 
             returnObject.emit = function(eventNameIn, eventDataIn, localFlag){
                 var that = this
-                    , eventStack
                     , functionToCall
                     , eventStack = (typeof localFlag !== 'undefined' && localFlag) ? that.eventStore[eventNameIn] : action.eventStore[eventNameIn];
 
@@ -30,7 +29,7 @@
                         }
 
                         if(listener.once){
-                            that.silence(eventNameIn, listener.call, true, isLocal);
+                            that.silence(eventNameIn, listener.call, true, localFlag);
                         }
                     });
                 }
@@ -44,7 +43,6 @@
 
             returnObject.listen = function(eventNameIn, handlerIn, scopeIn, onceIn, localFlagIn){
                 var that = this
-                    , i
                     , newCheck = true
 
                     //attribute holders and such
@@ -63,11 +61,11 @@
                     eventName = eventNameIn.eventName;
                     handler = eventNameIn.handler;
                     scope = eventNameIn.scope;
-                    once = eventNameIn.once;
-                    local = eventNameIn.local;
+                    once = (typeof eventNameIn.once !== 'undefined') ? eventNameIn.once : false;
+                    local = (typeof eventNameIn.local !== 'undefined') ? eventNameIn.local : false;
                 }
 
-                eventStack = (typeof local !== 'undefined' && local) ? that.eventStore[eventNameIn] : action.eventStore[eventNameIn];
+                eventStack = (typeof local !== 'undefined' && local) ? that.eventStore[eventName] : action.eventStore[eventName];
                 newEvent = (typeof local !== 'undefined' && local) ? that : action;
 
                 if(typeof eventStack !== 'undefined'){
@@ -79,19 +77,19 @@
                         }
                     });
 
-                    if(newCheck && typeof scopeIn !== 'undefined'){
-                            eventStack.push({once: false, call: handler, scope: scope});
+                    if(newCheck && typeof scope !== 'undefined'){
+                            eventStack.push({once: once, call: handler, scope: scope, local: local});
                     }else if(newCheck){
-                            eventStack.push({once: false, call:handler});
+                            eventStack.push({once: once, call:handler, local: local});
                     }
 
                 } else {
                     //new event
                     newEvent.eventStore[eventName] = []; //use an array to store functions
-                    if(typeof scopeIn !== 'undefined'){
-                        newEvent.eventStore[eventName].push({once: false, call: handler, scope: scope});
+                    if(typeof scope !== 'undefined'){
+                        newEvent.eventStore[eventName].push({once: once, call: handler, scope: scope, local: local});
                     }else{
-                        newEvent.eventStore[eventName].push({once: false, call: handler});
+                        newEvent.eventStore[eventName].push({once: once, call: handler, local: local});
                     }
                 }
             };
@@ -116,50 +114,18 @@
 
             returnObject.listenOnce = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
                 //same thing as .listen() but is only triggered once
-                var that = this
-                    , newCheck = true
-                    , eventStack
-                    , newEvent
-
-                    , eventName = eventNameIn
-                    , handler = handlerIn
-                    , scope = scopeIn
-                    , localFlag = localFlagIn;
+                var that = this;
 
                 if(typeof eventNameIn === 'object'){
-                    eventName = eventNameIn.eventName;
-                    handler = eventNameIn.handler;
-                    scope = eventNameIn.scope;
-                    localFlag = eventNameIn.local;
-                }
-
-                if(typeof localFlag !== 'undefined' && localFlag){
-                    //make it local!
-                    eventStack = that.eventStore[eventName];
-                    newEvent = that;
+                    eventNameIn.once = true;
+                    that.listen(eventNameIn);
                 }else{
-                    eventStack = action.eventStore[eventName];
-                    newEvent = action;
-                }
-
-                if(typeof eventStack !== 'undefined'){
-                    //already exists check to see if the function is already bound
-
-                    eventStack.some(function (listener) {
-                        if(listener.call.toString() === handler.toString() && listener.once === true){
-                            newCheck = false;
-                            return true;
-                        }
+                    that.listen({
+                        eventName: eventNameIn
+                        , handler: handlerIn
+                        , scope: scopeIn
+                        , once: true
                     });
-
-                    if(newCheck){
-                        eventStack.push({once:true, call: handler, scope: scope});
-                    }
-
-                } else{
-                    //new event
-                    newEvent.eventStore[eventNameIn] = []; //use an array to store functions
-                    newEvent.eventStore[eventNameIn].push({once:true, call: handler, scope: scope});
                 }
             };
 
@@ -169,13 +135,15 @@
                 //same thing as .listen() but is only triggered once
                 if(typeof eventNameIn === 'object'){
                     eventNameIn.local = true;
-                    that.listenLocal(eventNameIn);
+                    eventNameIn.once = true;
+                    that.listen(eventNameIn);
                 }else{
-                    that.listenLocal({
+                    that.listen({
                         eventName: eventNameIn
                         , handler: handlerIn
                         , scope: scopeIn
                         , local: true
+                        , once: true
                     });
                 }
             };

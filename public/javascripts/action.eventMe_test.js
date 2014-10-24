@@ -47,6 +47,28 @@ describe('The Event Module: eventMe', function(){
 		assert.strictEqual(evnt.executed, true);
 	});
 
+	it('should execute the assigned listeners when global events are triggered', function(){
+		var evnt = action.eventMe({
+			init: function(){
+				var that = this;
+
+				that.listen('global1', function(){
+					this.global1 = true;
+				}, that);
+			}
+		});
+
+		evnt.listen('global2', function(){
+			this.global2 = true
+		}, evnt);
+
+		action.emit('global1');
+		action.emit('global2');
+
+		assert.strictEqual(evnt.global1, true);
+		assert.strictEqual(evnt.global2, true);
+	});
+
 	it('should fire stateReady() when all required events are heard', function(){
 		var evnt = action.eventMe({
 			init: function(){
@@ -81,5 +103,95 @@ describe('The Event Module: eventMe', function(){
 		assert.strictEqual(evnt.event2, true);
 		assert.strictEqual(evnt._triggeredStateReady, true);
 		assert.strictEqual(evnt.something, 'Ready!');
+	});
+
+	it('should return the same object that it accepted', function(){
+		var evntObj = {
+			samwise: true
+			, boromir: false
+		};
+
+		assert.strictEqual(evntObj, action.eventMe(evntObj));
+		assert.isFunction(evntObj.listen);
+		assert.isFunction(evntObj.emit);
+	});
+
+	it('should not overwrite the stateready function if passed in', function(){
+		var evntObj = {
+			stateReady: function(){
+				return true;
+			}
+		};
+
+		assert.strictEqual(evntObj.stateReady.toString(), action.eventMe(evntObj).stateReady.toString());
+	});
+
+	it('should listen to local events', function(){
+		var evntObj = action.eventMe({});
+
+		evntObj.listenLocal('sam:wise', function(){
+			this.sam = 'wise';
+		}, evntObj);
+
+		evntObj.emitLocal('sam:wise');
+
+		assert.isDefined(evntObj.sam);
+		assert.strictEqual(evntObj.sam, 'wise');
+	});
+
+	it('local events should ignore global events', function(){
+		var evntObj = action.eventMe({});
+
+		evntObj.listenLocal('sam:wise', function(){
+			this.sam = 'wise';
+		}, evntObj);
+
+		action.emit('sam:wise');
+
+		assert.isUndefined(evntObj.sam);
+	});
+
+	it('global events should ignore local events', function(){
+		var evntObj = action.eventMe({});
+
+		evntObj.listen('sam:wise', function(){
+			this.sam = 'wise';
+		}, evntObj);
+
+		evntObj.emitLocal('sam:wise');
+
+		assert.isUndefined(evntObj.sam);
+	});
+
+	it('global once should ignore events after their first emit', function(){
+		var evntObj = action.eventMe({
+			sam: 0
+		});
+
+		evntObj.listenOnce('sam:wise', function(){
+			this.sam++;
+		}, evntObj);
+
+		evntObj.emit('sam:wise');
+		evntObj.emit('sam:wise');
+		evntObj.emit('sam:wise');
+
+		assert.strictEqual(evntObj.sam, 1);
+	});
+
+	it('local once should ignore events after their first emit', function(){
+		var evntObj = action.eventMe({
+			sam: 0
+		});
+
+		evntObj.listenOnceLocal('sam:wise', function(){
+			this.sam++;
+		}, evntObj);
+
+		evntObj.emitLocal('sam:wise');
+		evntObj.emitLocal('sam:wise');
+		evntObj.emitLocal('sam:wise');
+
+		assert.strictEqual(evntObj.sam, 1);
 	});
 });
