@@ -161,7 +161,6 @@
                 //localize variables
                 var that = this
                     , i
-                    , truthy = false
                     , eventName = eventNameIn
                     , handler = handlerIn
                     , once = onceIn
@@ -182,52 +181,34 @@
                 store = (typeof localFlag === 'undefined' || !localFlag) ? action : that;
 
                 if(typeof store.eventStore[eventName] === 'undefined'){
-                    //if there is no event with a name... return nothing
+                    //if there is no event with that name... return nothing
                     return;
                 }
 
-                //there is an event that matches... proceed
-                for(i = 0; i < store.eventStore[eventName].length; i ++){
-                    //reset this variable
-                    truthy = false;
+                if(typeof handler !== 'undefined'){
+                    //there is an event that matches... proceed
+                    store.eventStore[eventName] = store.eventStore[eventName].filter(function(listener){
+                        var isMatch = !!(handler.toString() === listener.call.toString());
 
-                    if(typeof handler !== 'undefined'){
                         //function is passed in
                         if(typeof scope !== 'undefined'){
                             //scope is passed in...
+                            isMatch = !!(isMatch && scope);
+
                             if(typeof once === 'boolean'){
                                 // function + scope + once provides the match
-                                truthy = (handler.toString() === store.eventStore[eventName][i].call.toString() && scope === store.eventStore[eventName][i].scope && once === store.eventStore[eventName][i].once);
-                            } else {
-                                //function + scope provides the match
-                                truthy = (handler.toString() === store.eventStore[eventName][i].call.toString() && scope === store.eventStore[eventName][i].scope);
+                                isMatch = !!(isMatch && once === listener.once);
                             }
-                        } else {
-                            //function + once in for the match
-                            if(typeof once === 'boolean'){
-                                truthy = (handler.toString() === store.eventStore[eventName][i].call.toString() && store.eventStore[eventName][i].once === once);
-                            } else {
-                                truthy = (handler.toString() === store.eventStore[eventName][i].call.toString());
-                            }
+                        } else if (typeof once === 'boolean'){
+                            isMatch = !!( isMatch && listener.once === once);
                         }
-                    } else {
-                        //no function unbind everything by resetting
-                        store.eventStore[eventName] = [];
 
-                        //and exit
-                        break;
-                    }
+                        return !isMatch;
+                    });
 
-                    if(truthy){
-                        //remove this bad boy
-                        store.eventStore[eventName].splice(i,1);
-
-                        myEvents.some(function(listener){
-                            if(listener === {name: eventName, call: handler, scope, scope, once: once, local: local}){
-
-                            }
-                        });
-                    }
+                } else {
+                    //no function unbind everything by resetting
+                    store.eventStore[eventName] = [];
                 }
             };
 
@@ -299,9 +280,12 @@
 
             returnObject.tearDown = function(){
                 //this needs to destroy the listeners... which is important
-                //  TODO: make this real
+                var that = this;
 
-                // myEvents = [];
+                myEvents.forEach(function(listener){
+                    that.silence(listener);
+                    action.silence(listener)
+                });
             };
 
             if(typeof returnObject.stateReady === 'undefined'){
