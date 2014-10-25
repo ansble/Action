@@ -479,25 +479,6 @@
 
                     oReq.open(type, requestUrl, true);
                     oReq.send();
-
-                    // $.ajax({
-                    //     type: type
-                    //     , url: requestUrl + '/' + id
-                    //     , data: that.flatten()
-                    //     , success: function(data, status){
-                    //         //only do this on success...
-                    //         that.clearChanges();
-
-                    //         //update the model with stuff from the server
-                    //         that.set(data);
-
-                    //         //emit the data event for this model to refresh everyone's values
-                    //         that.emit(that.get('dataEvent'), data);
-                    //     }
-                    //     , error: function(){
-                    //         that.emit('global:error', new action.Error('http', 'Error in request', that));
-                    //     }
-                    // });
                 } else {
                     action.emit('global:error', new action.Error('http', 'No URL defined', that));
                 }
@@ -535,6 +516,7 @@
 
             if(typeof objectIn.data !== 'undefined'){
                 newModel.set(objectIn.data); //set the inital attributes
+                delete objectIn.data;
             }
 
             newModel.listenLocal('attribute:changed', function(nameIn){
