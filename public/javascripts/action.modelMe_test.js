@@ -21,11 +21,12 @@ describe('The Model Module: modelMe', function(){
 					, 'models'
 				]
 			}
+            , url: '/foo/bar'
 		});
 	});
 
 	afterEach(function(){
-		if(typeof evnt !== 'undefined'){
+		if(typeof model !== 'undefined' && typeof model.tearDown !== 'undefined'){
 			model.tearDown();
 			model = {};
 		}
@@ -46,7 +47,7 @@ describe('The Model Module: modelMe', function(){
 		assert.isFunction(model.clearChanges);
 		assert.isFunction(model.getChanges);
 		assert.isFunction(model.clear);
-		assert.isFunction(model.destroy);
+		assert.isFunction(model.tearDown);
 		assert.isObject(model.super);
 
 		//event side of things
@@ -102,7 +103,7 @@ describe('The Model Module: modelMe', function(){
 		// assert.notEqual(model.super.fetch, model.fetch);
 	});
 
-    it('should be destroyed by .destroy()', function(){
+    it('should be destroyed by .tearDown()', function(){
         var console = {
             log: function(param){
                 console.result = param;
@@ -113,9 +114,36 @@ describe('The Model Module: modelMe', function(){
             console.log('test failed');
         });
 
-        model.destroy();
+        model.tearDown();
         action.emit('test');
 
         assert.isUndefined(console.result);
+        assert.strictEqual(model.toString(), {}.toString());
+        assert.isUndefined(model.url);
+
+        assert.isUndefined(model.get);
+        assert.isUndefined(model.set);
+        assert.isUndefined(model.flatten);
+        assert.isUndefined(model.fetch);
+        assert.isUndefined(model.ajaxGet);
+        assert.isUndefined(model.save);
+        assert.isUndefined(model.clearChanges);
+        assert.isUndefined(model.getChanges);
+        assert.isUndefined(model.clear);
+        assert.isUndefined(model.tearDown);
+        assert.isUndefined(model.super);
+
+        //event side of things
+        assert.isUndefined(model.listen);
+        assert.isUndefined(model.emit);
+        assert.isUndefined(model.listenLocal);
+        assert.isUndefined(model.emitLocal);
+        assert.isUndefined(model.listenOnce);
+        assert.isUndefined(model.listenOnceLocal);
+        assert.isUndefined(model.silence);
+        assert.isUndefined(model.silenceLocal);
+        assert.isUndefined(model.requiredEvent);
+        assert.isUndefined(model.stateReady);
+        assert.isUndefined(model.eventStore);
     });
 });

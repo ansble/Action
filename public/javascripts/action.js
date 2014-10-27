@@ -337,7 +337,7 @@
 
                             //TODO: maybe make this do a deep copy to prevent
                             //  pass by reference or switch to clone()
-                            if(key !== 'destroy' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
+                            if(key !== 'tearDown' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
                                 if(typeof attributeValue === 'object'){
                                     attributes[attributeName] = (Array.isArray(attributeName[key])) ? [] : {};
                                     action.clone(attributes[attributeName], attributeName[key]);
@@ -357,7 +357,7 @@
                         }
                     }
                 } else{
-                    if(attributeName !== 'destroy' && attributeName !== 'fetch' && attributeName !== 'save'){
+                    if(attributeName !== 'tearDown' && attributeName !== 'fetch' && attributeName !== 'save'){
                         if(typeof attributeValue === 'object'){
                             attributes[attributeName] = (Array.isArray(attributeValue)) ? [] : {};
                             action.clone(attributes[attributeName], attributeValue);
@@ -500,12 +500,17 @@
                 attributes = {};
             }
 
-            newModel.destroy = function(){
+            newModel.super.tearDownEvents = newModel.tearDown;
+
+            newModel.tearDown = function(){
                 var that = this
                     , key;
 
-                that.tearDown();
+                that.super.tearDownEvents.apply(newModel); //this is a little bit messy
                 that.clear();
+                Object.getOwnPropertyNames(newModel).forEach(function(key){
+                    newModel[key] = undefined;
+                });
             }
 
             if(typeof objectIn.data !== 'undefined'){
