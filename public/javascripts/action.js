@@ -387,18 +387,18 @@
 
             newModel.fetch = function(setVariableName, successFunction, errorFunction, flushCache){
                 var that = this
-                    , requestUrl = that.get('url')
+                    , requestUrl = that.url
                     , useLocal = that.get('cacheLocal') && action.useLocalCache && !flushCache;
 
                 if(typeof requestUrl !== 'undefined'){
                     //make the request for the model
                     if(useLocal){
-                        window.localforage.getItem(window.btoa(that.get('url')), function(data){
+                        window.localforage.getItem(window.btoa(that.url), function(data){
                             if(data === null){
                                 //this doesn't exist locally...
                                 that.ajaxGet(setVariableName, function(dataIn){
                                     var localData = dataIn
-                                        , articleId = that.get('url');
+                                        , articleId = that.url;
 
                                     window.localforage.setItem(window.btoa(articleId), localData, function(){
                                         // console.log('data done');
@@ -422,7 +422,7 @@
 
             newModel.ajaxGet = function(setVariableName, successFunction){
                 var that = this
-                    , requestUrl = that.get('url')// + '?' + Date.now()
+                    , requestUrl = that.url// + '?' + Date.now()
 
                     , oReq = new XMLHttpRequest();
 
@@ -461,7 +461,7 @@
                 //TODO make this talk to a server with the URL
                 //TODO make it only mark the saved changes clear
                 var that = this
-                    , requestUrl = that.get('url')
+                    , requestUrl = that.url
                     , id = that.get('id')
                     , type = (typeof id === 'undefined') ? 'post' : 'put'
 

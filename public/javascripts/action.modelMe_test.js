@@ -146,4 +146,42 @@ describe('The Model Module: modelMe', function(){
         assert.isUndefined(model.stateReady);
         assert.isUndefined(model.eventStore);
     });
+
+    it('should keep track of changes to it\'s internal state', function(){
+        model.set('sam', true);
+
+        assert.isArray(model.getChanges());
+        assert.strictEqual(model.getChanges()[0], 'sam');
+    });
+
+    it('should keep empty of changes to it\'s internal state with clearChanges()', function(){
+        model.set('sam', true);
+
+        assert.isArray(model.getChanges());
+        assert.strictEqual(model.getChanges()[0], 'sam');
+
+        model.clearChanges();
+
+        assert.strictEqual(model.getChanges().length, 0);
+    });
+
+    it('should wipe attributes with clear()', function(){
+        model.set('sam', true);
+
+        assert.strictEqual(model.get('sam'), true);
+        model.clear();
+        assert.isUndefined(model.get('sam'));
+    });
+
+    it('should save itself to the url provided with .save()', function(){
+        assert.strictEqual(true, false);
+    });
+
+    it('should get itself from the url provided with fetch()', function(){
+        assert.strictEqual(true, false);
+    });
+
+    it('should get data from the server with ajaxGet', function(){
+        assert.strictEqual(true, false);
+    });
 });
