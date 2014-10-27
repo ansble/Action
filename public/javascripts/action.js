@@ -529,7 +529,7 @@
 
             newModel.listenLocal('attribute:changed', function(nameIn){
                 changes.push(nameIn);
-            }, newModel); //maybe eliminate this 'this'
+            }, newModel);
 
             newModel.listen(newModel.get('requestEvent'), function(){
                 this.fetch();
