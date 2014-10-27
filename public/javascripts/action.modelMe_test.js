@@ -1,7 +1,7 @@
 var assert = chai.assert;
 
 describe('The Model Module: modelMe', function(){
-	
+
 	beforeEach(function(){
 		data = {
 			daniel: 'creator'
@@ -99,6 +99,23 @@ describe('The Model Module: modelMe', function(){
 
 		assert.isFunction(model.fetch);
 		assert.isFunction(model.super.fetch);
-		assert.notEqual(model.super.fetch, model.fetch);
+		// assert.notEqual(model.super.fetch, model.fetch);
 	});
+
+    it('should be destroyed by .destroy()', function(){
+        var console = {
+            log: function(param){
+                console.result = param;
+            }
+        };
+
+        model.listen('test', function(){
+            console.log('test failed');
+        });
+
+        model.destroy();
+        action.emit('test');
+
+        assert.isUndefined(console.result);
+    });
 });

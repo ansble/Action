@@ -1,7 +1,7 @@
 var assert = chai.assert;
 
 describe('The Event Module: eventMe', function(){
-	
+
 	beforeEach(function(){
 		evnt = action.eventMe({});
 		evnt2 = action.eventMe({});
@@ -229,7 +229,7 @@ describe('The Event Module: eventMe', function(){
 		console.log = function(textIn){
 			text++;
 		};
-		
+
 		action.listen('show:me', function(){
 			console.log('show');
 		});
@@ -253,7 +253,7 @@ describe('The Event Module: eventMe', function(){
 		console.log = function(textIn){
 			text++;
 		};
-		
+
 		evnt.listenLocal('show:me', function(){
 			console.log('show');
 		});
@@ -277,7 +277,7 @@ describe('The Event Module: eventMe', function(){
 		console.log = function(textIn){
 			text++;
 		};
-		
+
 		evnt.listen('show:me', function(){
 			console.log('show');
 		});
@@ -303,7 +303,7 @@ describe('The Event Module: eventMe', function(){
 		console.log = function(textIn){
 			text++;
 		};
-		
+
 		evnt.listenLocal('show:me', function(){
 			console.log('show');
 		});
@@ -333,7 +333,7 @@ describe('The Event Module: eventMe', function(){
 
 
 		assert.strictEqual(text, 0);
-		
+
 		evnt.listen('show:me', function(){
 			console.log('show');
 		}, scope);
@@ -360,7 +360,7 @@ describe('The Event Module: eventMe', function(){
 		console.log = function(textIn){
 			text++;
 		};
-		
+
 		evnt.listenLocal('show:me', function(){
 			console.log('show');
 		}, scope);
@@ -379,4 +379,21 @@ describe('The Event Module: eventMe', function(){
 		evnt.emitLocal('show:me');
 		assert.strictEqual(text, 3);
 	});
+
+    it('should remove all listeners when tearDown is executed', function(){
+        var console = {
+            log: function(param){
+                console.result = param;
+            }
+        };
+
+        evnt.listen('test', function(){
+            console.log('test failed');
+        });
+
+        evnt.tearDown();
+        action.emit('test');
+
+        assert.isUndefined(console.result);
+    });
 });

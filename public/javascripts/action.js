@@ -100,7 +100,7 @@
                     }
                 }
 
-                myEvents.push({name: eventName, once: once, call: handler, scope: scope, local:local});
+                myEvents.push({eventName: eventName, once: once, call: handler, scope: scope, local:local});
             };
 
             returnObject.listenLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
@@ -233,7 +233,7 @@
             //Event Based state machine
             returnObject.requiredEvent = function(name, callback, context, fireMultipleIn){
                 var that = this
-                    
+
                     , stateUpdate = function(nameIn, stateEventsIn){
                         var name = nameIn
                             , stateEvents = stateEventsIn;
@@ -501,27 +501,26 @@
             }
 
             newModel.destroy = function(){
-                //TODO not really working... should get rid of this thing
-                //  and all of its parameters
                 var that = this
                     , key;
 
-                setTimeout(function(){
-                    // delete me;
-                },0); // not quite working...
-
-                for(key in that){
-                    // delete this[key];
-                }
-
-                //TODO this still doesn't kill the attributes or changes
-                //  private data
+                that.tearDown();
+                that.clear();
             }
 
             if(typeof objectIn.data !== 'undefined'){
                 newModel.set(objectIn.data); //set the inital attributes
                 delete objectIn.data;
             }
+
+            //iterate over the passed in object and set the values on the returned object
+            Object.getOwnPropertyNames(objectIn).forEach(function(key){
+                if(typeof newModel[key] !== 'undefined'){
+                    newModel.super[key] = newModel[key];
+                }
+
+                newModel[key] = objectIn[key];
+            });
 
             newModel.listenLocal('attribute:changed', function(nameIn){
                 changes.push(nameIn);
@@ -622,7 +621,7 @@
         }
 
         , clone: function(objectIn, cloneMe){
-            cloneMe.getOwnPropertyNames().forEach(function (key) {
+            Object.getOwnPropertyNames(cloneMe).forEach(function (key) {
                 if (typeof cloneMe[key] === 'object'){
                     //set up the object for iteration later
                     objectIn[key] = (Array.isArray(cloneMe[key])) ? [] : {};
@@ -686,6 +685,6 @@
         module.exports = action;
     } else {
         //looks like a browser put it in the window scope
-        window.action = action;  
+        window.action = action;
     }
 })();
