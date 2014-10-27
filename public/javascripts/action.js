@@ -375,11 +375,15 @@
                         that[attributeName] = attributeValue;
                     }
                 }
-            }
+            };
 
             newModel.flatten = function(){
                 return attributes;
-            }
+            };
+
+            newModel.toJSON = function(){
+                return JSON.stringify(attributes);
+            };
 
             newModel.fetch = function(setVariableName, successFunction, errorFunction, flushCache){
                 var that = this
