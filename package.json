@@ -4,7 +4,8 @@
   "releaseName": "Antonio Banderas",
   "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "gulp test"
   },
   "dependencies": {
     "ejs": "*",

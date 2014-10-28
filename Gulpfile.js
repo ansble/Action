@@ -43,7 +43,7 @@ gulp.task('build', function () {
 
 gulp.task('localBuild', function(){
     'use strict';
-    
+
     gulp.src(['public/javascripts/app.js', './public/javascripts/components/**/*.js','!./public/javascripts/components/**/*_test.js'])
         .pipe(concat('app.js'))
         .pipe(jshint())
