@@ -47,3 +47,6 @@ in order from top left - down the column then on to the next column. If we run o
 There are a few dependencies for Action to be a fully useful framework. They are (with the reasons for them):
 0. localForage (If you want to use the local cache. It will automatically cache all of your ajax GET requests in local storage and pull from them all subsequent times they are requested)
 0. Handlebars, or compatible (a templating library)
+
+##Changelog
+Can be found in the History.md file...
