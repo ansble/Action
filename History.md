@@ -1,4 +1,5 @@
   ## v0.6.0 Antonio Banderas
+
   * stubbed out tests and they are failing so I remember they need work
   * removed a comment from the library and started adding tests for the utils
   * more tests and revised some of the URL handling code in the fetch, save, ajaxGet functions
