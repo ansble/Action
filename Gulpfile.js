@@ -77,6 +77,14 @@ gulp.task('test', function (done) {
   gulp.src(['public/javascripts/action*.js'])
         .pipe(karma({
             configFile: 'karma.conf.js'
+            , action: 'run'
+        }));
+});
+
+gulp.task('develop', function (done) {
+  gulp.src(['public/javascripts/action*.js'])
+        .pipe(karma({
+            configFile: 'karma.conf.js'
             , action: 'watch'
         }));
 });
