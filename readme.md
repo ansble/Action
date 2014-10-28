@@ -49,4 +49,5 @@ There are a few dependencies for Action to be a fully useful framework. They are
 0. Handlebars, or compatible (a templating library)
 
 ##Changelog
-Can be found in the History.md file...
+Can be found in the History.md file... generated with:
+git log git describe --tags --abbrev=0`..HEAD --pretty=format:"  * %s"`
