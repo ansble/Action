@@ -626,16 +626,33 @@
         }
 
         , clone: function(objectIn, cloneMe){
-            Object.getOwnPropertyNames(cloneMe).forEach(function (key) {
-                if (typeof cloneMe[key] === 'object'){
-                    //set up the object for iteration later
-                    objectIn[key] = (Array.isArray(cloneMe[key])) ? [] : {};
+            var obj = objectIn
+                , clone = cloneMe;
 
-                    action.clone(objectIn[key], cloneMe[key]);
-                }else{
-                    objectIn[key] = cloneMe[key];
+            if(typeof clone === 'undefined'){
+                clone = objectIn;
+                obj = {};
+            }
+
+            //wipe out any existing parts of the object before the clone
+            Object.getOwnPropertyNames(obj).forEach(function (key) {
+                if(key !== 'length'){
+                    obj[key] = undefined;
                 }
             });
+
+            Object.getOwnPropertyNames(clone).forEach(function (key) {
+                if (typeof clone[key] === 'object'){
+                    //set up the object for iteration later
+                    obj[key] = (Array.isArray(clone[key])) ? [] : {};
+
+                    action.clone(obj[key], clone[key]);
+                }else{
+                    obj[key] = clone[key];
+                }
+            });
+
+            return obj;
         }
 
         , eventStore: {}
