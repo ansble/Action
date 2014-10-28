@@ -1,5 +1,6 @@
 #Action!
 ![build status](https://travis-ci.org/designfrontier/Action.svg)
+
 `Action!` is a front end sub/pub based framework for event based development. No more passing around dependencies, no more worrying about timing. Events free you to build apps that function they way the real world does: cause and effect.
 
 Need data? Ask for it. Need to do something with that data? Listen for when it is sent back to you and do it. Need to watch for the user to do something? Listen for it and react accordingly. `Action!` embraces the asynchronicity that is the world around us to create better front end experiences and code.
