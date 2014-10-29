@@ -51,4 +51,4 @@ There are a few dependencies for Action to be a fully useful framework. They are
 
 ##Changelog
 Can be found in the History.md file... generated with:
-git log git describe --tags --abbrev=0`..HEAD --pretty=format:"  * %s"`
+git log `git describe --tags --abbrev=0`..HEAD --pretty=format:"  * %s" > History_temp.md
