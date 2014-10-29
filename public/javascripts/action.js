@@ -315,7 +315,7 @@
         , modelMe: function(objectIn){
             //this is the module for creating a data model object
             var that = this
-                , newModel = that.eventMe({})
+                , newModel = that.compose(that.eventMe, that.ajaxMe)
                 , attributes = {}
                 , changes = [];
 
@@ -420,43 +420,6 @@
                 }
             };
 
-            newModel.ajaxGet = function(setVariableName, successFunction){
-                var that = this
-                    , requestUrl = that.url// + '?' + Date.now()
-
-                    , oReq = new XMLHttpRequest();
-
-                oReq.onload = function(){
-                            var data = JSON.parse(this.responseText);
-
-                            //TODO: make the statuses more generic
-                            if(this.status === 200 || this.status === 302){
-                                that.emit(that.get('dataEvent'), data);
-
-                                if(typeof setVariableName === 'string'){
-                                    that.set(setVariableName, data);
-                                }else{
-                                    that.set(data);
-                                }
-
-                                if(typeof successFunction === 'function'){
-                                    successFunction.apply(that, [data]);
-                                }
-                            }else if(this.status === 400){
-
-                            }else if(this.status === 500){
-                                that.emit('global:error', new action.Error('http', 'Error in request', that));
-                            }
-                        };
-
-                oReq.onerror = function(xhr, errorType, error){
-                            that.emit('global:error', new action.Error('http', 'Error in request type: ' + errorType, that, error));
-                        };
-
-                oReq.open('get', requestUrl, true);
-                oReq.send();
-            };
-
             newModel.save = function(){
                 //TODO make this talk to a server with the URL
                 //TODO make it only mark the saved changes clear
@@ -540,6 +503,49 @@
             }
 
             return newModel;
+        }
+
+        , ajaxMe: function(objectIn) {
+            var obj = objectIn || {};
+
+            obj.ajaxGet = function(setVariableName, successFunction, urlIn){
+                var that = this
+                    , requestUrl = urlIn || that.url// + '?' + Date.now()
+
+                    , oReq = new XMLHttpRequest();
+
+                oReq.onload = function(){
+                            var data = JSON.parse(this.responseText);
+
+                            if(this.status.match(/^[23][0-9][0-9]$/)){
+                                that.emit(that.get('dataEvent'), data);
+
+                                if(typeof setVariableName === 'string'){
+                                    that.set(setVariableName, data);
+                                }else{
+                                    that.set(data);
+                                }
+
+                                if(typeof successFunction === 'function'){
+                                    successFunction.apply(that, [data]);
+                                }
+                            }else if(this.status.match(/^[4][0-9][0-9]$/)){
+
+                            }else if(this.status.match(/^[5][0-9][0-9]$/)){
+                                that.emit('global:error', new action.Error('http', 'Error in request', that));
+                            }
+                        };
+
+                oReq.onerror = function(xhr, errorType, error){
+                            that.emit('global:error', new action.Error('http', 'Error in request type: ' + errorType, that, error));
+                        };
+
+                oReq.open('get', requestUrl, true);
+                oReq.send();
+            };
+
+
+            return obj;
         }
 
         , viewMe : function(objectIn){
@@ -674,7 +680,7 @@
                     });
                 } else if (typeof arguments[i] === 'function') {
                     //this is a function apply it
-                    arguments[i].apply(obj);
+                    arguments[i].call(obj, obj);
                 }
             }
 

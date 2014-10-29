@@ -175,16 +175,16 @@ describe('The Model Module: modelMe', function(){
 
     it('should save itself to the url provided with .save()', function(){
         //TODO: make this real
-        // assert.strictEqual(true, false);
+        assert.isFunction(model.save);
     });
 
     it('should get itself from the url provided with fetch()', function(){
         //TODO: make this real
-        // assert.strictEqual(true, false);
+        assert.isFunction(model.fetch);
     });
 
     it('should get data from the server with ajaxGet', function(){
         //TODO: make this real
-        // assert.strictEqual(true, false);
+        assert.isFunction(model.ajaxGet);
     });
 });
