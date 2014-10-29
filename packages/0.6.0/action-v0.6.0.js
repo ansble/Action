@@ -104,7 +104,7 @@ https://github.com/designfrontier/Action
                     }
                 }
 
-                myEvents.push({name: eventName, once: once, call: handler, scope: scope, local:local});
+                myEvents.push({eventName: eventName, once: once, call: handler, scope: scope, local:local});
             };
 
             returnObject.listenLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
@@ -237,7 +237,7 @@ https://github.com/designfrontier/Action
             //Event Based state machine
             returnObject.requiredEvent = function(name, callback, context, fireMultipleIn){
                 var that = this
-                    
+
                     , stateUpdate = function(nameIn, stateEventsIn){
                         var name = nameIn
                             , stateEvents = stateEventsIn;
@@ -341,7 +341,7 @@ https://github.com/designfrontier/Action
 
                             //TODO: maybe make this do a deep copy to prevent
                             //  pass by reference or switch to clone()
-                            if(key !== 'destroy' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
+                            if(key !== 'tearDown' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
                                 if(typeof attributeValue === 'object'){
                                     attributes[attributeName] = (Array.isArray(attributeName[key])) ? [] : {};
                                     action.clone(attributes[attributeName], attributeName[key]);
@@ -361,7 +361,7 @@ https://github.com/designfrontier/Action
                         }
                     }
                 } else{
-                    if(attributeName !== 'destroy' && attributeName !== 'fetch' && attributeName !== 'save'){
+                    if(attributeName !== 'tearDown' && attributeName !== 'fetch' && attributeName !== 'save'){
                         if(typeof attributeValue === 'object'){
                             attributes[attributeName] = (Array.isArray(attributeValue)) ? [] : {};
                             action.clone(attributes[attributeName], attributeValue);
@@ -379,26 +379,30 @@ https://github.com/designfrontier/Action
                         that[attributeName] = attributeValue;
                     }
                 }
-            }
+            };
 
             newModel.flatten = function(){
                 return attributes;
-            }
+            };
+
+            newModel.toJSON = function(){
+                return JSON.stringify(attributes);
+            };
 
             newModel.fetch = function(setVariableName, successFunction, errorFunction, flushCache){
                 var that = this
-                    , requestUrl = that.get('url')
+                    , requestUrl = that.url
                     , useLocal = that.get('cacheLocal') && action.useLocalCache && !flushCache;
 
                 if(typeof requestUrl !== 'undefined'){
                     //make the request for the model
                     if(useLocal){
-                        window.localforage.getItem(window.btoa(that.get('url')), function(data){
+                        window.localforage.getItem(window.btoa(that.url), function(data){
                             if(data === null){
                                 //this doesn't exist locally...
                                 that.ajaxGet(setVariableName, function(dataIn){
                                     var localData = dataIn
-                                        , articleId = that.get('url');
+                                        , articleId = that.url;
 
                                     window.localforage.setItem(window.btoa(articleId), localData, function(){
                                         // console.log('data done');
@@ -422,7 +426,7 @@ https://github.com/designfrontier/Action
 
             newModel.ajaxGet = function(setVariableName, successFunction){
                 var that = this
-                    , requestUrl = that.get('url')// + '?' + Date.now()
+                    , requestUrl = that.url// + '?' + Date.now()
 
                     , oReq = new XMLHttpRequest();
 
@@ -461,7 +465,7 @@ https://github.com/designfrontier/Action
                 //TODO make this talk to a server with the URL
                 //TODO make it only mark the saved changes clear
                 var that = this
-                    , requestUrl = that.get('url')
+                    , requestUrl = that.url
                     , id = that.get('id')
                     , type = (typeof id === 'undefined') ? 'post' : 'put'
 
@@ -500,22 +504,17 @@ https://github.com/designfrontier/Action
                 attributes = {};
             }
 
-            newModel.destroy = function(){
-                //TODO not really working... should get rid of this thing
-                //  and all of its parameters
+            newModel.super.tearDownEvents = newModel.tearDown;
+
+            newModel.tearDown = function(){
                 var that = this
                     , key;
 
-                setTimeout(function(){
-                    // delete me;
-                },0); // not quite working...
-
-                for(key in that){
-                    // delete this[key];
-                }
-
-                //TODO this still doesn't kill the attributes or changes
-                //  private data
+                that.super.tearDownEvents.apply(newModel); //this is a little bit messy
+                that.clear();
+                Object.getOwnPropertyNames(newModel).forEach(function(key){
+                    newModel[key] = undefined;
+                });
             }
 
             if(typeof objectIn.data !== 'undefined'){
@@ -523,9 +522,18 @@ https://github.com/designfrontier/Action
                 delete objectIn.data;
             }
 
+            //iterate over the passed in object and set the values on the returned object
+            Object.getOwnPropertyNames(objectIn).forEach(function(key){
+                if(typeof newModel[key] !== 'undefined'){
+                    newModel.super[key] = newModel[key];
+                }
+
+                newModel[key] = objectIn[key];
+            });
+
             newModel.listenLocal('attribute:changed', function(nameIn){
                 changes.push(nameIn);
-            }, newModel); //maybe eliminate this 'this'
+            }, newModel);
 
             newModel.listen(newModel.get('requestEvent'), function(){
                 this.fetch();
@@ -622,16 +630,59 @@ https://github.com/designfrontier/Action
         }
 
         , clone: function(objectIn, cloneMe){
-            cloneMe.getOwnPropertyNames().forEach(function (key) {
-                if (typeof cloneMe[key] === 'object'){
-                    //set up the object for iteration later
-                    objectIn[key] = (Array.isArray(cloneMe[key])) ? [] : {};
+            var obj = objectIn
+                , clone = cloneMe;
 
-                    action.clone(objectIn[key], cloneMe[key]);
-                }else{
-                    objectIn[key] = cloneMe[key];
+            if(typeof clone === 'undefined'){
+                clone = objectIn;
+                obj = {};
+            }
+
+            //wipe out any existing parts of the object before the clone
+            Object.getOwnPropertyNames(obj).forEach(function (key) {
+                if(key !== 'length'){
+                    obj[key] = undefined;
                 }
             });
+
+            Object.getOwnPropertyNames(clone).forEach(function (key) {
+                if (typeof clone[key] === 'object'){
+                    //set up the object for iteration later
+                    obj[key] = (Array.isArray(clone[key])) ? [] : {};
+
+                    action.clone(obj[key], clone[key]);
+                }else{
+                    obj[key] = clone[key];
+                }
+            });
+
+            return obj;
+        }
+
+        , compose: function () {
+            var obj = {}
+                , i = 0
+                , currObj = {}
+                , that = this;
+
+            for(i = 0; i < arguments.length; i++){
+                if(typeof arguments[i] === 'object' && !Array.isArray(arguments[i])){
+                    currObj = arguments[i];
+
+                    Object.getOwnPropertyNames(currObj).forEach(function(property){
+                        if(typeof currObj[property] === 'object'){
+                            obj[property] = that.clone(currObj[property]);
+                        } else {
+                            obj[property] = currObj[property];
+                        }
+                    });
+                } else if (typeof arguments[i] === 'function') {
+                    //this is a function apply it
+                    arguments[i].apply(obj);
+                }
+            }
+
+            return obj;
         }
 
         , eventStore: {}
@@ -686,6 +737,6 @@ https://github.com/designfrontier/Action
         module.exports = action;
     } else {
         //looks like a browser put it in the window scope
-        window.action = action;  
+        window.action = action;
     }
 })();
