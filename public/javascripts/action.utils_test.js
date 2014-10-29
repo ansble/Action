@@ -79,4 +79,40 @@ describe('The Utilities Module', function(){
         assert.strictEqual(obj2.roles[0], obj.roles[0]);
         assert.strictEqual(obj2.attrib.maker, obj.attrib.maker);
     });
+    describe('compose function tests', function(){
+
+        it('should return a composed object', function(){
+            var t = {sam:true, bob:false}
+                , x = {rachel: true, caleb:true, joel: false}
+                , tx = action.compose(t, x);
+
+            assert.isObject(tx);
+            assert.strictEqual(tx.sam, true);
+            assert.strictEqual(tx.caleb, true);
+            assert.strictEqual(tx.rachel, true);
+            assert.strictEqual(tx.joel, false);
+            assert.strictEqual(tx.bob, false);
+        });
+
+        it('should execute functions passed into it', function(){
+            var t = action.compose(
+                {sam:true, bob:false}, 
+                {rachel: true, caleb:true, joel: false}, 
+                function(){
+                    this.self = function(){
+                        alert('self');
+                    }
+                });
+
+            assert.isFunction(t.self);
+        });
+
+        it('should clone complex objects to sever the reference', function(){
+            var t = {sam:true, bob:false, obj: {calendar: 'somehere'}}
+                , x = {rachel: true, caleb:true, joel: false}
+                , tx = action.compose(t, x);
+
+            assert.notStrictEqual(t.obj, tx.obj);
+        });
+    })
 });

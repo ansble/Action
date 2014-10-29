@@ -655,6 +655,32 @@
             return obj;
         }
 
+        , compose: function () {
+            var obj = {}
+                , i = 0
+                , currObj = {}
+                , that = this;
+
+            for(i = 0; i < arguments.length; i++){
+                if(typeof arguments[i] === 'object' && !Array.isArray(arguments[i])){
+                    currObj = arguments[i];
+
+                    Object.getOwnPropertyNames(currObj).forEach(function(property){
+                        if(typeof currObj[property] === 'object'){
+                            obj[property] = that.clone(currObj[property]);
+                        } else {
+                            obj[property] = currObj[property];
+                        }
+                    });
+                } else if (typeof arguments[i] === 'function') {
+                    //this is a function apply it
+                    arguments[i].apply(obj);
+                }
+            }
+
+            return obj;
+        }
+
         , eventStore: {}
     };
 
