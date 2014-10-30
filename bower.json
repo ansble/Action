@@ -1,0 +1,28 @@
+{
+  "name": "Action",
+  "version": "0.6.1",
+  "homepage": "https://github.com/designfrontier/Action",
+  "authors": [
+    "Daniel Sellers <daniel@designfrontier.net>"
+  ],
+  "description": "Action is a simple, lightweight event driven framework for javascript development",
+  "main": "packages/latest/action.min.js",
+  "moduleType": [
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "javascript",
+    "js",
+    "events",
+    "framework"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
