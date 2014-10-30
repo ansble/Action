@@ -16,7 +16,6 @@ So there are a variety of things that need to be completed for Action! to be rea
 0. Figure out how views really work... (https://github.com/twitter/hogan.js)
 
 ###TODOs generally
-0. create a prod branch and a debug branch (prod probably doesn't need the extra weight of the call stack and emitterid stuff)?
 0. update documentation
 0. example app
 0. make the error output even prettier! https://developers.google.com/chrome-developer-tools/docs/console-api#consoleerrorobject_object
@@ -38,6 +37,29 @@ We'll use these folks as release names: http://en.wikipedia.org/wiki/List_of_act
 in order from top left - down the column then on to the next column. If we run out we'll add more names to the list :-)
 
 ##Documentation
+This is really really loose and rudimentary, but it is now here. It will expand out over time. If you want more details about the API the tests, and code is probably your best bet.
+
+###action.eventMe()
+This is a functional constructor that adds events to an object. It provides a global, and local, listener and emitter.
+
+###action.modelMe()
+This is a functional constructor that creates a model object with private attributes (accessible through get() and set()), events, ajax, etc.
+
+###action.routeMe()
+Route events and support for yoru application
+
+###action.clone()
+A clone function that copies an object without preserving references
+
+###action.compose()
+A function for composition with 
+
+###action.Error
+Error constructor prototype
+
+###action.viewMe()
+The view constructor function for view objects... more to come
+
 ###Browser Support
 0. IE 9+
 0. Chrome

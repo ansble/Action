@@ -1,5 +1,12 @@
   ##v0.6.0 Antonio Banderas
 
+  ####File Sizes:
+  
+  * min: 8499kb ↑
+  * full: 29101kb ↓
+
+### Changes
+
   * stubbed out tests and they are failing so I remember they need work
   * removed a comment from the library and started adding tests for the utils
   * more tests and revised some of the URL handling code in the fetch, save, ajaxGet functions
@@ -34,3 +41,8 @@
   * Merge branch 'development' of https://github.com/designfrontier/Action into development
   * added lots of routing work to this bad boy
   * added a History.md file
+  * Merge branch 'antonio' of https://github.com/designfrontier/Action
+  * corrected the history command
+  * prepping for the publish today
+  * started pulling out the ajax stuff and switched the model to use compose to create its new object
+  * added a compose function that composes objects from other objects or constructor functions
