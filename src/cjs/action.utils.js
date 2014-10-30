@@ -30,4 +30,4 @@ var Error =  function(typeIn, messageIn, objectIn, errorObjectIn){
         }
     };
 
-export { Error, clone }
+module.exports = {Error: Error, clone: clone};

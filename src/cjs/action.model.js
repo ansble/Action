@@ -1,5 +1,5 @@
-var eventMe = require('./action.events.es6');
-var utils = require('./action.utils.es6');
+var eventMe = require('./action.events');
+var utils = require('./action.utils');
 
 var modelMe = function(objectIn){
         'use strict';

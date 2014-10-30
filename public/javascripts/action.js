@@ -1,5 +1,3 @@
-//TODO routing and pushstate
-//  view rendering on routing events
 (function(){
     'use strict';
 
