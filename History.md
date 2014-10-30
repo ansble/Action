@@ -1,6 +1,23 @@
-  ##v0.6.0 Antonio Banderas
+## v0.6.1 Antonio Banderas
 
-  ####File Sizes:
+#### File Sizes:
+  
+  * min: 8499kb ↑
+  * full: 29101kb ↓
+
+### Changes
+
+  * bumped rev
+  * added a bower.json file to start getting this thing more consumable by bower
+  * antonio release here we come
+  * Merge branch 'antonio' of https://github.com/designfrontier/Action
+  * corrected the history command
+  * prepping for the publish today
+  * started pulling out the ajax stuff and switched the model to use compose to create its new object
+
+## v0.6.0 Antonio Banderas
+
+#### File Sizes:
   
   * min: 8499kb ↑
   * full: 29101kb ↓
