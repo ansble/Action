@@ -294,10 +294,10 @@
                 };
             }
 
-            returnObject.listen('system:trace', function(emitterIDIn){
+            returnObject.listen('system:trace', function(emitterIdIn){
                 var that = this;
 
-                if(that.emitterId === emitterIDIn){
+                if(that.emitterId === emitterIdIn){
                     that.emit('system:addTraced', that);
                 }
             }, returnObject);
@@ -549,10 +549,11 @@
         , viewMe : function(objectIn){
             var that = this
                 , _stateReady = (typeof objectIn.stateReady === 'function')
-                , newView = that.eventMe(objectIn);
+                , newView = that.modelMe(objectIn);
 
             if(typeof newView.render === 'undefined'){
-                throw 'render is required for a view';
+                that.emit('global:error', new action.Error('required param', 'render() is required for a view', that));
+                return;
             }
 
             if(_stateReady){
@@ -566,14 +567,14 @@
             }
 
             //require event for the data
-            newView.requiredEvent('data:set:' + newView.dataID, function(dataIn){
-                this.viewData = dataIn;
+            newView.requiredEvent('data:set:' + newView.dataId, function(dataIn){
+                this.set(dataIn);
             }, newView, true);
 
             //required event for the template
-            newView.requiredEvent('template:set:' + newView.templateID, function(templateIn){
+            newView.requiredEvent('template:set:' + newView.templateId, function(templateIn){
                 this.template = templateIn;
-            }, newView);
+            }, newView, true);
 
             if(typeof newView.destroy === 'undefined'){
                 newView.destroy = function(){
@@ -581,12 +582,12 @@
                 };
             }
 
-            newView.listen('state:change', function(stateID){
+            newView.listen('state:change', function(stateId){
                 var that = this;
 
-                if(stateID === that.stateEvent || stateID.replace('/', '') === that.stateEvent){
-                    that.emit('template:get', that.templateID);
-                    that.emit('data:get:' + that.dataID);
+                if(stateId === that.stateEvent || stateId.replace('/', '') === that.stateEvent){
+                    that.emit('template:get', that.templateId);
+                    that.emit('data:get:' + that.dataId);
                 }
             }, newView);
 
@@ -699,8 +700,8 @@
     action = action.eventMe(action);
 
     //this is the template manager event system
-    action.listen('template:get', function(templateID){
-        action.emit('template:set:' + templateID, action.templates[templateID]);
+    action.listen('template:get', function(templateId){
+        action.emit('template:set:' + templateId, action.templates[templateId]);
     });
 
     action.listen('system:addTraced', function(objIn){
