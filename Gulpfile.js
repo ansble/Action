@@ -74,7 +74,7 @@ gulp.task('publish', ['generateForPublish'], function(){
 });
 
 gulp.task('test', function (done) {
-  gulp.src(['public/javascripts/action*.js'])
+  gulp.src(['public/javascripts/action*.js', 'src/cjs/*_test.js'])
         .pipe(karma({
             configFile: 'karma.conf.js'
             , action: 'run'
