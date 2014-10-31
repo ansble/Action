@@ -548,20 +548,27 @@
 
         , viewMe : function(objectIn){
             var that = this
+                , _stateReady = (typeof objectIn.stateReady === 'function')
                 , newView = that.eventMe(objectIn);
 
             if(typeof newView.render === 'undefined'){
                 throw 'render is required for a view';
             }
 
-            newView.stateReady = function(){
-                newView.render.apply(newView);
-            };
+            if(_stateReady){
+                newView.super.stateReady = function(){
+                    newView.render.apply(newView);
+                };
+            } else {
+                newView.stateReady = function(){
+                    newView.render.apply(newView);
+                };
+            }
 
             //require event for the data
             newView.requiredEvent('data:set:' + newView.dataID, function(dataIn){
                 this.viewData = dataIn;
-            }, newView);
+            }, newView, true);
 
             //required event for the template
             newView.requiredEvent('template:set:' + newView.templateID, function(templateIn){
