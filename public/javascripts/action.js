@@ -549,10 +549,26 @@
         , viewMe : function(objectIn){
             var that = this
                 , _stateReady = (typeof objectIn.stateReady === 'function')
-                , newView = that.modelMe(objectIn);
+                , newView = that.modelMe(objectIn)
+                , children = {};
 
             if(typeof newView.render === 'undefined'){
                 that.emit('global:error', new action.Error('required param', 'render() is required for a view', that));
+                return;
+            }
+
+            if(typeof newView.templateId === 'undefined'){
+                that.emit('global:error', new action.Error('required param', 'templateId is required for a view', that));
+                return;
+            }
+
+            if(typeof newView.dataId === 'undefined'){
+                that.emit('global:error', new action.Error('required param', 'dataId is required for a view', that));
+                return;
+            }
+
+            if(typeof newView.viewId === 'undefined'){
+                that.emit('global:error', new action.Error('required param', 'viewId is required for a view', that));
                 return;
             }
 
@@ -565,6 +581,12 @@
                     newView.render.apply(newView);
                 };
             }
+
+            newView.super.render = newView.render;
+            newView.render = function(){
+                newView.super.render.apply(newView);
+                newView.emit('rendered:' + newView.viewId);
+            };
 
             //require event for the data
             newView.requiredEvent('data:set:' + newView.dataId, function(dataIn){
@@ -581,6 +603,14 @@
                     //TODO: write this out/figure it out
                 };
             }
+            
+            newView.registerChild = function(eventIn, selectorIn){
+                children[eventIn] = selectorIn;
+            };
+
+            newView.listChildren = function(){
+                return children;
+            };
 
             newView.listen('state:change', function(stateId){
                 var that = this;
