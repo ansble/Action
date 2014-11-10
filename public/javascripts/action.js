@@ -583,9 +583,14 @@
             }
 
             newView.super.render = newView.render;
+
             newView.render = function(){
                 newView.super.render.apply(newView);
                 newView.emit('rendered:' + newView.viewId);
+
+                Object.getOwnPropertyNames(children).forEach(function (childEvent) {
+                    newView.emit(childEvent, children[childEvent]);
+                });
             };
 
             //require event for the data
