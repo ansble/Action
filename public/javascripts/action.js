@@ -515,9 +515,10 @@
                     , oReq = new XMLHttpRequest();
 
                 oReq.onload = function(){
-                            var data = JSON.parse(this.responseText);
+                            var data = JSON.parse(this.responseText),
+                                respStatus = Number(this.status);
 
-                            if(this.status.match(/^[23][0-9][0-9]$/)){
+                            if((200 <= respStatus) && (respStatus < 400)){
                                 that.emit(that.get('dataEvent'), data);
 
                                 if(typeof setVariableName === 'string'){
@@ -529,9 +530,9 @@
                                 if(typeof successFunction === 'function'){
                                     successFunction.apply(that, [data]);
                                 }
-                            }else if(this.status.match(/^[4][0-9][0-9]$/)){
+                            }else if((400 <= respStatus) && (respStatus < 500)){
 
-                            }else if(this.status.match(/^[5][0-9][0-9]$/)){
+                            }else if((500 <= respStatus) && (respStatus < 600)){
                                 that.emit('global:error', new action.Error('http', 'Error in request', that));
                             }
                         };
