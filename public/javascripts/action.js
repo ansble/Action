@@ -584,6 +584,10 @@
 
             newView.super.render = newView.render;
 
+            //TODO: maybe render is no longer required. It defaults to executing the template on the
+            //  data and targeting the element. Instead the template, data and target (or a target elem) 
+            //  events are required.
+
             newView.render = function(){
                 newView.super.render.apply(newView);
                 newView.emit('rendered:' + newView.viewId);
@@ -602,6 +606,12 @@
             newView.requiredEvent('template:set:' + newView.templateId, function(templateIn){
                 this.template = templateIn;
             }, newView, true);
+
+            if(typeof newView.targetId !== 'undefined'){
+                newView.requiredEvent('target:set:' + newView.targetId, function(elementIn){
+                    this.element = elementIn;
+                });
+            }
 
             if(typeof newView.destroy === 'undefined'){
                 newView.destroy = function(){
