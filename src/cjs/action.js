@@ -14,10 +14,14 @@ var eventMe = require('./action.events')
 	});
 
 action.listen('template:get', function(templateID){
+    'use strict';
+
     action.emit('template:set:' + templateID, action.templates[templateID]);
 });
 
 action.listen('global:error', function(errorIn) {
+    'use strict';
+    
     console.group('An Error occured in an object with emitterid: ' + errorIn.createdBy.emitterId);
     console.log('It was a ' + errorIn.type + 'error.');
 

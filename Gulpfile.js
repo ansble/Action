@@ -27,18 +27,25 @@ gulp.task('default', ['localBuild'], function(){
 
 gulp.task('build', function () {
 
-    gulp.src('src/es6/action.shell.js')
-        .pipe(jshint({
-            esnext: true
-        }))
+    // gulp.src('src/es6/action.shell.js')
+    //     .pipe(jshint({
+    //         esnext: true
+    //     }))
+    //     .pipe(jshint.reporter(stylish))
+    //     .pipe(es6Mod({
+    //         moduleName: 'action'
+    //         , 'global': 'action'
+    //         , type: 'amd'
+    //     }))
+    //     // .pipe(concat('action.js'))
+    //     .pipe(gulp.dest('public/javascripts/es6'));
+
+    gulp.src('src/cjs/action.js')
+        .pipe(jshint())
         .pipe(jshint.reporter(stylish))
-        .pipe(es6Mod({
-            moduleName: 'action'
-            , 'global': 'action'
-            , type: 'amd'
-        }))
+        .pipe(browserify())
         // .pipe(concat('action.js'))
-        .pipe(gulp.dest('public/javascripts/es6'));
+        .pipe(gulp.dest('public/javascripts/cjs'));
 });
 
 gulp.task('localBuild', function(){
