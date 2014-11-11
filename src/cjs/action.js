@@ -46,4 +46,8 @@ action.listen('global:error', function(errorIn) {
     // throw errorIn;
 });
 
-module.exports = action;
+if(typeof window !== 'undefined'){
+    window.action = action;
+} else {
+    module.exports = action;
+}

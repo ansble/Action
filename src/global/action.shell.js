@@ -52,5 +52,3 @@ action.listen('global:error', function(errorIn) {
     // action.trace(errorIn.createdBy.emitterId);
     // throw errorIn;
 });
-
-window.action = action;

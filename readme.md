@@ -74,3 +74,17 @@ There are a few dependencies for Action to be a fully useful framework. They are
 ##Changelog
 Can be found in the History.md file... generated with:
 git log `git describe --tags --abbrev=0`..HEAD --pretty=format:"  * %s" > History_temp.md
+
+##Next Version Roadmap
+
+v0.7.0 Adam Baldwin
+
+* break into commonjs components for more encasulated development and generate with brwoserify
+* expand testing
+* rework the view system to be peer updated and more powerful
+* revise routing and write routing tests
+* add a data:change event to compliment data:set and get events
+* more code modernization and updates
+
+v0.8.0 Aaron Kwok
+

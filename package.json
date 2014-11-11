@@ -1,7 +1,7 @@
 {
   "name": "action",
-  "version": "0.6.1",
-  "releaseName": "Antonio Banderas",
+  "version": "0.7.0",
+  "releaseName": "Adam Baldwin",
   "private": true,
   "scripts": {
     "start": "node app.js",
