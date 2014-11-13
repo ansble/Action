@@ -3,7 +3,7 @@ var eventMe = require('./action.events')
     , routeMe = function () {
         'use strict';
 
-        var events = eventMe({})
+        var events = eventMe({});
 
         (function(){
             var that = this
@@ -11,7 +11,7 @@ var eventMe = require('./action.events')
                 , body = document
                 , i = 0;
 
-            body.addEventListener('click', function(e){
+            body.addEventListener('click', function (e) {
                // var location = this.attributes.href.textContent;
                 var elem = e.target
                     , location;

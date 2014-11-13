@@ -79,7 +79,7 @@ git log `git describe --tags --abbrev=0`..HEAD --pretty=format:"  * %s" > Histor
 
 v0.7.0 Adam Baldwin
 
-* break into commonjs components for more encasulated development and generate with brwoserify
+* ~~break into commonjs components for more encasulated development and generate with browserify~~
 * expand testing
 * rework the view system to be peer updated and more powerful
 * revise routing and write routing tests

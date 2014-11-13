@@ -373,11 +373,11 @@ var modelMe = function (objectIn) {
 
     newModel.super = {};
 
-    newModel.get = function(attributeName){
+    newModel.get = function (attributeName) {
         return attributes[attributeName];
     };
 
-    newModel.set = function(attributeName, attributeValue){
+    newModel.set = function (attributeName, attributeValue) {
         var that = this
             , key;
 
@@ -392,7 +392,7 @@ var modelMe = function (objectIn) {
                     if(key !== 'tearDown' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
                         if(typeof attributeValue === 'object'){
                             attributes[attributeName] = (Array.isArray(attributeName[key])) ? [] : {};
-                            action.clone(attributes[attributeName], attributeName[key]);
+                            utils.clone(attributes[attributeName], attributeName[key]);
                         }else{
                             attributes[key] = attributeName[key];
                         }
@@ -412,7 +412,7 @@ var modelMe = function (objectIn) {
             if(attributeName !== 'tearDown' && attributeName !== 'fetch' && attributeName !== 'save'){
                 if(typeof attributeValue === 'object'){
                     attributes[attributeName] = (Array.isArray(attributeValue)) ? [] : {};
-                    action.clone(attributes[attributeName], attributeValue);
+                    utils.clone(attributes[attributeName], attributeValue);
                 }else{
                     attributes[attributeName] = attributeValue;
                 }
@@ -429,15 +429,15 @@ var modelMe = function (objectIn) {
         }
     };
 
-    newModel.flatten = function(){
+    newModel.flatten = function () {
         return attributes;
     };
 
-    newModel.toJSON = function(){
+    newModel.toJSON = function () {
         return JSON.stringify(attributes);
     };
 
-    newModel.fetch = function(setVariableName, successFunction, errorFunction, flushCache){
+    newModel.fetch = function (setVariableName, successFunction, errorFunction, flushCache) {
         var that = this
             , requestUrl = that.url
             , useLocal = that.get('cacheLocal') && action.useLocalCache && !flushCache;
@@ -465,14 +465,14 @@ var modelMe = function (objectIn) {
                 that.ajaxGet(setVariableName, successFunction);
             }
         } else {
-            that.emit('global:error', new action.Error('http', 'No URL defined', that));
+            that.emit('global:error', new utils.Error('http', 'No URL defined', that));
             if(typeof errorFunction === 'function'){
                 errorFunction.apply(that);
             }
         }
     };
 
-    newModel.save = function(){
+    newModel.save = function () {
         //TODO make this talk to a server with the URL
         //TODO make it only mark the saved changes clear
         var that = this
@@ -483,14 +483,14 @@ var modelMe = function (objectIn) {
             , oReq = new XMLHttpRequest();
 
         if(typeof requestUrl !== 'undefined'){
-            oReq.onload = function(){
+            oReq.onload = function () {
                 if(this.status === 200 || this.status === 302){
                     that.clearChanges();
                     that.set(data);
                     that.emit(that.get('dataEvent'), data);
 
                 }else if(this.status === 500 || this.status === 400){
-                    that.emit('global:error', new action.Error('http', 'Error in request', that));
+                    that.emit('global:error', new utils.Error('http', 'Error in request', that));
                 }
             };
 
@@ -499,31 +499,31 @@ var modelMe = function (objectIn) {
             oReq.open(type, requestUrl, true);
             oReq.send();
         } else {
-            action.emit('global:error', new action.Error('http', 'No URL defined', that));
+            that.emit('global:error', new utils.Error('http', 'No URL defined', that));
         }
     }
 
-    newModel.clearChanges = function(){
+    newModel.clearChanges = function () {
         changes = [];
     }
 
-    newModel.getChanges = function(){
+    newModel.getChanges = function () {
         return changes;
     }
 
-    newModel.clear = function(){
+    newModel.clear = function () {
         attributes = {};
     }
 
     newModel.super.tearDownEvents = newModel.tearDown;
 
-    newModel.tearDown = function(){
+    newModel.tearDown = function () {
         var that = this
             , key;
 
         that.super.tearDownEvents.apply(newModel); //this is a little bit messy
         that.clear();
-        Object.getOwnPropertyNames(newModel).forEach(function(key){
+        Object.getOwnPropertyNames(newModel).forEach(function (key) {
             newModel[key] = undefined;
         });
     }
@@ -534,7 +534,7 @@ var modelMe = function (objectIn) {
     }
 
     //iterate over the passed in object and set the values on the returned object
-    Object.getOwnPropertyNames(objectIn).forEach(function(key){
+    Object.getOwnPropertyNames(objectIn).forEach(function (key) {
         if(typeof newModel[key] !== 'undefined'){
             newModel.super[key] = newModel[key];
         }
@@ -542,11 +542,11 @@ var modelMe = function (objectIn) {
         newModel[key] = objectIn[key];
     });
 
-    newModel.listenLocal('attribute:changed', function(nameIn){
+    newModel.listenLocal('attribute:changed', function (nameIn) {
         changes.push(nameIn);
     }, newModel);
 
-    newModel.listen(newModel.get('requestEvent'), function(){
+    newModel.listen(newModel.get('requestEvent'), function () {
         this.fetch();
     }, newModel);
 
@@ -564,7 +564,7 @@ var eventMe = require('./action.events')
     , routeMe = function () {
         'use strict';
 
-        var events = eventMe({})
+        var events = eventMe({});
 
         (function(){
             var that = this
@@ -572,7 +572,7 @@ var eventMe = require('./action.events')
                 , body = document
                 , i = 0;
 
-            body.addEventListener('click', function(e){
+            body.addEventListener('click', function (e) {
                // var location = this.attributes.href.textContent;
                 var elem = e.target
                     , location;
