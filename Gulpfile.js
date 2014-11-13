@@ -17,35 +17,14 @@ var gulp = require('gulp')
 
     , pkg = require('./package.json');
 
-gulp.task('default', ['localBuild'], function(){
-    'use strict';
-
-    gulp.watch(['public/javascripts/app.js', 'public/javascripts/components/**/*.js'], function(){
-        gulp.run('localBuild');
-    });
-});
-
 gulp.task('build', function () {
-
-    // gulp.src('src/es6/action.shell.js')
-    //     .pipe(jshint({
-    //         esnext: true
-    //     }))
-    //     .pipe(jshint.reporter(stylish))
-    //     .pipe(es6Mod({
-    //         moduleName: 'action'
-    //         , 'global': 'action'
-    //         , type: 'amd'
-    //     }))
-    //     // .pipe(concat('action.js'))
-    //     .pipe(gulp.dest('public/javascripts/es6'));
+    'use strict';
 
     gulp.src('src/cjs/action.js')
         .pipe(jshint())
         .pipe(jshint.reporter(stylish))
         .pipe(browserify())
-        // .pipe(concat('action.js'))
-        .pipe(gulp.dest('public/javascripts/cjs'));
+        .pipe(gulp.dest('public/javascripts'));
 });
 
 gulp.task('localBuild', function(){
@@ -60,9 +39,13 @@ gulp.task('localBuild', function(){
 
 gulp.task('generateForPublish', function(){
     'use strict';
+    
     var headerText = '/****************************************\nAction! v' + pkg.version + ' ' + pkg.releaseName + ' \nhttps://github.com/designfrontier/Action \n****************************************/\n';
 
-    gulp.src('public/javascripts/action.js')
+    gulp.src('src/cjs/action.js')
+        .pipe(jshint())
+        .pipe(jshint.reporter(stylish))
+        .pipe(browserify())
         .pipe(header(headerText))
         .pipe(gulp.dest('packages/latest/'))
         .pipe(rename('action-v' + pkg.version + '.js'))
@@ -89,17 +72,5 @@ gulp.task('test', function (done) {
 });
 
 gulp.task('develop', function (done) {
-  gulp.src(['public/javascripts/action*.js', 'src/cjs/*_test.js'])
-        .pipe(karma({
-            configFile: 'karma.conf.js'
-            , action: 'watch'
-        }));
+    gulp.watch(['src/cjs/*.js'], ['build', 'test']);
 });
-
-
-// gulp.task('default', function () {
-//     watch({ glob: ['public/javascripts/app.js', 'public/javascripts/components/**/*.js'], emitOnGlob: false })
-//         .pipe(plumber())
-//         .pipe(concat('app.js'))
-//         .pipe(gulp.dest('public/javascripts/built/js/'));
-// });

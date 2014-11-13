@@ -1,9 +1,10 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
- var eventMe = function(objectIn){
+var eventMe = function (objectIn) {
     'use strict';
 
     var returnObject = objectIn
-        , localEvents = {};
+        , localEvents = {}
+        , myEvents = [];
 
     //set an emitter id for troubleshooting
     returnObject.emitterId = Math.ceil(Math.random() * 10000);
@@ -13,30 +14,28 @@
 
     returnObject.emit = function(eventNameIn, eventDataIn, localFlag){
         var that = this
-            , eventStack
             , functionToCall
-            , i
-            , isLocal = (typeof localFlag !== 'undefined' && localFlag);
-
-        if(isLocal){
-            eventStack = that.eventStore[eventNameIn];
-        } else {
-            eventStack = action.eventStore[eventNameIn];
-        }
+            , eventStack = (typeof localFlag !== 'undefined' && localFlag) ? that.eventStore[eventNameIn] : action.eventStore[eventNameIn];
 
         //emit the event
         if(typeof eventStack !== 'undefined'){
-            for(i = 0; i < eventStack.length; i ++){
-                if(typeof eventStack[i].scope !== 'undefined'){
-                    eventStack[i].call.apply(eventStack[i].scope,[eventDataIn, that.emitterId]);
+            eventStack.forEach(function (listener) {
+                if(typeof listener.scope !== 'undefined'){
+                    listener.call.apply(listener.scope,[eventDataIn, that.emitterId]);
                 }else{
-                    eventStack[i].call(eventDataIn, that.emitterId);
+                    listener.call(eventDataIn, that.emitterId);
                 }
 
-                if(eventStack[i].once){
-                    that.silence(eventNameIn, eventStack[i].call, true, isLocal);
+                if(listener.once){
+                    that.silence({
+                        eventName: eventNameIn
+                        , scope: listener.scope
+                        , handler: listener.call
+                        , once: listener.once
+                        , local: listener.local
+                    });
                 }
-            }
+            });
         }
     };
 
@@ -48,7 +47,6 @@
 
     returnObject.listen = function(eventNameIn, handlerIn, scopeIn, onceIn, localFlagIn){
         var that = this
-            , i
             , newCheck = true
 
             //attribute holders and such
@@ -67,38 +65,39 @@
             eventName = eventNameIn.eventName;
             handler = eventNameIn.handler;
             scope = eventNameIn.scope;
-            once = eventNameIn.once;
-            local = eventNameIn.local;
+            once = (typeof eventNameIn.once !== 'undefined') ? eventNameIn.once : false;
+            local = (typeof eventNameIn.local !== 'undefined') ? eventNameIn.local : false;
         }
 
-        eventStack = (typeof local !== 'undefined' && local) ? that.eventStore[eventNameIn] : action.eventStore[eventNameIn];
+        eventStack = (typeof local !== 'undefined' && local) ? that.eventStore[eventName] : action.eventStore[eventName];
         newEvent = (typeof local !== 'undefined' && local) ? that : action;
 
         if(typeof eventStack !== 'undefined'){
             //already exists check to see if the function is already bound
-
-            for(i = 0; i < eventStack.length; i ++){
-                if(eventStack[i].call === handler && eventStack[i].once === false){
+            eventStack.some(function (listener) {
+                if(listener.call.toString() === handler.toString() && listener.once === false){
                     newCheck = false;
-                    break;
+                    return true;
                 }
-            }
+            });
 
-            if(newCheck && typeof scopeIn !== 'undefined'){
-                    eventStack.push({once: false, call: handler, scope: scope});
+            if(newCheck && typeof scope !== 'undefined'){
+                    eventStack.push({once: once, call: handler, scope: scope, local: local});
             }else if(newCheck){
-                    eventStack.push({once: false, call:handler});
+                    eventStack.push({once: once, call:handler, local: local});
             }
 
         } else {
             //new event
             newEvent.eventStore[eventName] = []; //use an array to store functions
-            if(typeof scopeIn !== 'undefined'){
-                newEvent.eventStore[eventName].push({once: false, call: handler, scope: scope});
+            if(typeof scope !== 'undefined'){
+                newEvent.eventStore[eventName].push({once: once, call: handler, scope: scope, local: local});
             }else{
-                newEvent.eventStore[eventName].push({once: false, call: handler});
+                newEvent.eventStore[eventName].push({once: once, call: handler, local: local});
             }
         }
+
+        myEvents.push({eventName: eventName, once: once, call: handler, scope: scope, local:local});
     };
 
     returnObject.listenLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
@@ -121,51 +120,18 @@
 
     returnObject.listenOnce = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
         //same thing as .listen() but is only triggered once
-        var that = this
-            , i
-            , newCheck = true
-            , eventStack
-            , newEvent
-
-            , eventName = eventNameIn
-            , handler = handlerIn
-            , scope = scopeIn
-            , localFlag = localFlagIn;
+        var that = this;
 
         if(typeof eventNameIn === 'object'){
-            eventName = eventNameIn.eventName;
-            handler = eventNameIn.handler;
-            scope = eventNameIn.scope;
-            localFlag = eventNameIn.local;
-        }
-
-        if(typeof localFlag !== 'undefined' && localFlag){
-            //make it local!
-            eventStack = that.eventStore[eventName];
-            newEvent = that;
+            eventNameIn.once = true;
+            that.listen(eventNameIn);
         }else{
-            eventStack = action.eventStore[eventName];
-            newEvent = action;
-        }
-
-        if(typeof eventStack !== 'undefined'){
-            //already exists check to see if the function is already bound
-
-            for(i = 0; i < eventStack.length; i ++){
-                if(eventStack[i].call === handler && eventStack[i].once === true){
-                    newCheck = false;
-                    break;
-                }
-            }
-
-            if(newCheck){
-                eventStack.push({once:true, call: handler, scope: scope});
-            }
-
-        } else{
-            //new event
-            newEvent.eventStore[eventNameIn] = []; //use an array to store functions
-            newEvent.eventStore[eventNameIn].push({once:true, call: handler, scope: scope});
+            that.listen({
+                eventName: eventNameIn
+                , handler: handlerIn
+                , scope: scopeIn
+                , once: true
+            });
         }
     };
 
@@ -175,22 +141,23 @@
         //same thing as .listen() but is only triggered once
         if(typeof eventNameIn === 'object'){
             eventNameIn.local = true;
-            that.listenLocal(eventNameIn);
+            eventNameIn.once = true;
+            that.listen(eventNameIn);
         }else{
-            that.listenLocal({
+            that.listen({
                 eventName: eventNameIn
                 , handler: handlerIn
                 , scope: scopeIn
                 , local: true
+                , once: true
             });
         }
     };
 
-    returnObject.silence = function(eventNameIn, handlerIn, onceIn, scopeIn, localFlagIn){
+    returnObject.silence = function(eventNameIn, handlerIn, onceIn, localFlagIn, scopeIn){
         //localize variables
         var that = this
             , i
-            , truthy = false
             , eventName = eventNameIn
             , handler = handlerIn
             , once = onceIn
@@ -211,47 +178,34 @@
         store = (typeof localFlag === 'undefined' || !localFlag) ? action : that;
 
         if(typeof store.eventStore[eventName] === 'undefined'){
-            //if there is no event with a name... return nothing
+            //if there is no event with that name... return nothing
             return;
         }
 
-        //there is an event that matches... proceed
-        for(i = 0; i < store.eventStore[eventName].length; i ++){
-            //reset this variable
-            truthy = false;
+        if(typeof handler !== 'undefined'){
+            //there is an event that matches... proceed
+            store.eventStore[eventName] = store.eventStore[eventName].filter(function(listener){
+                var isMatch = !!(handler.toString() === listener.call.toString());
 
-            if(typeof handler !== 'undefined'){
                 //function is passed in
                 if(typeof scope !== 'undefined'){
                     //scope is passed in...
+                    isMatch = !!(isMatch && scope);
+
                     if(typeof once === 'boolean'){
                         // function + scope + once provides the match
-                        truthy = (handler === store.eventStore[eventName][i].call && scope === store.eventStore[eventName][i].scope && once === store.eventStore[eventName][i].once);
-                    } else {
-                        //function + scope provides the match
-                        truthy = (handler === store.eventStore[eventName][i].call && scope === store.eventStore[eventName][i].scope);
+                        isMatch = !!(isMatch && once === listener.once);
                     }
-                } else {
-                    //function + once in for the match
-                    if(typeof once === 'boolean'){
-                        truthy = (handler === store.eventStore[eventName][i].call && store.eventStore[eventName][i].once === once);
-                    } else {
-                        truthy = (handler === store.eventStore[eventName][i].call);
-                    }
+                } else if (typeof once === 'boolean'){
+                    isMatch = !!( isMatch && listener.once === once);
                 }
-            } else {
-                //no function unbind everything by resetting
-                store.eventStore[eventName] = [];
 
-                //and exit
-                break;
-            }
+                return !isMatch;
+            });
 
-            if(truthy){
-                //remove this bad boy
-                store.eventStore[eventName].splice(i,1);
-            }
-
+        } else {
+            //no function unbind everything by resetting
+            store.eventStore[eventName] = [];
         }
     };
 
@@ -276,7 +230,33 @@
     //Event Based state machine
     returnObject.requiredEvent = function(name, callback, context, fireMultipleIn){
         var that = this
-            , stateUpdate;
+
+            , stateUpdate = function(nameIn, stateEventsIn){
+                var name = nameIn
+                    , stateEvents = stateEventsIn;
+
+                return function(){
+                    var truthy = true
+                        , key;
+
+                    if(typeof stateEvents[name] !== 'undefined'){
+                        stateEvents[name] = true;
+
+                        for(key in stateEvents){
+                            truthy = truthy && stateEvents[key];
+                        }
+
+                        if(truthy){
+                            if(!that._triggeredStateReady || that._fireMultiple){
+                                //feels like a little bit of a hack.
+                                //  lets the data finish propogating before triggering the call
+                                setTimeout(that.stateReady.apply(that), 100);
+                                that._triggeredStateReady = true;
+                            }
+                        }
+                    }
+                };
+            };
 
         that._fireMultiple = (typeof fireMultipleIn !== 'undefined') ? fireMultipleIn : false;
 
@@ -291,52 +271,33 @@
 
         that.stateEvents[name] = false;
 
-        stateUpdate = that.stateUpdate(name, that.stateEvents);
-
         that.listen(name, callback, context);
-        that.listen(name, stateUpdate, that);
+        that.listen(name, stateUpdate(name, that.stateEvents), that);
     };
 
-    returnObject.stateUpdate = function(nameIn, stateEventsIn){
-        var name = nameIn
-            , stateEvents = stateEventsIn
-            , that = this;
-
-        return function(){
-            var truthy = true
-                , key;
-
-            if(typeof stateEvents[name] !== 'undefined'){
-                stateEvents[name] = true;
-
-                for(key in stateEvents){
-                    truthy = truthy && stateEvents[key];
-                }
-
-                if(truthy){
-                    if(!that._triggeredStateReady || that._fireMultiple){
-                        //feels like a little bit of a hack.
-                        //  lets the data finish propogating before triggering the call
-                        setTimeout(that.stateReady.apply(that), 100);
-                        that._triggeredStateReady = true;
-                    }
-                }
-            }
-        };
-    };
-
-    returnObject.stateReady = function(){
-        //this is a default action when all required events have been completed.
-        //  needs to be overridden if you want to do something real
-        console.log('ready!');
-    };
-
-    returnObject.listen('system:trace', function(emitterIDIn){
+    returnObject.tearDown = function(){
+        //this needs to destroy the listeners... which is important
         var that = this;
 
-        if(that.emitterId === emitterIDIn){
-            // that.emit('system:addTraced', that);
-            action.traced = that;
+        myEvents.forEach(function(listener){
+            that.silence(listener);
+            action.silence(listener)
+        });
+    };
+
+    if(typeof returnObject.stateReady === 'undefined'){
+        returnObject.stateReady = function(){
+            //this is a default action when all required events have been completed.
+            //  needs to be overridden if you want to do something real
+            console.log('ready!');
+        };
+    }
+
+    returnObject.listen('system:trace', function(emitterIdIn){
+        var that = this;
+
+        if(that.emitterId === emitterIdIn){
+            that.emit('system:addTraced', that);
         }
     }, returnObject);
 
@@ -349,7 +310,6 @@
 };
 
 module.exports = eventMe;
-
 },{}],2:[function(require,module,exports){
 var eventMe = require('./action.events');
 var utils = require('./action.utils');
@@ -717,6 +677,7 @@ var eventMe = require('./action.events')
 	, utils = require('./action.utils')
 	, routeMe = require('./action.route');
 
+//setup the object before we event it to prevent issues with action.eventStore not existing
 window.action = {
 	eventStore: {}
 	, eventMe: eventMe

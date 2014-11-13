@@ -1,4 +1,4 @@
-var Error =  function(typeIn, messageIn, objectIn, errorObjectIn){
+var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
         'use strict';
 
         return {
@@ -10,24 +10,64 @@ var Error =  function(typeIn, messageIn, objectIn, errorObjectIn){
     }
 
     //a clone function
-    , clone =  function(objectIn, cloneMe){
+    , clone =  function (objectIn, cloneMe) {
         'use strict';
-        
-        var key;
 
-        for(key in cloneMe){
-            if(cloneMe.hasOwnProperty(key)){
-                //good to copy this one...
-                if (typeof cloneMe[key] === 'object'){
-                    //set up the object for iteration later
-                    objectIn[key] = (Array.isArray(cloneMe[key])) ? [] : {};
+        var obj = objectIn
+            , clone = cloneMe;
 
-                    action.clone(objectIn[key], cloneMe[key]);
-                }else{
-                    objectIn[key] = cloneMe[key];
-                }
+        if(typeof clone === 'undefined'){
+            clone = objectIn;
+            obj = {};
+        }
+
+        //wipe out any existing parts of the object before the clone
+        Object.getOwnPropertyNames(obj).forEach(function (key) {
+            if(key !== 'length'){
+                obj[key] = undefined;
+            }
+        });
+
+        Object.getOwnPropertyNames(clone).forEach(function (key) {
+            if (typeof clone[key] === 'object'){
+                //set up the object for iteration later
+                obj[key] = (Array.isArray(clone[key])) ? [] : {};
+
+                action.clone(obj[key], clone[key]);
+            }else{
+                obj[key] = clone[key];
+            }
+        });
+
+        return obj;
+    }
+
+    , compose = function () {
+        'use strict';
+
+        var obj = {}
+            , i = 0
+            , currObj = {}
+            , that = this;
+
+        for(i = 0; i < arguments.length; i++){
+            if(typeof arguments[i] === 'object' && !Array.isArray(arguments[i])){
+                currObj = arguments[i];
+
+                Object.getOwnPropertyNames(currObj).forEach(function(property){
+                    if(typeof currObj[property] === 'object'){
+                        obj[property] = that.clone(currObj[property]);
+                    } else {
+                        obj[property] = currObj[property];
+                    }
+                });
+            } else if (typeof arguments[i] === 'function') {
+                //this is a function apply it
+                arguments[i].call(obj, obj);
             }
         }
+
+        return obj;
     };
 
-module.exports = {Error: Error, clone: clone};
+module.exports = {Error: Error, clone: clone, compose: compose};
