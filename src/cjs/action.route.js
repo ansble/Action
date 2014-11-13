@@ -1,35 +1,34 @@
 var eventMe = require('./action.events')
 
-    , routeMe = function(objectIn){
-        var that = this
-            , events = that.eventMe({})
+    , routeMe = function () {
+        'use strict';
 
-            , init = function(){
-                var that = this
-                    , atags = document.querySelectorAll('a')
-                    , body = document
-                    , i = 0;
+        var events = eventMe({})
 
-                body.addEventListener('click', function(e){
-                   // var location = this.attributes.href.textContent;
-                    var elem = e.toElement
-                        , location;
+        (function(){
+            var that = this
+                , atags = document.querySelectorAll('a')
+                , body = document
+                , i = 0;
 
-                    if(elem.tagName.toLowerCase() === 'a'){
-                        location = elem.attributes.href.textContent;
+            body.addEventListener('click', function(e){
+               // var location = this.attributes.href.textContent;
+                var elem = e.target
+                    , location;
 
-                        if(location.match(/http:/)){
-                            return {};
-                        }else{
-                            //emit the state:event
-                            events.emit('state:change', location);
-                            e.preventDefault();
-                        }
+                if(elem.tagName.toLowerCase() === 'a'){
+                    location = elem.attributes.href.textContent;
+
+                    if(location.match(/http:/)){
+                        return {};
+                    }else{
+                        //emit the state:event
+                        events.emit('state:change', location);
+                        e.preventDefault();
                     }
-                });
-            };
-
-            init();
+                }
+            });
+        })();
 
         return {};
     };

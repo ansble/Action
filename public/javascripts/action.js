@@ -561,36 +561,35 @@ module.exports = modelMe;
 },{"./action.ajax":1,"./action.events":2,"./action.utils":5}],4:[function(require,module,exports){
 var eventMe = require('./action.events')
 
-    , routeMe = function(objectIn){
-        var that = this
-            , events = that.eventMe({})
+    , routeMe = function () {
+        'use strict';
 
-            , init = function(){
-                var that = this
-                    , atags = document.querySelectorAll('a')
-                    , body = document
-                    , i = 0;
+        var events = eventMe({})
 
-                body.addEventListener('click', function(e){
-                   // var location = this.attributes.href.textContent;
-                    var elem = e.toElement
-                        , location;
+        (function(){
+            var that = this
+                , atags = document.querySelectorAll('a')
+                , body = document
+                , i = 0;
 
-                    if(elem.tagName.toLowerCase() === 'a'){
-                        location = elem.attributes.href.textContent;
+            body.addEventListener('click', function(e){
+               // var location = this.attributes.href.textContent;
+                var elem = e.target
+                    , location;
 
-                        if(location.match(/http:/)){
-                            return {};
-                        }else{
-                            //emit the state:event
-                            events.emit('state:change', location);
-                            e.preventDefault();
-                        }
+                if(elem.tagName.toLowerCase() === 'a'){
+                    location = elem.attributes.href.textContent;
+
+                    if(location.match(/http:/)){
+                        return {};
+                    }else{
+                        //emit the state:event
+                        events.emit('state:change', location);
+                        e.preventDefault();
                     }
-                });
-            };
-
-            init();
+                }
+            });
+        })();
 
         return {};
     };
@@ -775,7 +774,8 @@ var eventMe = require('./action.events')
 	, viewMe = require('./action.view')
 	, modelMe = require('./action.model')
 	, utils = require('./action.utils')
-	, routeMe = require('./action.route');
+	, routeMe = require('./action.route')
+    , ajaxMe = require('./action.ajax');
 
 //setup the object before we event it to prevent issues with action.eventStore not existing
 window.action = {
@@ -787,6 +787,7 @@ window.action = {
 	, clone: utils.clone
     , compose: utils.compose
 	, Error: utils.Error
+    , ajaxMe: ajaxMe
     , init: function(){
         'use strict';
 
@@ -828,4 +829,4 @@ window.action = {
 
 window.action = eventMe(window.action);
 
-},{"./action.events":2,"./action.model":3,"./action.route":4,"./action.utils":5,"./action.view":6}]},{},[7])
+},{"./action.ajax":1,"./action.events":2,"./action.model":3,"./action.route":4,"./action.utils":5,"./action.view":6}]},{},[7])

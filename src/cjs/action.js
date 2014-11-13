@@ -2,7 +2,8 @@ var eventMe = require('./action.events')
 	, viewMe = require('./action.view')
 	, modelMe = require('./action.model')
 	, utils = require('./action.utils')
-	, routeMe = require('./action.route');
+	, routeMe = require('./action.route')
+    , ajaxMe = require('./action.ajax');
 
 //setup the object before we event it to prevent issues with action.eventStore not existing
 window.action = {
@@ -14,6 +15,7 @@ window.action = {
 	, clone: utils.clone
     , compose: utils.compose
 	, Error: utils.Error
+    , ajaxMe: ajaxMe
     , init: function(){
         'use strict';
 
