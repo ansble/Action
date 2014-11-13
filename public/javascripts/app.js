@@ -1,7 +1,9 @@
 //do some setup for testing
 angLee = action.modelMe({
-    name: 'Ang Lee'
-    , role: 'Director'
+    data: {
+        name: 'Ang Lee'
+        , role: 'Director'
+    }
 
     , init: function(){
         'use strict';
