@@ -86,9 +86,11 @@ var modelMe = require('./action.model')
 
         newView.save = function () {
             var that = this;
-            
-            that.emit('data:changed:' + that.dataId, that.flatten());
-            that.clearChanges();
+            if(that.getChanges().length > 0){
+                //there have been changes to persist
+                that.emit('data:changed:' + that.dataId, that.flatten());
+                that.clearChanges();
+            }
         };
 
         newView.listen('state:change', function(stateId){

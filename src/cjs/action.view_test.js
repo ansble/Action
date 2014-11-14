@@ -101,7 +101,21 @@ describe('The View Module: viewMe', function(){
 		assert.strictEqual(view.renderCnt, 1);
 	});
 
-	it('should emit a data:changed event when save() is called', function () {
+	it('should emit a data:changed event when save() is called if there is a value that has changed', function () {
+		var emitTest = false;
+
+		action.listen('data:changed:bicycle', function(){
+			emitTest = true;
+		});
+
+		view.set('caleb', 'awesome');
+
+		view.save();
+
+		assert.strictEqual(emitTest, true);
+	});
+
+	it('should not emit a data:changed event when save() is called if nothing has changed', function () {
 		var emitTest = false;
 
 		action.listen('data:changed:bicycle', function(){
@@ -110,7 +124,7 @@ describe('The View Module: viewMe', function(){
 
 		view.save();
 
-		assert.strictEqual(emitTest, true);
+		assert.strictEqual(emitTest, false);
 	});
 
 	describe('Parent Views', function(){
