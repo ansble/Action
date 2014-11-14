@@ -50,7 +50,7 @@ var modelMe = require('./action.model')
             newView.emit('rendered:' + newView.viewId);
 
             Object.getOwnPropertyNames(children).forEach(function (childEvent) {
-                newView.emit(childEvent, children[childEvent]);
+                newView.emit(childEvent, document.querySelector(children[childEvent]));
             });
         };
 

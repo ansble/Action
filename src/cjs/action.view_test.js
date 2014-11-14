@@ -19,6 +19,12 @@ describe('The View Module: viewMe', function(){
 			, viewId: 'katie'
 			
 			, render: function(){
+				var elem = document.createElement('p');
+
+				elem.classList.add('view__child');
+
+				document.body.appendChild(elem);
+
 				this.renderCnt++;
 			}
 		});
@@ -130,6 +136,28 @@ describe('The View Module: viewMe', function(){
 	describe('Parent Views', function(){
 		it('should have a function for registering child views', function(){
 			assert.isFunction(view.registerChild);
+		});
+
+		it('should have a function for listing child views', function(){
+			assert.isFunction(view.listChildren);
+		});
+
+		it('should emit an event for each registered child after rendering that contains a dom node', function(){
+			var emitTest = false
+				, dom;
+
+			action.listen('render:katie', function(domElem){
+				emitTest = true;
+				dom = domElem;
+			});
+
+			view.registerChild('render:katie', '.view__child');
+
+			action.emit('data:set:bicycle', {bike: true});
+			action.emit('template:set:tom', function(){});
+
+			assert.strictEqual(emitTest, true);
+			assert.strictEqual(dom.classList.contains('view__child'), true);
 		});
 	});
 });
