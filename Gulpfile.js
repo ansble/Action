@@ -39,8 +39,8 @@ gulp.task('localBuild', function(){
 
 gulp.task('generateForPublish', function(){
     'use strict';
-    
-    var headerText = '/****************************************\nAction! v' + pkg.version + ' ' + pkg.releaseName + ' \nhttps://github.com/designfrontier/Action \n****************************************/\n';
+
+    var headerText = '/****************************************\nAction! v' + pkg.version + ' ' + pkg.releaseName + ' \n' + pkg.quote + '\nhttps://github.com/designfrontier/Action \n****************************************/\n';
 
     gulp.src('src/cjs/action.js')
         .pipe(jshint())
