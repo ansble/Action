@@ -5,31 +5,8 @@
 
 Need data? Ask for it. Need to do something with that data? Listen for when it is sent back to you and do it. Need to watch for the user to do something? Listen for it and react accordingly. `Action!` embraces the asynchronicity that is the world around us to create better front end experiences and code.
 
-##Road Map
-So there are a variety of things that need to be completed for Action! to be ready for primetime. Some of them are basic (getting statemachine working), others are more complex (build tooling for troubleshooting event stacks). I am going to keep them here and make this a living document.
-
-###TODOs before RC
-0. Revise the destroy function to make it really do what it needs to
-0. Figure out how views really work... (https://github.com/twitter/hogan.js)
-
-###TODOs generally
-0. update documentation
-0. example app
-0. make the error output even prettier! https://developers.google.com/chrome-developer-tools/docs/console-api#consoleerrorobject_object
-
-###Done
-0. Tooling for troubleshooting events
-0. Add events into the error handler
-0. state machine support
-0. Add emitter IDs to every time an event gets emitted for debugging work
-0. Clone/ Deep Copy in the set functions
-0. Build out the save function for models
-0. ajax resolution/integration for models
-0. Consider web components (considered... and moved on for now)
-0. simplify model set function?
-0. make the destroy function silence all events registered by the object it is called on
-0. dependency resolution integration with state machines
-0. Figure out the testing side of event driven FED in Action
+###TODOs
+Are now located in the issues section where they are easier to manage and align with milestones.
 
 #### Release Names
 We'll use these folks as release names: http://en.wikipedia.org/wiki/List_of_action_film_actors
@@ -79,12 +56,14 @@ git log `git describe --tags --abbrev=0`..HEAD --pretty=format:"  * %s" > Histor
 
 v0.7.0 Adam Baldwin
 
+A more complete form of this list is availble [here.](https://github.com/designfrontier/Action/milestones/v0.7.0%20Adam%20Baldwin)
+
 * ~~break into commonjs components for more encasulated development and generate with browserify~~
 * expand testing
-* rework the view system to be peer updated and more powerful
+* ~~rework the view system to be peer updated and more powerful~~
 * revise routing and write routing tests
-* add a data:change event to compliment data:set and get events
-* more code modernization and updates
+* ~~add a data:change event to compliment data:set and get events~~
+* more code modernization and updates (whatever gets done in the process of meeting other milestones)
 
 v0.8.0 Aaron Kwok
 
