@@ -75,6 +75,12 @@ describe('The View Module: viewMe', function(){
 		assert.isDefined(console.thrown);
 	});
 
+	it('should throw an error if no stateEvent(s) are passed in');
+
+	it('should allow either a string or an array of strings as values for stateEvent');
+
+	it('should trigger the gets for template and data when a state event it cares about is fired');
+
 	it('should trigger render when all required events are complete', function(){
 
 		action.emit('data:set:bicycle', {bike: true});

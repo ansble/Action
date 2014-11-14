@@ -701,6 +701,10 @@ var modelMe = require('./action.model')
             return;
         }
 
+        //TODO: should require a stateEvent which can be either
+        //  a string or an array of strings containing the event
+        //  or events that this view cares about
+
         if(_stateReady){
             newView.super.stateReady = function(){
                 newView.render.apply(newView);
