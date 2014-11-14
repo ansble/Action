@@ -167,4 +167,3 @@ pip-log.txt
 node_modules/
 
 public/javascripts/built/
-public/javascripts/action.js
