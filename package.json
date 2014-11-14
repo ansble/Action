@@ -2,7 +2,7 @@
   "name": "action",
   "version": "0.7.0",
   "releaseName": "Adam Baldwin",
-  "quote": "He robbed from the rich and he gave to the poor.\nStood up to the man and he gave him what for.\nOur love for him now, ain't hard to explain,\nThe hero of Canton, the man they call Jayne!"
+  "quote": "He robbed from the rich and he gave to the poor.\nStood up to the man and he gave him what for.\nOur love for him now, ain't hard to explain,\nThe hero of Canton, the man they call Jayne!",
   "private": true,
   "scripts": {
     "start": "node app.js",
