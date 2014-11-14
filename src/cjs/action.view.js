@@ -76,7 +76,13 @@ var modelMe = require('./action.model')
 
         if(typeof newView.destroy === 'undefined'){
             newView.destroy = function(){
-                //TODO: write this out/figure it out
+                //deal with events outside the DOM
+                this.tearDown()
+
+                //deal with the DOM
+                this.element.remove();
+
+                //TODO: notify children to tear themselves down
             };
         }
         
