@@ -68,7 +68,8 @@ gulp.task('test', function (done) {
         .pipe(karma({
             configFile: 'karma.conf.js'
             , action: 'run'
-        }));
+        }))
+        .pipe(plumber());
 });
 
 gulp.task('develop', function (done) {

@@ -367,7 +367,7 @@ var modelMe = function (objectIn) {
 
     //this is the module for creating a data model object
     var that = this
-        , newModel = that.compose(eventMe, ajaxMe)
+        , newModel = utils.compose(eventMe, ajaxMe)
         , attributes = {}
         , changes = [];
 
@@ -670,7 +670,7 @@ var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
 
 module.exports = {Error: Error, clone: clone, compose: compose};
 },{}],6:[function(require,module,exports){
-var eventMe = require('./action.events')
+var modelMe = require('./action.model')
     , utils = require('./action.utils')
 
     , viewMe = function (objectIn) {
@@ -678,7 +678,7 @@ var eventMe = require('./action.events')
 
         var that = this
             , _stateReady = (typeof objectIn.stateReady === 'function')
-            , newView = that.modelMe(objectIn)
+            , newView = modelMe(objectIn)
             , children = {};
 
         if(typeof newView.render === 'undefined'){
@@ -756,6 +756,13 @@ var eventMe = require('./action.events')
             return children;
         };
 
+        newView.save = function () {
+            var that = this;
+            
+            that.emit('data:changed:' + that.dataId, that.flatten());
+            that.clearChanges();
+        };
+
         newView.listen('state:change', function(stateId){
             var that = this;
 
@@ -769,7 +776,7 @@ var eventMe = require('./action.events')
     };
 
 module.exports = viewMe;
-},{"./action.events":2,"./action.utils":5}],7:[function(require,module,exports){
+},{"./action.model":3,"./action.utils":5}],7:[function(require,module,exports){
 var eventMe = require('./action.events')
 	, viewMe = require('./action.view')
 	, modelMe = require('./action.model')

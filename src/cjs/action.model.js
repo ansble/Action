@@ -7,7 +7,7 @@ var modelMe = function (objectIn) {
 
     //this is the module for creating a data model object
     var that = this
-        , newModel = that.compose(eventMe, ajaxMe)
+        , newModel = utils.compose(eventMe, ajaxMe)
         , attributes = {}
         , changes = [];
 

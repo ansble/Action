@@ -101,6 +101,18 @@ describe('The View Module: viewMe', function(){
 		assert.strictEqual(view.renderCnt, 1);
 	});
 
+	it('should emit a data:changed event when save() is called', function () {
+		var emitTest = false;
+
+		action.listen('data:changed:bicycle', function(){
+			emitTest = true;
+		});
+
+		view.save();
+
+		assert.strictEqual(emitTest, true);
+	});
+
 	describe('Parent Views', function(){
 		it('should have a function for registering child views', function(){
 			assert.isFunction(view.registerChild);

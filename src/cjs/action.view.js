@@ -1,4 +1,4 @@
-var eventMe = require('./action.events')
+var modelMe = require('./action.model')
     , utils = require('./action.utils')
 
     , viewMe = function (objectIn) {
@@ -6,7 +6,7 @@ var eventMe = require('./action.events')
 
         var that = this
             , _stateReady = (typeof objectIn.stateReady === 'function')
-            , newView = that.modelMe(objectIn)
+            , newView = modelMe(objectIn)
             , children = {};
 
         if(typeof newView.render === 'undefined'){
@@ -82,6 +82,13 @@ var eventMe = require('./action.events')
 
         newView.listChildren = function(){
             return children;
+        };
+
+        newView.save = function () {
+            var that = this;
+            
+            that.emit('data:changed:' + that.dataId, that.flatten());
+            that.clearChanges();
         };
 
         newView.listen('state:change', function(stateId){
