@@ -9,9 +9,6 @@ Need data? Ask for it. Need to do something with that data? Listen for when it i
 So there are a variety of things that need to be completed for Action! to be ready for primetime. Some of them are basic (getting statemachine working), others are more complex (build tooling for troubleshooting event stacks). I am going to keep them here and make this a living document.
 
 ###TODOs before RC
-0. make the destroy function silence all events registered by the object it is called on
-0. dependency resolution integration with state machines
-0. Figure out the testing side of event driven FED in Action
 0. Revise the destroy function to make it really do what it needs to
 0. Figure out how views really work... (https://github.com/twitter/hogan.js)
 
@@ -30,6 +27,9 @@ So there are a variety of things that need to be completed for Action! to be rea
 0. ajax resolution/integration for models
 0. Consider web components (considered... and moved on for now)
 0. simplify model set function?
+0. make the destroy function silence all events registered by the object it is called on
+0. dependency resolution integration with state machines
+0. Figure out the testing side of event driven FED in Action
 
 #### Release Names
 We'll use these folks as release names: http://en.wikipedia.org/wiki/List_of_action_film_actors
@@ -52,7 +52,7 @@ Route events and support for yoru application
 A clone function that copies an object without preserving references
 
 ###action.compose()
-A function for composition with 
+A function for composition with
 
 ###action.Error
 Error constructor prototype
