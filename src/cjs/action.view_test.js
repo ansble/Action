@@ -133,6 +133,8 @@ describe('The View Module: viewMe', function(){
 		assert.strictEqual(emitTest, false);
 	});
 
+	it('should hide itself when a different route triggers');
+
 	describe('Parent Views', function(){
 		it('should have a function for registering child views', function(){
 			assert.isFunction(view.registerChild);

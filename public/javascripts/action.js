@@ -771,6 +771,8 @@ var modelMe = require('./action.model')
             if(stateId === that.stateEvent || stateId.replace('/', '') === that.stateEvent){
                 that.emit('template:get', that.templateId);
                 that.emit('data:get:' + that.dataId);
+            } else if (typeof that.element !== 'undefined' && that.elemtn.style.display !== 'none') {
+                that.element.style.display = 'none';
             }
         }, newView);
 
