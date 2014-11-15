@@ -7,7 +7,7 @@ var modelMe = require('./action.model')
         var that = this
             , _stateReady = (typeof objectIn.stateReady === 'function')
             , newView = modelMe(objectIn)
-            , children = {};
+            , children = [];
 
         if(typeof newView.render === 'undefined'){
             that.emit('global:error', new utils.Error('required param', 'render() is required for a view', that));
@@ -53,8 +53,8 @@ var modelMe = require('./action.model')
             newView.super.render.apply(newView);
             newView.emit('rendered:' + newView.viewId);
 
-            Object.getOwnPropertyNames(children).forEach(function (childEvent) {
-                newView.emit(childEvent, document.querySelector(children[childEvent]));
+            children.forEach(function (child) {
+                newView.emit('target:set:' + child.viewId, document.querySelector(child.selector));
             });
         };
 
@@ -68,10 +68,14 @@ var modelMe = require('./action.model')
             this.template = templateIn;
         }, newView, true);
 
-        if(typeof newView.targetId !== 'undefined'){
-            newView.requiredEvent('target:set:' + newView.targetId, function(elementIn){
+        if(newView.getElement){
+            newView.requiredEvent('target:set:' + newView.viewId, function(elementIn){
                 this.element = elementIn;
             });
+
+            newView.listen('destroy:' + newView.viewId, function(){
+                this.destroy();
+            }, newView);
         }
 
         if(typeof newView.destroy === 'undefined'){
@@ -79,15 +83,21 @@ var modelMe = require('./action.model')
                 //deal with events outside the DOM
                 this.tearDown()
 
+                //notify children to tear themselves down
+                children.forEach(function (child) {
+                    this.emit('destroy:' + child.viewId);
+                });
+
                 //deal with the DOM
                 this.element.remove();
-
-                //TODO: notify children to tear themselves down
             };
         }
         
-        newView.registerChild = function(eventIn, selectorIn){
-            children[eventIn] = selectorIn;
+        newView.registerChild = function(viewIdIn, selectorIn){
+            children.push({
+                selector: selectorIn
+                , viewId: viewIdIn
+            });
         };
 
         newView.listChildren = function(){
