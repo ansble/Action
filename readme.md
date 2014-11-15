@@ -37,6 +37,8 @@ Error constructor prototype
 ###action.viewMe()
 The view constructor function for view objects... more to come
 
+If you want the view to act as a child, or receive its target element through an event you need to set the `getElement` attribute to true. This enables teardown of children and sets up the listener for the `target:set` event for the particular view you are dealing with.
+
 ###Browser Support
 0. IE 9+
 0. Chrome

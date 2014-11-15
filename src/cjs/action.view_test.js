@@ -17,7 +17,7 @@ describe('The View Module: viewMe', function(){
 			, templateId: 'tom'
 			, dataId: 'bicycle'
 			, viewId: 'katie'
-			
+
 			, render: function(){
 				var elem = document.createElement('p');
 
@@ -150,17 +150,35 @@ describe('The View Module: viewMe', function(){
 
 		it('should emit an event for each registered child after rendering that contains a dom node', function(){
 			var emitTest = false
-				, dom;
+				, dom
+				, view = action.viewMe({
+					renderCnt: 0
+					, templateId: 'tom'
+					, dataId: 'bicycle'
+					, viewId: 'katie'
+					, getElement: true
+					
+					, render: function(){
+						var elem = document.createElement('p');
 
-			action.listen('render:katie', function(domElem){
+						elem.classList.add('view__child');
+
+						document.body.appendChild(elem);
+
+						this.renderCnt++;
+					}
+				});
+
+			action.listen('target:set:travis', function(domElem){
 				emitTest = true;
 				dom = domElem;
 			});
 
-			view.registerChild('render:katie', '.view__child');
+			view.registerChild('travis', '.view__child');
 
 			action.emit('data:set:bicycle', {bike: true});
 			action.emit('template:set:tom', function(){});
+			action.emit('target:set:katie', document.querySelector('body'));
 
 			assert.strictEqual(emitTest, true);
 			assert.strictEqual(dom.classList.contains('view__child'), true);
