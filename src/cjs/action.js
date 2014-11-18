@@ -21,7 +21,7 @@ window.action = {
 
         this.listen('template:get', function(templateID){
             this.emit('template:set:' + templateID, this.templates[templateID]);
-        });
+        }, this);
 
         this.listen('global:error', function(errorIn) {
             
@@ -51,7 +51,7 @@ window.action = {
             console.groupEnd();
             // this.trace(errorIn.createdBy.emitterId);
             // throw errorIn;
-        });
+        }, this);
     }
 };
 

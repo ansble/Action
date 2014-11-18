@@ -27,7 +27,7 @@ gulp.task('build', function () {
         .pipe(gulp.dest('public/javascripts'));
 });
 
-gulp.task('localBuild', function(){
+gulp.task('exampleBuild', function(){
     'use strict';
 
     gulp.src(['public/javascripts/app.js', './public/javascripts/components/**/*.js','!./public/javascripts/components/**/*_test.js'])
@@ -37,15 +37,15 @@ gulp.task('localBuild', function(){
         .pipe(gulp.dest('public/javascripts/built/'));
 });
 
-gulp.task('generateForPublish', function(){
+gulp.task('generateForPublish', ['build'], function(){
     'use strict';
 
     var headerText = '/****************************************\nAction! v' + pkg.version + ' ' + pkg.releaseName + ' \n' + pkg.quote + '\nhttps://github.com/designfrontier/Action \n****************************************/\n';
 
-    gulp.src('src/cjs/action.js')
-        .pipe(jshint())
-        .pipe(jshint.reporter(stylish))
-        .pipe(browserify())
+    gulp.src('public/javascripts/action.js')
+        // .pipe(jshint())
+        // .pipe(jshint.reporter(stylish))
+        // .pipe(browserify())
         .pipe(header(headerText))
         .pipe(gulp.dest('packages/latest/'))
         .pipe(rename('action-v' + pkg.version + '.js'))
