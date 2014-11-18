@@ -43,9 +43,6 @@ gulp.task('generateForPublish', ['build'], function(){
     var headerText = '/****************************************\nAction! v' + pkg.version + ' ' + pkg.releaseName + ' \n' + pkg.quote + '\nhttps://github.com/designfrontier/Action \n****************************************/\n';
 
     gulp.src('public/javascripts/action.js')
-        // .pipe(jshint())
-        // .pipe(jshint.reporter(stylish))
-        // .pipe(browserify())
         .pipe(header(headerText))
         .pipe(gulp.dest('packages/latest/'))
         .pipe(rename('action-v' + pkg.version + '.js'))

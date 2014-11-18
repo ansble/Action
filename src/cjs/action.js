@@ -19,11 +19,13 @@ window.action = {
     , init: function(){
         'use strict';
 
-        this.listen('template:get', function(templateID){
-            this.emit('template:set:' + templateID, this.templates[templateID]);
-        }, this);
+        var that = this;
 
-        this.listen('global:error', function(errorIn) {
+        that.listen('template:get', function(templateID){
+            that.emit('template:set:' + templateID, that.templates[templateID]);
+        }, that);
+
+        that.listen('global:error', function(errorIn) {
             
             console.group('An Error occured in an object with emitterid: ' + errorIn.createdBy.emitterId);
             console.log('It was a ' + errorIn.type + 'error.');
@@ -51,7 +53,7 @@ window.action = {
             console.groupEnd();
             // this.trace(errorIn.createdBy.emitterId);
             // throw errorIn;
-        }, this);
+        }, that);
     }
 };
 
