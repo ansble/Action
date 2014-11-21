@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Action by designfrontier</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Action</h1>
+          <h2>Action! framework</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/designfrontier/Action/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/designfrontier/Action/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/designfrontier/Action" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a id="action" class="anchor" href="#action" aria-hidden="true"><span class="octicon octicon-link"></span></a>Action!</h1>
+
+<p><img src="https://travis-ci.org/designfrontier/Action.svg" alt="build status"></p>
+
+<p><code>Action!</code> is a front end sub/pub based framework for event based development. No more passing around dependencies, no more worrying about timing. Events free you to build apps that function they way the real world does: cause and effect.</p>
+
+<p>Need data? Ask for it. Need to do something with that data? Listen for when it is sent back to you and do it. Need to watch for the user to do something? Listen for it and react accordingly. <code>Action!</code> embraces the asynchronicity that is the world around us to create better front end experiences and code.</p>
+
+<h2>
+<a id="road-map" class="anchor" href="#road-map" aria-hidden="true"><span class="octicon octicon-link"></span></a>Road Map</h2>
+
+<p>So there are a variety of things that need to be completed for Action! to be ready for primetime. Some of them are basic (getting statemachine working), others are more complex (build tooling for troubleshooting event stacks). I am going to keep them here and make this a living document.</p>
+
+<h3>
+<a id="todos-before-rc" class="anchor" href="#todos-before-rc" aria-hidden="true"><span class="octicon octicon-link"></span></a>TODOs before RC</h3>
+
+<ol>
+<li>make the destroy function silence all events registered by the object it is called on</li>
+<li>dependency resolution integration with state machines</li>
+<li>Figure out the testing side of event driven FED in Action</li>
+<li>Revise the destroy function to make it really do what it needs to</li>
+<li>Figure out how views really work... (<a href="https://github.com/twitter/hogan.js">https://github.com/twitter/hogan.js</a>)</li>
+</ol>
+
+<h3>
+<a id="todos-generally" class="anchor" href="#todos-generally" aria-hidden="true"><span class="octicon octicon-link"></span></a>TODOs generally</h3>
+
+<ol>
+<li>update documentation</li>
+<li>example app</li>
+<li>make the error output even prettier! <a href="https://developers.google.com/chrome-developer-tools/docs/console-api#consoleerrorobject_object">https://developers.google.com/chrome-developer-tools/docs/console-api#consoleerrorobject_object</a>
+</li>
+</ol>
+
+<h3>
+<a id="done" class="anchor" href="#done" aria-hidden="true"><span class="octicon octicon-link"></span></a>Done</h3>
+
+<ol>
+<li>Tooling for troubleshooting events</li>
+<li>Add events into the error handler</li>
+<li>state machine support</li>
+<li>Add emitter IDs to every time an event gets emitted for debugging work</li>
+<li>Clone/ Deep Copy in the set functions</li>
+<li>Build out the save function for models</li>
+<li>ajax resolution/integration for models</li>
+<li>Consider web components (considered... and moved on for now)</li>
+<li>simplify model set function?</li>
+</ol>
+
+<h4>
+<a id="release-names" class="anchor" href="#release-names" aria-hidden="true"><span class="octicon octicon-link"></span></a>Release Names</h4>
+
+<p>We'll use these folks as release names: <a href="http://en.wikipedia.org/wiki/List_of_action_film_actors">http://en.wikipedia.org/wiki/List_of_action_film_actors</a></p>
+
+<p>in order from top left - down the column then on to the next column. If we run out we'll add more names to the list :-)</p>
+
+<h2>
+<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h2>
+
+<p>This is really really loose and rudimentary, but it is now here. It will expand out over time. If you want more details about the API the tests, and code is probably your best bet.</p>
+
+<h3>
+<a id="actioneventme" class="anchor" href="#actioneventme" aria-hidden="true"><span class="octicon octicon-link"></span></a>action.eventMe()</h3>
+
+<p>This is a functional constructor that adds events to an object. It provides a global, and local, listener and emitter.</p>
+
+<h3>
+<a id="actionmodelme" class="anchor" href="#actionmodelme" aria-hidden="true"><span class="octicon octicon-link"></span></a>action.modelMe()</h3>
+
+<p>This is a functional constructor that creates a model object with private attributes (accessible through get() and set()), events, ajax, etc.</p>
+
+<h3>
+<a id="actionrouteme" class="anchor" href="#actionrouteme" aria-hidden="true"><span class="octicon octicon-link"></span></a>action.routeMe()</h3>
+
+<p>Route events and support for yoru application</p>
+
+<h3>
+<a id="actionclone" class="anchor" href="#actionclone" aria-hidden="true"><span class="octicon octicon-link"></span></a>action.clone()</h3>
+
+<p>A clone function that copies an object without preserving references</p>
+
+<h3>
+<a id="actioncompose" class="anchor" href="#actioncompose" aria-hidden="true"><span class="octicon octicon-link"></span></a>action.compose()</h3>
+
+<p>A function for composition with </p>
+
+<h3>
+<a id="actionerror" class="anchor" href="#actionerror" aria-hidden="true"><span class="octicon octicon-link"></span></a>action.Error</h3>
+
+<p>Error constructor prototype</p>
+
+<h3>
+<a id="actionviewme" class="anchor" href="#actionviewme" aria-hidden="true"><span class="octicon octicon-link"></span></a>action.viewMe()</h3>
+
+<p>The view constructor function for view objects... more to come</p>
+
+<h3>
+<a id="browser-support" class="anchor" href="#browser-support" aria-hidden="true"><span class="octicon octicon-link"></span></a>Browser Support</h3>
+
+<ol>
+<li>IE 9+</li>
+<li>Chrome</li>
+<li>Firefox</li>
+<li>Opera?</li>
+</ol>
+
+<h3>
+<a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dependencies</h3>
+
+<p>There are a few dependencies for Action to be a fully useful framework. They are (with the reasons for them):
+0. localForage (If you want to use the local cache. It will automatically cache all of your ajax GET requests in local storage and pull from them all subsequent times they are requested)
+0. Handlebars, or compatible (a templating library)</p>
+
+<h2>
+<a id="changelog" class="anchor" href="#changelog" aria-hidden="true"><span class="octicon octicon-link"></span></a>Changelog</h2>
+
+<p>Can be found in the History.md file... generated with:
+git log <code>git describe --tags --abbrev=0</code>..HEAD --pretty=format:"  * %s" &gt; History_temp.md</p>
+
+<h2>
+<a id="next-version-roadmap" class="anchor" href="#next-version-roadmap" aria-hidden="true"><span class="octicon octicon-link"></span></a>Next Version Roadmap</h2>
+
+<p>v0.7.0 Adam Baldwin</p>
+
+<ul>
+<li>break into commonjs components for more encasulated development and generate with brwoserify</li>
+<li>expand testing</li>
+<li>rework the view system to be peer updated and more powerful</li>
+<li>revise routing and write routing tests</li>
+<li>add a data:change event to compliment data:set and get events</li>
+<li>more code modernization and updates</li>
+</ul>
+
+<p>v0.8.0 Aaron Kwok</p>
+        </section>
+
+        <footer>
+          Action is maintained by <a href="https://github.com/designfrontier">designfrontier</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
