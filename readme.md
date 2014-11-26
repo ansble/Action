@@ -1,5 +1,6 @@
 #Action!
 ![build status](https://travis-ci.org/designfrontier/Action.svg)
+[![Bower version](https://badge.fury.io/bo/actionjs.svg)](http://badge.fury.io/bo/actionjs)
 
 `Action!` is a front end sub/pub based framework for event based development. No more passing around dependencies, no more worrying about timing. Events free you to build apps that function they way the real world does: cause and effect.
 
