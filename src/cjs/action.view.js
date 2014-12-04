@@ -5,9 +5,17 @@ var modelMe = require('./action.model')
         'use strict';
 
         var that = this
-            , _stateReady = (typeof objectIn.stateReady === 'function')
+            , stateReady = (typeof objectIn.stateReady === 'function')
             , newView = modelMe(objectIn)
-            , children = [];
+            , children = []
+
+            , isMyState = function (stateId) {
+                var chk = newView.myStateEvents.filter(function(evnt){
+                    return evnt === stateId;
+                });
+
+                return (chk.length > 0);
+            };
 
         if(typeof newView.render === 'undefined'){
             that.emit('global:error', new utils.Error('required param', 'render() is required for a view', that));
@@ -29,11 +37,20 @@ var modelMe = require('./action.model')
             return;
         }
 
+        if(typeof newView.myStateEvents !== 'string' && !Array.isArray(newView.myStateEvents)){
+            that.emit('global:error', new utils.Error('required param', 'myStateEvents is required for a view and must be an array', that));
+            return;
+        }
+
+        if(typeof newView.myStateEvents === 'string'){
+            newView.myStateEvents = [newView.myStateEvents];
+        }
+
         //TODO: should require a stateEvent which can be either
         //  a string or an array of strings containing the event
         //  or events that this view cares about
 
-        if(_stateReady){
+        if(stateReady){
             newView.super.stateReady = function(){
                 newView.render.apply(newView);
             };
@@ -46,7 +63,7 @@ var modelMe = require('./action.model')
         newView.super.render = newView.render;
 
         //TODO: maybe render is no longer required. It defaults to executing the template on the
-        //  data and targeting the element. Instead the template, data and target (or a target elem) 
+        //  data and targeting the element. Instead the template, data and target (or a target elem)
         //  events are required.
 
         newView.render = function(){
@@ -92,7 +109,7 @@ var modelMe = require('./action.model')
                 this.element.remove();
             };
         }
-        
+
         newView.registerChild = function(viewIdIn, selectorIn){
             children.push({
                 selector: selectorIn

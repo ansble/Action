@@ -246,26 +246,26 @@ var eventMe = function (objectIn) {
                         }
 
                         if(truthy){
-                            if(!that._triggeredStateReady || that._fireMultiple){
+                            if(!that.triggeredStateReady || that.fireMultiple){
                                 //feels like a little bit of a hack.
                                 //  lets the data finish propogating before triggering the call
                                 setTimeout(that.stateReady.apply(that), 100);
-                                that._triggeredStateReady = true;
+                                that.triggeredStateReady = true;
                             }
                         }
                     }
                 };
             };
 
-        that._fireMultiple = (typeof fireMultipleIn !== 'undefined') ? fireMultipleIn : false;
+        that.fireMultiple = (typeof fireMultipleIn !== 'undefined') ? fireMultipleIn : false;
 
         //init some hidden storage if needed
         if(typeof that.stateEvents === 'undefined'){
             that.stateEvents = {};
         }
 
-        if(typeof that._triggeredStateReady === 'undefined'){
-            that._triggeredStateReady = false;
+        if(typeof that.triggeredStateReady === 'undefined'){
+            that.triggeredStateReady = false;
         }
 
         that.stateEvents[name] = false;

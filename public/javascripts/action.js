@@ -294,26 +294,26 @@ var eventMe = function (objectIn) {
                         }
 
                         if(truthy){
-                            if(!that._triggeredStateReady || that._fireMultiple){
+                            if(!that.triggeredStateReady || that.fireMultiple){
                                 //feels like a little bit of a hack.
                                 //  lets the data finish propogating before triggering the call
                                 setTimeout(that.stateReady.apply(that), 100);
-                                that._triggeredStateReady = true;
+                                that.triggeredStateReady = true;
                             }
                         }
                     }
                 };
             };
 
-        that._fireMultiple = (typeof fireMultipleIn !== 'undefined') ? fireMultipleIn : false;
+        that.fireMultiple = (typeof fireMultipleIn !== 'undefined') ? fireMultipleIn : false;
 
         //init some hidden storage if needed
         if(typeof that.stateEvents === 'undefined'){
             that.stateEvents = {};
         }
 
-        if(typeof that._triggeredStateReady === 'undefined'){
-            that._triggeredStateReady = false;
+        if(typeof that.triggeredStateReady === 'undefined'){
+            that.triggeredStateReady = false;
         }
 
         that.stateEvents[name] = false;
@@ -357,6 +357,7 @@ var eventMe = function (objectIn) {
 };
 
 module.exports = eventMe;
+
 },{}],3:[function(require,module,exports){
 var eventMe = require('./action.events')
     , utils = require('./action.utils')
@@ -677,7 +678,7 @@ var modelMe = require('./action.model')
         'use strict';
 
         var that = this
-            , _stateReady = (typeof objectIn.stateReady === 'function')
+            , stateReady = (typeof objectIn.stateReady === 'function')
             , newView = modelMe(objectIn)
             , children = [];
 
@@ -705,7 +706,7 @@ var modelMe = require('./action.model')
         //  a string or an array of strings containing the event
         //  or events that this view cares about
 
-        if(_stateReady){
+        if(stateReady){
             newView.super.stateReady = function(){
                 newView.render.apply(newView);
             };
@@ -718,7 +719,7 @@ var modelMe = require('./action.model')
         newView.super.render = newView.render;
 
         //TODO: maybe render is no longer required. It defaults to executing the template on the
-        //  data and targeting the element. Instead the template, data and target (or a target elem) 
+        //  data and targeting the element. Instead the template, data and target (or a target elem)
         //  events are required.
 
         newView.render = function(){
@@ -764,7 +765,7 @@ var modelMe = require('./action.model')
                 this.element.remove();
             };
         }
-        
+
         newView.registerChild = function(viewIdIn, selectorIn){
             children.push({
                 selector: selectorIn
@@ -800,6 +801,7 @@ var modelMe = require('./action.model')
     };
 
 module.exports = viewMe;
+
 },{"./action.model":3,"./action.utils":5}],7:[function(require,module,exports){
 var eventMe = require('./action.events')
 	, viewMe = require('./action.view')

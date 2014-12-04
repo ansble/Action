@@ -103,7 +103,7 @@ describe('The Event Module: eventMe', function(){
 
 		assert.strictEqual(evnt.event1, true);
 		assert.strictEqual(evnt.event2, true);
-		assert.strictEqual(evnt._triggeredStateReady, true);
+		assert.strictEqual(evnt.triggeredStateReady, true);
 		assert.strictEqual(evnt.something, 'Ready!');
 	});
 
