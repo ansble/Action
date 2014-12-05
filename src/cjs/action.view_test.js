@@ -1,7 +1,7 @@
 var assert = chai.assert;
 
 describe('The View Module: viewMe', function(){
-	
+
 	beforeEach(function(){
 		console = {
 			log: function(stuff){
@@ -17,6 +17,7 @@ describe('The View Module: viewMe', function(){
 			, templateId: 'tom'
 			, dataId: 'bicycle'
 			, viewId: 'katie'
+            , stateEvents: 'route:daniel'
 
 			, render: function(){
 				var elem = document.createElement('p');
@@ -28,12 +29,32 @@ describe('The View Module: viewMe', function(){
 				this.renderCnt++;
 			}
 		});
+
+        view2 = action.viewMe({
+            renderCnt: 0
+            , templateId: 'tom'
+            , dataId: 'bicycle'
+            , viewId: 'katie'
+            , stateEvents: ['route:daniel', 'route:katie']
+
+            , render: function(){
+                var elem = document.createElement('p');
+
+                elem.classList.add('view__child');
+
+                document.body.appendChild(elem);
+
+                this.renderCnt++;
+            }
+        });
+
+        action.templates = {'tom': {}};
 	});
 
 	it('should be defined', function(){
 		assert.isDefined(action.viewMe);
 		assert.isFunction(action.viewMe);
-	});	
+	});
 
 	it('should throw an error if no render function is passed in', function(){
 		action.viewMe({
@@ -75,9 +96,38 @@ describe('The View Module: viewMe', function(){
 		assert.isDefined(console.thrown);
 	});
 
-	it('should allow either a string or an array of strings as values for stateEvent');
+    it('should throw an error if no stateEvent is passed in', function(){
+        action.viewMe({
+            render: function(){}
+            , dataId: 'sam'
+            , templateId: 'roger'
+        });
 
-	it('should trigger the gets for template and data when a state event it cares about is fired');
+        assert.isDefined(console.thrown);
+    });
+
+	it('should allow either a string or an array of strings as values for stateEvent', function(){
+        assert.isArray(view.stateEvents);
+        assert.isArray(view2.stateEvents);
+    });
+
+	it('should trigger the gets for template and data when a state event it cares about is fired', function(){
+        var testCnt = 0;
+
+        action.listen('data:get:bicycle', function(){
+            testCnt++;
+        });
+
+        action.listen('template:get', function(id){
+            if (id === 'tom') {
+                testCnt++;
+            }
+        });
+
+        action.emit('state:change', 'route:daniel');
+
+        assert.strictEqual(testCnt > 4, true);
+    });
 
 	it('should trigger render when all required events are complete', function(){
 
@@ -157,7 +207,7 @@ describe('The View Module: viewMe', function(){
 					, dataId: 'bicycle'
 					, viewId: 'katie'
 					, getElement: true
-					
+
 					, render: function(){
 						var elem = document.createElement('p');
 

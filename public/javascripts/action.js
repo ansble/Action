@@ -680,7 +680,15 @@ var modelMe = require('./action.model')
         var that = this
             , stateReady = (typeof objectIn.stateReady === 'function')
             , newView = modelMe(objectIn)
-            , children = [];
+            , children = []
+
+            , isMyState = function (stateId) {
+                var chk = newView.stateEvents.filter(function(evnt){
+                    return evnt === stateId || evnt === stateId.replace('/', '');
+                });
+
+                return (chk.length > 0);
+            };
 
         if(typeof newView.render === 'undefined'){
             that.emit('global:error', new utils.Error('required param', 'render() is required for a view', that));
@@ -700,6 +708,16 @@ var modelMe = require('./action.model')
         if(typeof newView.viewId === 'undefined'){
             that.emit('global:error', new utils.Error('required param', 'viewId is required for a view', that));
             return;
+        }
+
+        if(typeof newView.stateEvents !== 'string' && !Array.isArray(newView.stateEvents)){
+            that.emit('global:error', new utils.Error('required param', 'stateEvents is required for a view and must be an array', that));
+            return;
+        }
+
+        //make sure that stateEvents is an array
+        if(typeof newView.stateEvents === 'string'){
+            newView.stateEvents = [newView.stateEvents];
         }
 
         //TODO: should require a stateEvent which can be either
@@ -789,10 +807,10 @@ var modelMe = require('./action.model')
         newView.listen('state:change', function(stateId){
             var that = this;
 
-            if(stateId === that.stateEvent || stateId.replace('/', '') === that.stateEvent){
+            if(isMyState(stateId)){
                 that.emit('template:get', that.templateId);
                 that.emit('data:get:' + that.dataId);
-            } else if (typeof that.element !== 'undefined' && that.elemtn.style.display !== 'none') {
+            } else if (typeof that.element !== 'undefined' && that.element.style.display !== 'none') {
                 that.element.style.display = 'none';
             }
         }, newView);
