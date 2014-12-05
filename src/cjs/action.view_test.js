@@ -202,24 +202,7 @@ describe('The View Module: viewMe', function(){
 
 		it('should emit an event for each registered child after rendering that contains a dom node', function(){
 			var emitTest = false
-				, dom
-				, view = action.viewMe({
-					renderCnt: 0
-					, templateId: 'tom'
-					, dataId: 'bicycle'
-					, viewId: 'katie'
-					, getElement: true
-
-					, render: function(){
-						var elem = document.createElement('p');
-
-						elem.classList.add('view__child');
-
-						document.body.appendChild(elem);
-
-						this.renderCnt++;
-					}
-				});
+				, dom;
 
 			action.listen('target:set:travis', function(domElem){
 				emitTest = true;
