@@ -23,6 +23,7 @@ describe('The View Module: viewMe', function(){
 				var elem = document.createElement('p');
 
 				elem.classList.add('view__child');
+                elem.classList.add('view__first');
 
 				document.body.appendChild(elem);
 
@@ -41,6 +42,7 @@ describe('The View Module: viewMe', function(){
                 var elem = document.createElement('p');
 
                 elem.classList.add('view__child');
+                elem.classList.add('view__second');
 
                 document.body.appendChild(elem);
 
