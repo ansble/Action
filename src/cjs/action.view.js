@@ -132,13 +132,11 @@ var modelMe = require('./action.model')
         };
 
         newView.listen('state:change', function(stateId){
-            var that = this;
-
             if(isMyState(stateId)){
-                that.emit('template:get', that.templateId);
-                that.emit('data:get:' + that.dataId);
-            } else if (typeof that.element !== 'undefined' && that.element.style.display !== 'none') {
-                that.element.style.display = 'none';
+                newView.emit('template:get', newView.templateId);
+                newView.emit('data:get:' + newView.dataId);
+            } else if (typeof newView.element !== 'undefined' && newView.element.style.display !== 'none') {
+                newView.element.style.display = 'none';
             }
         }, newView);
 

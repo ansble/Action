@@ -18,14 +18,15 @@ describe('The View Module: viewMe', function(){
 			, dataId: 'bicycle'
 			, viewId: 'katie'
             , stateEvents: 'route:daniel'
+            , element: {}
 
 			, render: function(){
-				var elem = document.createElement('p');
+				this.element = document.createElement('p');
 
-				elem.classList.add('view__child');
-                elem.classList.add('view__first');
+				this.element.classList.add('view__child');
+                this.element.classList.add('view__first');
 
-				document.body.appendChild(elem);
+				document.body.appendChild(this.element);
 
 				this.renderCnt++;
 			}
@@ -39,12 +40,12 @@ describe('The View Module: viewMe', function(){
             , stateEvents: ['route:daniel', 'route:katie']
 
             , render: function(){
-                var elem = document.createElement('p');
+                this.element = document.createElement('p');
 
-                elem.classList.add('view__child');
-                elem.classList.add('view__second');
+                this.element.classList.add('view__child');
+                this.element.classList.add('view__second');
 
-                document.body.appendChild(elem);
+                document.body.appendChild(this.element);
 
                 this.renderCnt++;
             }
@@ -189,7 +190,14 @@ describe('The View Module: viewMe', function(){
 		assert.strictEqual(emitTest, false);
 	});
 
-	it('should hide itself when a different route triggers');
+	it('should hide itself when a different route triggers', function(){
+
+        action.emit('state:change', 'route:daniel');
+        action.emit('state:change', 'route:katie');
+
+        assert.isDefined(view.element);
+        assert.strictEqual(view.element.style, 'none');
+    });
 
 	describe('Parent Views', function(){
 		it('should have a function for registering child views', function(){
@@ -218,5 +226,7 @@ describe('The View Module: viewMe', function(){
 			assert.strictEqual(emitTest, true);
 			assert.strictEqual(dom.classList.contains('view__child'), true);
 		});
+
+        it('should emit an event that tells its children to destroy themselves');
 	});
 });
