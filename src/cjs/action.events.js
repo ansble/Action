@@ -245,13 +245,11 @@ var eventMe = function (objectIn) {
                             truthy = truthy && stateEvents[key];
                         }
 
-                        if(truthy){
-                            if(!that.triggeredStateReady || that.fireMultiple){
-                                //feels like a little bit of a hack.
-                                //  lets the data finish propogating before triggering the call
-                                setTimeout(that.stateReady.apply(that), 100);
-                                that.triggeredStateReady = true;
-                            }
+                        if(truthy && (!that.triggeredStateReady || that.fireMultiple)){
+                            //feels like a little bit of a hack.
+                            //  lets the data finish propogating before triggering the call
+                            setTimeout(that.stateReady.apply(that), 100);
+                            that.triggeredStateReady = true;
                         }
                     }
                 };
