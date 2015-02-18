@@ -293,13 +293,11 @@ var eventMe = function (objectIn) {
                             truthy = truthy && stateEvents[key];
                         }
 
-                        if(truthy){
-                            if(!that.triggeredStateReady || that.fireMultiple){
-                                //feels like a little bit of a hack.
-                                //  lets the data finish propogating before triggering the call
-                                setTimeout(that.stateReady.apply(that), 100);
-                                that.triggeredStateReady = true;
-                            }
+                        if(truthy && (!that.triggeredStateReady || that.fireMultiple)){
+                            //feels like a little bit of a hack.
+                            //  lets the data finish propogating before triggering the call
+                            setTimeout(that.stateReady.apply(that), 100);
+                            that.triggeredStateReady = true;
                         }
                     }
                 };
@@ -810,6 +808,10 @@ var modelMe = require('./action.model')
                 newView.emit('data:get:' + newView.dataId);
             } else if (typeof newView.element !== 'undefined' && newView.element.style.display !== 'none') {
                 newView.element.style.display = 'none';
+                //TODO I am not sure that this.element is being
+                //  used consistently. Parts of it seem to be the
+                //  target Element and others the actual element
+                //  this MUST be fixed.
             }
         }, newView);
 
