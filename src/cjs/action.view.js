@@ -5,22 +5,18 @@ var modelMe = require('./action.model')
         'use strict';
 
         var that = this
-            , stateReady = (typeof objectIn.stateReady === 'function')
             , newView = modelMe(objectIn)
             , children = []
 
             , isMyState = function (stateId) {
-                var chk = newView.stateEvents.filter(function(evnt){
+                var chk = newView.stateEvents.filter(function (evnt) {
                     return evnt === stateId || evnt === stateId.replace('/', '');
                 });
 
                 return (chk.length > 0);
-            };
+            }
 
-        if(typeof newView.render === 'undefined'){
-            that.emit('global:error', new utils.Error('required param', 'render() is required for a view', that));
-            return;
-        }
+            , renderStack = [];
 
         if(typeof newView.templateId === 'undefined'){
             that.emit('global:error', new utils.Error('required param', 'templateId is required for a view', that));
@@ -47,18 +43,24 @@ var modelMe = require('./action.model')
             newView.stateEvents = [newView.stateEvents];
         }
 
-        newView.super.render = newView.render;
+        if(typeof newView.render === 'function'){
+            //now with a renderStack to allow multiple things to be done on render
+            renderStack.push(newView.render);
+        }
 
-        //TODO: maybe render is no longer required. It defaults to executing the template on the
-        //  data and targeting the element. Instead the template, data and target (or a target elem)
-        //  events are required.
+       renderStack.push(function(){
+            var that = this;
 
-        newView.render = function(){
-            newView.super.render.apply(newView);
-            newView.emit('rendered:' + newView.viewId);
+            that.emit('rendered:' + that.viewId);
 
             children.forEach(function (child) {
-                newView.emit('target:set:' + child.viewId, document.querySelector(child.selector));
+                that.emit('target:set:' + child.viewId, document.querySelector(child.selector));
+            });
+        });
+
+        newView.render = function () {
+            renderStack.forEach(function (renderer) {
+                renderer.apply(newView, []);
             });
         };
 
@@ -92,7 +94,7 @@ var modelMe = require('./action.model')
         if(typeof newView.destroy === 'undefined'){
             newView.destroy = function(){
                 //deal with events outside the DOM
-                this.tearDown()
+                this.tearDown();
 
                 //notify children to tear themselves down
                 children.forEach(function (child) {

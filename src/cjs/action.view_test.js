@@ -1,7 +1,7 @@
 var assert = chai.assert;
 
 describe('The View Module: viewMe', function(){
-	'use strct';
+	'use strict';
 
 	var view, view2;
 

@@ -1,34 +1,76 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var required = function (eventsArrayIn, callback, scope) {
+//TODO: use .off when .on is used to register
+
+var required = function (eventsArrayIn, callback, scopeIn, multiple) {
+		'use strict';
+
 		var that = this
-			, scope = scope || {}
+			, scope = scopeIn || {}
 			, eventData = []
+			, updateData = []
 			, called = false
 			, listen = that.once || that.one || that.on //use once if available, one, if available, and lastly on if available.
+			, silence = that.off || that.removeListener
+			, isOn = (listen === that.on) //are we using .on?
+
+			, clear = function () {
+				//this function silences listeners once they are not needed anymore
+
+				eventsArrayIn.forEach(function (event) {
+					silence.apply(that,[event, updateData[eventsArrayIn.indexOf(event)]]);
+				});
+
+				eventData = undefined;
+			}
 
 			, updateState = function (eventName) {
+				// this function handles updating the whether or not an event has been triggered
+				//	it returns a function that holds onto the eventName in closure scope
+				var index = eventsArrayIn.indexOf(eventName);
+
 				return function (data) {
-					eventData[eventsArrayIn.indexOf(eventName)] = data;
-					stateCheck();
+					eventData[index] = data; //update the data array
+					stateCheck(); //check to see if all the events have triggered
 				};
 			}
 
 			, stateCheck = function () {
+				//the state check function... it checks to see if all the events have triggered
 				var ready = true;
 				
 				eventsArrayIn.forEach(function (event) {
 					ready = ready && (typeof eventData[eventsArrayIn.indexOf(event)] !== 'undefined');
 				});
 
-				if(ready && !called){
-					called = true;
+				if(ready && !called){ //have all events triggered? and has the callback been called before?
+					//yep... apply the callback
 					callback.apply(scope, [eventData]);
+
+					//if we aren't dealing with a set of events we want to trigger multiple times then
+					//	mark called true so we don't call the callback mulitple times
+					if(!multiple){
+						called = true;
+						
+						if(isOn){ //if we used .on to bind then unbind the listeners we created
+							clear();
+						}
+					}
 				}
 			};
 
+		if(multiple){ //if it is supposed to trigger muliple times then we need to use .on not .once or .one
+			listen = that.on;
+		}
+
+		//setup the listeners for each event
 		eventsArrayIn.forEach(function (event) {
-			listen.apply(that, [event, updateState(event)]);
+			var index = eventsArrayIn.indexOf(event);
+			updateData[index] = updateState(event);
+			listen.apply(that, [event, updateData[index]]);
 		});
+
+		//returns a function that clears the event listeners
+		return {cancel: clear};
 	};
 
 module.exports = required;
@@ -96,7 +138,6 @@ var required = require('event-state')
 
     returnObject.emit = function(eventNameIn, eventDataIn, localFlag){
         var that = this
-            , functionToCall
             , eventStack = (typeof localFlag !== 'undefined' && localFlag) ? that.eventStore[eventNameIn] : action.eventStore[eventNameIn];
 
         //emit the event
@@ -217,6 +258,7 @@ var required = require('event-state')
                 , handler: handlerIn
                 , scope: scopeIn
                 , once: true
+                , local: localFlagIn
             });
         }
     };
@@ -247,7 +289,6 @@ var required = require('event-state')
     returnObject.off = function(eventNameIn, handlerIn, onceIn, localFlagIn, scopeIn){
         //localize variables
         var that = this
-            , i
             , eventName = eventNameIn
             , handler = handlerIn
             , once = onceIn
@@ -275,7 +316,7 @@ var required = require('event-state')
         if(typeof handler !== 'undefined'){
             //there is an event that matches... proceed
             store.eventStore[eventName] = store.eventStore[eventName].filter(function(listener){
-                var isMatch = !!(handler.toString() === listener.call.toString());
+                var isMatch = (handler.toString() === listener.call.toString());
 
                 //function is passed in
                 if(typeof scope !== 'undefined'){
@@ -330,7 +371,7 @@ var required = require('event-state')
 
         myEvents.forEach(function(listener){
             that.silence(listener);
-            action.silence(listener)
+            action.silence(listener);
         });
     };
 
@@ -361,8 +402,7 @@ var modelMe = function (objectIn) {
     'use strict';
 
     //this is the module for creating a data model object
-    var that = this
-        , newModel = utils.compose(eventMe, ajaxMe)
+    var newModel = utils.compose(eventMe, ajaxMe)
         , attributes = {}
         , changes = [];
 
@@ -496,32 +536,31 @@ var modelMe = function (objectIn) {
         } else {
             that.emit('global:error', new utils.Error('http', 'No URL defined', that));
         }
-    }
+    };
 
     newModel.clearChanges = function () {
         changes = [];
-    }
+    };
 
     newModel.getChanges = function () {
         return changes;
-    }
+    };
 
     newModel.clear = function () {
         attributes = {};
-    }
+    };
 
     newModel.super.tearDownEvents = newModel.tearDown;
 
     newModel.tearDown = function () {
-        var that = this
-            , key;
+        var that = this;
 
         that.super.tearDownEvents.apply(newModel); //this is a little bit messy
         that.clear();
         Object.getOwnPropertyNames(newModel).forEach(function (key) {
             newModel[key] = undefined;
         });
-    }
+    };
 
     if(typeof objectIn.data !== 'undefined'){
         newModel.set(objectIn.data); //set the inital attributes
@@ -589,7 +628,7 @@ var eventMe = require('./action.events')
         return {};
     };
 
-module.exports = routeMe
+module.exports = routeMe;
 },{"./action.events":3}],6:[function(require,module,exports){
 var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
         'use strict';
@@ -672,22 +711,18 @@ var modelMe = require('./action.model')
         'use strict';
 
         var that = this
-            , stateReady = (typeof objectIn.stateReady === 'function')
             , newView = modelMe(objectIn)
             , children = []
 
             , isMyState = function (stateId) {
-                var chk = newView.stateEvents.filter(function(evnt){
+                var chk = newView.stateEvents.filter(function (evnt) {
                     return evnt === stateId || evnt === stateId.replace('/', '');
                 });
 
                 return (chk.length > 0);
-            };
+            }
 
-        if(typeof newView.render === 'undefined'){
-            that.emit('global:error', new utils.Error('required param', 'render() is required for a view', that));
-            return;
-        }
+            , renderStack = [];
 
         if(typeof newView.templateId === 'undefined'){
             that.emit('global:error', new utils.Error('required param', 'templateId is required for a view', that));
@@ -714,18 +749,24 @@ var modelMe = require('./action.model')
             newView.stateEvents = [newView.stateEvents];
         }
 
-        newView.super.render = newView.render;
+        if(typeof newView.render === 'function'){
+            //now with a renderStack to allow multiple things to be done on render
+            renderStack.push(newView.render);
+        }
 
-        //TODO: maybe render is no longer required. It defaults to executing the template on the
-        //  data and targeting the element. Instead the template, data and target (or a target elem)
-        //  events are required.
+       renderStack.push(function(){
+            var that = this;
 
-        newView.render = function(){
-            newView.super.render.apply(newView);
-            newView.emit('rendered:' + newView.viewId);
+            that.emit('rendered:' + that.viewId);
 
             children.forEach(function (child) {
-                newView.emit('target:set:' + child.viewId, document.querySelector(child.selector));
+                that.emit('target:set:' + child.viewId, document.querySelector(child.selector));
+            });
+        });
+
+        newView.render = function () {
+            renderStack.forEach(function (renderer) {
+                renderer.apply(newView, []);
             });
         };
 
@@ -759,7 +800,7 @@ var modelMe = require('./action.model')
         if(typeof newView.destroy === 'undefined'){
             newView.destroy = function(){
                 //deal with events outside the DOM
-                this.tearDown()
+                this.tearDown();
 
                 //notify children to tear themselves down
                 children.forEach(function (child) {

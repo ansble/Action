@@ -23,3 +23,9 @@ example of change: http://recordit.co/YZQLHxYPli
 `.required` now retusn a function that can be used to cancel the state for which it will trigger. So if you decide based on another state that maybe you don't want it to trigger if it hasn't already, then simply execute the function it returns and it will dissapear.
 
 These new features are because of the replacement of the builtin .require with [event-state](https://github.com/ansble/event-state)
+
+#### deprecations and API changes
+
+- `.on` replaces `.listen` they both are the same otherwise. `.listen` is deprecated and will be removed in the next version
+- `.off` coexists with `.silence` they will both coexist going forward.
+- `.onLocal` replaces `.listenLocal`

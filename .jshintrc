@@ -1,6 +1,29 @@
-{ 
-  "asi": true, 
-  "laxcomma": true, 
-  "node": true, 
-  "strict": true 
+{
+  "node": true,
+  "esnext": true,
+  "bitwise": true,
+  "camelcase": true,
+  "curly": true,
+  "eqeqeq": true,
+  "immed": true,
+  "indent": 4,
+  "latedef": true,
+  "newcap": true,
+  "noarg": true,
+  "quotmark": "single",
+  "undef": true,
+  "unused": true,
+  "strict": true,
+  "laxcomma": true,
+  "maxdepth": 2,
+  "noarg": true,
+  "shadow": true,
+  "browser": true,
+  "predef": [
+    "action"
+    , "beforeEach"
+    , "it"
+    , "describe"
+    , "chai"
+  ]
 }

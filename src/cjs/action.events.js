@@ -14,7 +14,6 @@ var required = require('event-state')
 
     returnObject.emit = function(eventNameIn, eventDataIn, localFlag){
         var that = this
-            , functionToCall
             , eventStack = (typeof localFlag !== 'undefined' && localFlag) ? that.eventStore[eventNameIn] : action.eventStore[eventNameIn];
 
         //emit the event
@@ -135,6 +134,7 @@ var required = require('event-state')
                 , handler: handlerIn
                 , scope: scopeIn
                 , once: true
+                , local: localFlagIn
             });
         }
     };
@@ -165,7 +165,6 @@ var required = require('event-state')
     returnObject.off = function(eventNameIn, handlerIn, onceIn, localFlagIn, scopeIn){
         //localize variables
         var that = this
-            , i
             , eventName = eventNameIn
             , handler = handlerIn
             , once = onceIn
@@ -193,7 +192,7 @@ var required = require('event-state')
         if(typeof handler !== 'undefined'){
             //there is an event that matches... proceed
             store.eventStore[eventName] = store.eventStore[eventName].filter(function(listener){
-                var isMatch = !!(handler.toString() === listener.call.toString());
+                var isMatch = (handler.toString() === listener.call.toString());
 
                 //function is passed in
                 if(typeof scope !== 'undefined'){
@@ -248,7 +247,7 @@ var required = require('event-state')
 
         myEvents.forEach(function(listener){
             that.silence(listener);
-            action.silence(listener)
+            action.silence(listener);
         });
     };
 

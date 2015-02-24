@@ -33,4 +33,4 @@ var eventMe = require('./action.events')
         return {};
     };
 
-module.exports = routeMe
+module.exports = routeMe;
