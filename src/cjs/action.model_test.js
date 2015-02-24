@@ -187,18 +187,21 @@ describe('The Model Module: modelMe', function(){
         assert.isUndefined(model.get('sam'));
     });
 
-    it('should save itself to the url provided with .save()', function(){
+    it('should save itself to the url provided with .save()'//, function(){
         //TODO: make this real
-        assert.isFunction(model.save);
-    });
+       // assert.isFunction(model.save);
+    //});
+    );
 
-    it('should get itself from the url provided with fetch()', function(){
+    it('should get itself from the url provided with fetch()'//, function(){
         //TODO: make this real
-        assert.isFunction(model.fetch);
-    });
+        // assert.isFunction(model.fetch);
+    // });
+    );
 
-    it('should get data from the server with ajaxGet', function(){
+    it('should get data from the server with ajaxGet'//, function(){
         //TODO: make this real
-        assert.isFunction(model.ajaxGet);
-    });
+        // assert.isFunction(model.ajaxGet);
+    // });
+    );
 });

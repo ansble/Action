@@ -56,14 +56,12 @@ var modelMe = require('./action.model')
         if(typeof newView.render === 'function'){
             //now with a renderStack to allow multiple things to be done on render
             renderStack.push(newView.render);
-        }
-
-        if(Array.isArray(newView.render)){
+        } else if(Array.isArray(newView.render)){
             //an array of render functions... cool
             renderStack = renderStack.concat(newView.render);
         }
 
-
+        //overwrite the existing render so that it renders the full render stack
         newView.render = function () {
             renderStack.forEach(function (renderer) {
                 if(typeof renderer === 'function'){
@@ -102,15 +100,15 @@ var modelMe = require('./action.model')
         if(typeof newView.destroy === 'undefined'){
             newView.destroy = function(){
                 //deal with events outside the DOM
-                this.tearDown();
+                newView.tearDown();
 
                 //notify children to tear themselves down
                 children.forEach(function (child) {
-                    this.emit('destroy:' + child.viewId);
+                    newView.emit('destroy:' + child.viewId);
                 });
 
                 //deal with the DOM
-                this.element.remove();
+                newView.element.remove();
             };
         }
 
@@ -136,7 +134,10 @@ var modelMe = require('./action.model')
 
         newView.listen('state:change', function(stateId){
             if(isMyState(stateId)){
-                newView.emit('template:get', newView.templateId);
+                if(typeof newView.template !== 'function'){
+                    newView.emit('template:get', newView.templateId);
+                }
+
                 newView.emit('data:get:' + newView.dataId);
             } else if (typeof newView.element !== 'undefined' && newView.element.style.display !== 'none') {
                 newView.element.style.display = 'none';
