@@ -34,3 +34,7 @@ All deprecations will be removed completely in the next version (0.8.0) so start
 - `.off` replaces `.silence`
 - `.offLocal` replaces `.silenceLocal`
 - `.requiredEvent` has been replaced by `.required`. Breaking syntax change and requiredEvent has been removed completely. See the section above outlining the changes.
+
+### Non-breaking changes
+
+- Parents now teardown their child views correctly
