@@ -1,6 +1,9 @@
 var assert = chai.assert;
 
 describe('The Event Module: eventMe', function(){
+	'use strict';
+
+	var evnt, evnt2, evnt3;
 
 	beforeEach(function(){
 		evnt = action.eventMe({});

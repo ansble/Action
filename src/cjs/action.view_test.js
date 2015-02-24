@@ -1,7 +1,10 @@
 var assert = chai.assert;
 
 describe('The View Module: viewMe', function(){
-	
+	'use strct';
+
+	var view, view2;
+
 	beforeEach(function(){
 		console = {
 			log: function(stuff){

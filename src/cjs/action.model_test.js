@@ -3,6 +3,8 @@ var assert = chai.assert;
 describe('The Model Module: modelMe', function(){
 	'use strict';
 
+	var data, model;
+
 	beforeEach(function(){
 		data = {
 			daniel: 'creator'

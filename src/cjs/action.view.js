@@ -47,20 +47,6 @@ var modelMe = require('./action.model')
             newView.stateEvents = [newView.stateEvents];
         }
 
-        //TODO: should require a stateEvent which can be either
-        //  a string or an array of strings containing the event
-        //  or events that this view cares about
-
-        if(stateReady){
-            newView.super.stateReady = function(){
-                newView.render.apply(newView);
-            };
-        } else {
-            newView.stateReady = function(){
-                newView.render.apply(newView);
-            };
-        }
-
         newView.super.render = newView.render;
 
         //TODO: maybe render is no longer required. It defaults to executing the template on the
@@ -80,7 +66,7 @@ var modelMe = require('./action.model')
         if(newView.getElement){
             //hook up the destroy method for this view
             newView.listen('destroy:' + newView.viewId, function(){
-                this.destroy();
+                newView.destroy();
             }, newView);
 
             newView.required([
@@ -90,12 +76,16 @@ var modelMe = require('./action.model')
                     ], function (eventData) {
                 this.set(eventData[0]);
                 this.template = eventData[1];
+
+                this.render.apply(this);
             }, newView, true);
         } else {
             newView.required(['data:set:' + newView.dataId, 'template:set:' + newView.templateId], function (eventData) {
                 this.set(eventData[0]);
                 this.template = eventData[1];
                 this.element = eventData[2];
+
+                this.render.apply(newView);
             }, newView, true);
         }
 
