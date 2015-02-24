@@ -12,7 +12,8 @@
     "ejs": "*",
     "event-state": "^0.2.2",
     "express": "3.2.0",
-    "portfinder": "^0.2.1"
+    "portfinder": "^0.2.1",
+    "util-deprecate": "^1.0.1"
   },
   "devDependencies": {
     "browserify": "^6.1.0",

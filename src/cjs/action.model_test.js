@@ -56,24 +56,18 @@ describe('The Model Module: modelMe', function(){
 		//event side of things
 		assert.isFunction(model.listen);
 		assert.isFunction(model.on);
-		assert.strictEqual(model.on, model.listen);
 		assert.isFunction(model.emit);
 		assert.isFunction(model.listenLocal);
 		assert.isFunction(model.onLocal);
-		assert.strictEqual(model.onLocal, model.listenLocal);
 		assert.isFunction(model.emitLocal);
 		assert.isFunction(model.listenOnce);
 		assert.isFunction(model.once);
-		assert.strictEqual(model.once, model.listenOnce);
 		assert.isFunction(model.listenOnceLocal);
 		assert.isFunction(model.onceLocal);
-		assert.strictEqual(model.onceLocal, model.listenOnceLocal);
 		assert.isFunction(model.silence);
 		assert.isFunction(model.off);
-		assert.strictEqual(model.off, model.silence);
 		assert.isFunction(model.silenceLocal);
 		assert.isFunction(model.offLocal);
-		assert.strictEqual(model.offLocal, model.silenceLocal);
 		assert.isFunction(model.required);
 		assert.isObject(model.eventStore);
 	});
@@ -124,7 +118,7 @@ describe('The Model Module: modelMe', function(){
             }
         };
 
-        model.listen('test', function(){
+        model.on('test', function(){
             console.log('test failed');
         });
 

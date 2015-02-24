@@ -25,7 +25,16 @@ example of change: http://recordit.co/YZQLHxYPli
 These new features are because of the replacement of the builtin .require with [event-state](https://github.com/ansble/event-state)
 
 #### deprecations and API changes
+All deprecations will be removed completely in the next version (0.8.0) so start refactoring! And stop using them. They will throw a warning in the console if the old syntax is used. The API for all deprecations is the same except where noted (see .required above).
 
-- `.on` replaces `.listen` they both are the same otherwise. `.listen` is deprecated and will be removed in the next version
-- `.off` coexists with `.silence` they will both coexist going forward.
+- `.on` replaces `.listen`
+- `.once` replaces `.listenOnce`
 - `.onLocal` replaces `.listenLocal`
+- `.onceLocal` replaces `.listenOnceLocal`
+- `.off` replaces `.silence`
+- `.offLocal` replaces `.silenceLocal`
+- `.requiredEvent` has been replaced by `.required`. Breaking syntax change and requiredEvent has been removed completely. See the section above outlining the changes.
+
+### Non-breaking changes
+
+- Parents now teardown their child views correctly

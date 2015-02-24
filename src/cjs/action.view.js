@@ -73,7 +73,7 @@ var modelMe = require('./action.model')
 
         if(newView.getElement){
             //hook up the destroy method for this view
-            newView.listen('destroy:' + newView.viewId, function(){
+            newView.on('destroy:' + newView.viewId, function(){
                 newView.destroy();
             }, newView);
 
@@ -132,7 +132,7 @@ var modelMe = require('./action.model')
             }
         };
 
-        newView.listen('state:change', function(stateId){
+        newView.on('state:change', function(stateId){
             if(isMyState(stateId)){
                 if(typeof newView.template !== 'function'){
                     newView.emit('template:get', newView.templateId);
