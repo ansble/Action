@@ -1,9 +1,9 @@
 var required = require('event-state')
+    , deprecate = require('util-deprecate')
     , eventMe = function (objectIn) {
     'use strict';
 
     var returnObject = objectIn
-        , localEvents = {}
         , myEvents = [];
 
     //set an emitter id for troubleshooting
@@ -26,7 +26,7 @@ var required = require('event-state')
                 }
 
                 if(listener.once){
-                    that.silence({
+                    that.off({
                         eventName: eventNameIn
                         , scope: listener.scope
                         , handler: listener.call
@@ -39,9 +39,7 @@ var required = require('event-state')
     };
 
     returnObject.emitLocal = function(eventNameIn, eventDataIn){
-        var that = this;
-
-        that.emit(eventNameIn, eventDataIn, true);
+        returnObject.emit(eventNameIn, eventDataIn, true);
     };
 
     returnObject.on = function(eventNameIn, handlerIn, scopeIn, onceIn, localFlagIn){
@@ -99,7 +97,7 @@ var required = require('event-state')
         myEvents.push({eventName: eventName, once: once, call: handler, scope: scope, local:local});
     };
     //Old API backward compat
-    returnObject.listen = returnObject.on;
+    returnObject.listen = deprecate(returnObject.on, '.listen is deprecated, use .on instead');
 
     returnObject.onLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
         var that = this;
@@ -107,9 +105,9 @@ var required = require('event-state')
         //convenience function for local listens
         if(typeof eventNameIn === 'object'){
             eventNameIn.local = true;
-            that.listen(eventNameIn);
+            that.on(eventNameIn);
         } else {
-            that.listen({
+            that.on({
                 eventName: eventNameIn
                 , handler: handlerIn
                 , scope: scopeIn
@@ -119,7 +117,7 @@ var required = require('event-state')
         }
     };
 
-    returnObject.listenLocal = returnObject.onLocal;
+    returnObject.listenLocal = deprecate(returnObject.onLocal, '.listenLocal is deprecated, use .onLocal instead');
 
     returnObject.once = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
         //same thing as .listen() but is only triggered once
@@ -127,9 +125,9 @@ var required = require('event-state')
 
         if(typeof eventNameIn === 'object'){
             eventNameIn.once = true;
-            that.listen(eventNameIn);
+            that.on(eventNameIn);
         }else{
-            that.listen({
+            that.on({
                 eventName: eventNameIn
                 , handler: handlerIn
                 , scope: scopeIn
@@ -139,7 +137,7 @@ var required = require('event-state')
         }
     };
     //Old API backward compat
-    returnObject.listenOnce = returnObject.once;
+    returnObject.listenOnce = deprecate(returnObject.once, '.listenOnce is deprecated, use .once instead');
 
     returnObject.onceLocal = function(eventNameIn, handlerIn, scopeIn){
         var that = this;
@@ -148,9 +146,9 @@ var required = require('event-state')
         if(typeof eventNameIn === 'object'){
             eventNameIn.local = true;
             eventNameIn.once = true;
-            that.listen(eventNameIn);
+            that.on(eventNameIn);
         }else{
-            that.listen({
+            that.on({
                 eventName: eventNameIn
                 , handler: handlerIn
                 , scope: scopeIn
@@ -160,7 +158,7 @@ var required = require('event-state')
         }
     };
     //Old API backward compat
-    returnObject.listenOnceLocal = returnObject.onceLocal;
+    returnObject.listenOnceLocal = deprecate(returnObject.onceLocal, '.listenOnceLocal is deprecated, use .onceLocal instead');
 
     returnObject.off = function(eventNameIn, handlerIn, onceIn, localFlagIn, scopeIn){
         //localize variables
@@ -216,7 +214,7 @@ var required = require('event-state')
         }
     };
     //move towards new API while supporting old API
-    returnObject.silence = returnObject.off;
+    returnObject.silence = deprecate(returnObject.off, '.silence is deprecated, use .off instead');
 
     returnObject.offLocal = function(eventNameIn, handlerIn, onceIn, scopeIn){
         var that = this;
@@ -224,9 +222,9 @@ var required = require('event-state')
         //essentially a convenience function.
         if(typeof eventNameIn === 'object'){
             eventNameIn.local = true;
-            that.silence(eventNameIn);
+            that.off(eventNameIn);
         }else{
-            that.silence({
+            that.off({
                 eventName: eventNameIn
                 , handler: handlerIn
                 , once: onceIn
@@ -236,7 +234,7 @@ var required = require('event-state')
         }
     };
 
-    returnObject.silenceLocal = returnObject.offLocal;
+    returnObject.silenceLocal = deprecate(returnObject.offLocal, '.silenceLocal is deprecated, use .offLocal instead');
 
     //Event Based state machine
     returnObject.required = required;
@@ -246,12 +244,12 @@ var required = require('event-state')
         var that = this;
 
         myEvents.forEach(function(listener){
-            that.silence(listener);
-            action.silence(listener);
+            that.off(listener);
+            action.off(listener);
         });
     };
 
-    returnObject.listen('system:trace', function(emitterIdIn){
+    returnObject.on('system:trace', function(emitterIdIn){
         var that = this;
 
         if(that.emitterId === emitterIdIn){

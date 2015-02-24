@@ -75,6 +75,72 @@ var required = function (eventsArrayIn, callback, scopeIn, multiple) {
 
 module.exports = required;
 },{}],2:[function(require,module,exports){
+(function (global){
+
+/**
+ * Module exports.
+ */
+
+module.exports = deprecate;
+
+/**
+ * Mark that a method should not be used.
+ * Returns a modified function which warns once by default.
+ *
+ * If `localStorage.noDeprecation = true` is set, then it is a no-op.
+ *
+ * If `localStorage.throwDeprecation = true` is set, then deprecated functions
+ * will throw an Error when invoked.
+ *
+ * If `localStorage.traceDeprecation = true` is set, then deprecated functions
+ * will invoke `console.trace()` instead of `console.error()`.
+ *
+ * @param {Function} fn - the function to deprecate
+ * @param {String} msg - the string to print to the console when `fn` is invoked
+ * @returns {Function} a new "deprecated" version of `fn`
+ * @api public
+ */
+
+function deprecate (fn, msg) {
+  if (config('noDeprecation')) {
+    return fn;
+  }
+
+  var warned = false;
+  function deprecated() {
+    if (!warned) {
+      if (config('throwDeprecation')) {
+        throw new Error(msg);
+      } else if (config('traceDeprecation')) {
+        console.trace(msg);
+      } else {
+        console.warn(msg);
+      }
+      warned = true;
+    }
+    return fn.apply(this, arguments);
+  }
+
+  return deprecated;
+}
+
+/**
+ * Checks `localStorage` for boolean values for the given `name`.
+ *
+ * @param {String} name
+ * @returns {Boolean}
+ * @api private
+ */
+
+function config (name) {
+  if (!global.localStorage) return false;
+  var val = global.localStorage[name];
+  if (null == val) return false;
+  return String(val).toLowerCase() === 'true';
+}
+
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],3:[function(require,module,exports){
 var ajaxMe =  function (objectIn) {
     'use strict';
 
@@ -121,13 +187,13 @@ var ajaxMe =  function (objectIn) {
 };
 
 module.exports = ajaxMe;
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 var required = require('event-state')
+    , deprecate = require('util-deprecate')
     , eventMe = function (objectIn) {
     'use strict';
 
     var returnObject = objectIn
-        , localEvents = {}
         , myEvents = [];
 
     //set an emitter id for troubleshooting
@@ -150,7 +216,7 @@ var required = require('event-state')
                 }
 
                 if(listener.once){
-                    that.silence({
+                    that.off({
                         eventName: eventNameIn
                         , scope: listener.scope
                         , handler: listener.call
@@ -163,9 +229,7 @@ var required = require('event-state')
     };
 
     returnObject.emitLocal = function(eventNameIn, eventDataIn){
-        var that = this;
-
-        that.emit(eventNameIn, eventDataIn, true);
+        returnObject.emit(eventNameIn, eventDataIn, true);
     };
 
     returnObject.on = function(eventNameIn, handlerIn, scopeIn, onceIn, localFlagIn){
@@ -223,7 +287,7 @@ var required = require('event-state')
         myEvents.push({eventName: eventName, once: once, call: handler, scope: scope, local:local});
     };
     //Old API backward compat
-    returnObject.listen = returnObject.on;
+    returnObject.listen = deprecate(returnObject.on, '.listen is deprecated, use .on instead');
 
     returnObject.onLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
         var that = this;
@@ -231,9 +295,9 @@ var required = require('event-state')
         //convenience function for local listens
         if(typeof eventNameIn === 'object'){
             eventNameIn.local = true;
-            that.listen(eventNameIn);
+            that.on(eventNameIn);
         } else {
-            that.listen({
+            that.on({
                 eventName: eventNameIn
                 , handler: handlerIn
                 , scope: scopeIn
@@ -243,7 +307,7 @@ var required = require('event-state')
         }
     };
 
-    returnObject.listenLocal = returnObject.onLocal;
+    returnObject.listenLocal = deprecate(returnObject.onLocal, '.listenLocal is deprecated, use .onLocal instead');
 
     returnObject.once = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
         //same thing as .listen() but is only triggered once
@@ -251,9 +315,9 @@ var required = require('event-state')
 
         if(typeof eventNameIn === 'object'){
             eventNameIn.once = true;
-            that.listen(eventNameIn);
+            that.on(eventNameIn);
         }else{
-            that.listen({
+            that.on({
                 eventName: eventNameIn
                 , handler: handlerIn
                 , scope: scopeIn
@@ -263,7 +327,7 @@ var required = require('event-state')
         }
     };
     //Old API backward compat
-    returnObject.listenOnce = returnObject.once;
+    returnObject.listenOnce = deprecate(returnObject.once, '.listenOnce is deprecated, use .once instead');
 
     returnObject.onceLocal = function(eventNameIn, handlerIn, scopeIn){
         var that = this;
@@ -272,9 +336,9 @@ var required = require('event-state')
         if(typeof eventNameIn === 'object'){
             eventNameIn.local = true;
             eventNameIn.once = true;
-            that.listen(eventNameIn);
+            that.on(eventNameIn);
         }else{
-            that.listen({
+            that.on({
                 eventName: eventNameIn
                 , handler: handlerIn
                 , scope: scopeIn
@@ -284,7 +348,7 @@ var required = require('event-state')
         }
     };
     //Old API backward compat
-    returnObject.listenOnceLocal = returnObject.onceLocal;
+    returnObject.listenOnceLocal = deprecate(returnObject.onceLocal, '.listenOnceLocal is deprecated, use .onceLocal instead');
 
     returnObject.off = function(eventNameIn, handlerIn, onceIn, localFlagIn, scopeIn){
         //localize variables
@@ -340,7 +404,7 @@ var required = require('event-state')
         }
     };
     //move towards new API while supporting old API
-    returnObject.silence = returnObject.off;
+    returnObject.silence = deprecate(returnObject.off, '.silence is deprecated, use .off instead');
 
     returnObject.offLocal = function(eventNameIn, handlerIn, onceIn, scopeIn){
         var that = this;
@@ -348,9 +412,9 @@ var required = require('event-state')
         //essentially a convenience function.
         if(typeof eventNameIn === 'object'){
             eventNameIn.local = true;
-            that.silence(eventNameIn);
+            that.off(eventNameIn);
         }else{
-            that.silence({
+            that.off({
                 eventName: eventNameIn
                 , handler: handlerIn
                 , once: onceIn
@@ -360,7 +424,7 @@ var required = require('event-state')
         }
     };
 
-    returnObject.silenceLocal = returnObject.offLocal;
+    returnObject.silenceLocal = deprecate(returnObject.offLocal, '.silenceLocal is deprecated, use .offLocal instead');
 
     //Event Based state machine
     returnObject.required = required;
@@ -370,12 +434,12 @@ var required = require('event-state')
         var that = this;
 
         myEvents.forEach(function(listener){
-            that.silence(listener);
-            action.silence(listener);
+            that.off(listener);
+            action.off(listener);
         });
     };
 
-    returnObject.listen('system:trace', function(emitterIdIn){
+    returnObject.on('system:trace', function(emitterIdIn){
         var that = this;
 
         if(that.emitterId === emitterIdIn){
@@ -393,7 +457,7 @@ var required = require('event-state')
 
 module.exports = eventMe;
 
-},{"event-state":1}],4:[function(require,module,exports){
+},{"event-state":1,"util-deprecate":2}],5:[function(require,module,exports){
 var eventMe = require('./action.events')
     , utils = require('./action.utils')
     , ajaxMe = require('./action.ajax');
@@ -576,11 +640,11 @@ var modelMe = function (objectIn) {
         newModel[key] = objectIn[key];
     });
 
-    newModel.listenLocal('attribute:changed', function (nameIn) {
+    newModel.onLocal('attribute:changed', function (nameIn) {
         changes.push(nameIn);
     }, newModel);
 
-    newModel.listen(newModel.get('requestEvent'), function () {
+    newModel.on(newModel.get('requestEvent'), function () {
         this.fetch();
     }, newModel);
 
@@ -592,7 +656,7 @@ var modelMe = function (objectIn) {
 };
 
 module.exports = modelMe;
-},{"./action.ajax":2,"./action.events":3,"./action.utils":6}],5:[function(require,module,exports){
+},{"./action.ajax":3,"./action.events":4,"./action.utils":7}],6:[function(require,module,exports){
 var eventMe = require('./action.events')
 
     , routeMe = function () {
@@ -629,7 +693,7 @@ var eventMe = require('./action.events')
     };
 
 module.exports = routeMe;
-},{"./action.events":3}],6:[function(require,module,exports){
+},{"./action.events":4}],7:[function(require,module,exports){
 var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
         'use strict';
 
@@ -703,7 +767,7 @@ var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
     };
 
 module.exports = {Error: Error, clone: clone, compose: compose};
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var modelMe = require('./action.model')
     , utils = require('./action.utils')
 
@@ -779,7 +843,7 @@ var modelMe = require('./action.model')
 
         if(newView.getElement){
             //hook up the destroy method for this view
-            newView.listen('destroy:' + newView.viewId, function(){
+            newView.on('destroy:' + newView.viewId, function(){
                 newView.destroy();
             }, newView);
 
@@ -838,7 +902,7 @@ var modelMe = require('./action.model')
             }
         };
 
-        newView.listen('state:change', function(stateId){
+        newView.on('state:change', function(stateId){
             if(isMyState(stateId)){
                 if(typeof newView.template !== 'function'){
                     newView.emit('template:get', newView.templateId);
@@ -855,7 +919,7 @@ var modelMe = require('./action.model')
 
 module.exports = viewMe;
 
-},{"./action.model":4,"./action.utils":6}],8:[function(require,module,exports){
+},{"./action.model":5,"./action.utils":7}],9:[function(require,module,exports){
 var eventMe = require('./action.events')
 	, viewMe = require('./action.view')
 	, modelMe = require('./action.model')
@@ -917,4 +981,4 @@ window.action = {
 
 window.action = eventMe(window.action);
 
-},{"./action.ajax":2,"./action.events":3,"./action.model":4,"./action.route":5,"./action.utils":6,"./action.view":7}]},{},[8])
+},{"./action.ajax":3,"./action.events":4,"./action.model":5,"./action.route":6,"./action.utils":7,"./action.view":8}]},{},[9])

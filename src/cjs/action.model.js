@@ -180,11 +180,11 @@ var modelMe = function (objectIn) {
         newModel[key] = objectIn[key];
     });
 
-    newModel.listenLocal('attribute:changed', function (nameIn) {
+    newModel.onLocal('attribute:changed', function (nameIn) {
         changes.push(nameIn);
     }, newModel);
 
-    newModel.listen(newModel.get('requestEvent'), function () {
+    newModel.on(newModel.get('requestEvent'), function () {
         this.fetch();
     }, newModel);
 

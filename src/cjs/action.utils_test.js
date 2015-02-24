@@ -1,6 +1,8 @@
 var assert = chai.assert;
 
 describe('The Utilities Module', function(){
+    'use strict';
+    
     describe('Error object constructor tests', function(){
         it('should return an Error constructor', function(){
             assert.isFunction(action.Error);

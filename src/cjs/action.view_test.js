@@ -3,9 +3,11 @@ var assert = chai.assert;
 describe('The View Module: viewMe', function(){
 	'use strict';
 
-	var view, view2;
+	var view, view2, oldConsole;
 
 	beforeEach(function(){
+		oldConsole = console;
+
 		console = {
 			log: function(stuff){
 				console.thrown = stuff;
@@ -13,6 +15,9 @@ describe('The View Module: viewMe', function(){
 			, group: function(){}
 			, dir: function(){}
 			, groupEnd: function(){}
+			, warn: function(stringIn){
+				oldConsole.warn(stringIn);
+			}
 		};
 
 		view = action.viewMe({
@@ -120,11 +125,11 @@ describe('The View Module: viewMe', function(){
 	it('should trigger the gets for template and data when a state event it cares about is fired', function(){
         var testCnt = 0;
 
-        action.listen('data:get:bicycle', function(){
+        action.on('data:get:bicycle', function(){
             testCnt++;
         });
 
-        action.listen('template:get', function(id){
+        action.on('template:get', function(id){
             if (id === 'tom') {
                 testCnt++;
             }
@@ -156,7 +161,7 @@ describe('The View Module: viewMe', function(){
 	it('should emit a rendered event when it has rendered', function(){
 		var emitTest = false;
 
-		action.listen('rendered:katie', function(){
+		action.on('rendered:katie', function(){
 			emitTest = true;
 		});
 
@@ -170,7 +175,7 @@ describe('The View Module: viewMe', function(){
 	it('should emit a data:changed event when save() is called if there is a value that has changed', function () {
 		var emitTest = false;
 
-		action.listen('data:changed:bicycle', function(){
+		action.on('data:changed:bicycle', function(){
 			emitTest = true;
 		});
 
@@ -184,7 +189,7 @@ describe('The View Module: viewMe', function(){
 	it('should not emit a data:changed event when save() is called if nothing has changed', function () {
 		var emitTest = false;
 
-		action.listen('data:changed:bicycle', function(){
+		action.on('data:changed:bicycle', function(){
 			emitTest = true;
 		});
 
@@ -219,7 +224,7 @@ describe('The View Module: viewMe', function(){
 			var emitTest = false
 				, dom;
 
-			action.listen('target:set:travis', function(domElem){
+			action.on('target:set:travis', function(domElem){
 				emitTest = true;
 				dom = domElem;
 			});

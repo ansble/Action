@@ -12,7 +12,7 @@ describe('The Event Module: eventMe', function(){
 	});
 
 	afterEach(function(){
-		action.silence('show:me');
+		action.off('show:me');
 
 		if(typeof evnt !== 'undefined'){
 			evnt.tearDown();
@@ -37,34 +37,19 @@ describe('The Event Module: eventMe', function(){
 	it('should add events to an empty object', function(){
 		assert.isFunction(evnt.listen);
 		assert.isFunction(evnt.on);
-		assert.strictEqual(evnt.on, evnt.listen);
-
 		assert.isFunction(evnt.emit);
-
 		assert.isFunction(evnt.listenLocal);
 		assert.isFunction(evnt.onLocal);
-		assert.strictEqual(evnt.onLocal, evnt.listenLocal);
-		
 		assert.isFunction(evnt.emitLocal);
-
 		assert.isFunction(evnt.listenOnce);
 		assert.isFunction(evnt.once);
-		assert.strictEqual(evnt.once, evnt.listenOnce);
-
 		assert.isFunction(evnt.listenOnceLocal);
 		assert.isFunction(evnt.onceLocal);
-		assert.strictEqual(evnt.onceLocal, evnt.listenOnceLocal);
-		
 		assert.isFunction(evnt.silence);
 		assert.isFunction(evnt.off);
-		assert.strictEqual(evnt.off, evnt.silence);
-
 		assert.isFunction(evnt.silenceLocal);
 		assert.isFunction(evnt.offLocal);
-		assert.strictEqual(evnt.offLocal, evnt.silenceLocal);
-
 		assert.isFunction(evnt.required);
-
 		assert.isObject(evnt.eventStore);
 	});
 
@@ -79,12 +64,12 @@ describe('The Event Module: eventMe', function(){
 	});
 
 	it('should execute the assigned listeners when global events are triggered', function(){
-		evnt.listen('global1', function(){
+		evnt.on('global1', function(){
 			this.global1 = true;
 		}, evnt);
 
-		evnt.listen('global2', function(){
-			this.global2 = true
+		evnt.on('global2', function(){
+			this.global2 = true;
 		}, evnt);
 
 		action.emit('global1');
@@ -128,7 +113,7 @@ describe('The Event Module: eventMe', function(){
 		};
 
 		assert.strictEqual(evntObj, action.eventMe(evntObj));
-		assert.isFunction(evntObj.listen);
+		assert.isFunction(evntObj.on);
 		assert.isFunction(evntObj.emit);
 	});
 
@@ -143,7 +128,7 @@ describe('The Event Module: eventMe', function(){
 	});
 
 	it('should listen to local events', function(){
-		evnt.listenLocal('sam:wise', function(){
+		evnt.onLocal('sam:wise', function(){
 			this.sam = 'wise';
 		}, evnt);
 
@@ -154,7 +139,7 @@ describe('The Event Module: eventMe', function(){
 	});
 
 	it('local events should ignore global events', function(){
-		evnt.listenLocal('sam:wise', function(){
+		evnt.onLocal('sam:wise', function(){
 			this.sam = 'wise';
 		}, evnt);
 
@@ -164,7 +149,7 @@ describe('The Event Module: eventMe', function(){
 	});
 
 	it('global events should ignore local events', function(){
-		evnt.listen('sam:wise', function(){
+		evnt.on('sam:wise', function(){
 			this.sam = 'wise';
 		}, evnt);
 
@@ -178,7 +163,7 @@ describe('The Event Module: eventMe', function(){
 			sam: 0
 		});
 
-		evnt.listenOnce('sam:wise', function(){
+		evnt.once('sam:wise', function(){
 			this.sam++;
 		}, evnt);
 
@@ -194,7 +179,7 @@ describe('The Event Module: eventMe', function(){
 			sam: 0
 		});
 
-		evnt.listenOnceLocal('sam:wise', function(){
+		evnt.onceLocal('sam:wise', function(){
 			this.sam++;
 		}, evnt);
 
@@ -213,7 +198,7 @@ describe('The Event Module: eventMe', function(){
 		//noop console.log()
 		console.log = function(){};
 
-		action.listen('system:addTraced', function(objIn){
+		action.on('system:addTraced', function(objIn){
 			emitObj = objIn;
 		});
 
@@ -229,7 +214,7 @@ describe('The Event Module: eventMe', function(){
 		//noop console.log()
 		console.log = function(){};
 
-		action.listen('system:addTraced', function(objIn){
+		action.on('system:addTraced', function(objIn){
 			emitObj = objIn;
 		});
 
@@ -240,22 +225,22 @@ describe('The Event Module: eventMe', function(){
 	it('should silence all of a global event through silence when passed the event', function(){
 		var text = 0;
 
-		console.log = function(textIn){
+		console.log = function(){
 			text++;
 		};
 
-		action.listen('show:me', function(){
+		action.on('show:me', function(){
 			console.log('show');
 		});
 
-		action.listen('show:me', function(){
+		action.on('show:me', function(){
 			console.log('show it');
 		});
 
 		action.emit('show:me');
 		assert.strictEqual(text, 2);
 
-		action.silence('show:me');
+		action.off('show:me');
 
 		action.emit('show:me');
 		assert.strictEqual(text, 2);
@@ -264,22 +249,22 @@ describe('The Event Module: eventMe', function(){
 	it('should silence all of a local event through silence when passed the event', function(){
 		var text = 0;
 
-		console.log = function(textIn){
+		console.log = function(){
 			text++;
 		};
 
-		evnt.listenLocal('show:me', function(){
+		evnt.onLocal('show:me', function(){
 			console.log('show');
 		});
 
-		evnt.listenLocal('show:me', function(){
+		evnt.onLocal('show:me', function(){
 			console.log('show it');
 		});
 
 		evnt.emitLocal('show:me');
 		assert.strictEqual(text, 2);
 
-		evnt.silenceLocal('show:me');
+		evnt.offLocal('show:me');
 
 		evnt.emitLocal('show:me');
 		assert.strictEqual(text, 2);
@@ -288,22 +273,22 @@ describe('The Event Module: eventMe', function(){
 	it('should silence only a specific function in a global event stack through silence when passed the event and function', function(){
 		var text = 0;
 
-		console.log = function(textIn){
+		console.log = function(){
 			text++;
 		};
 
-		evnt.listen('show:me', function(){
+		evnt.on('show:me', function(){
 			console.log('show');
 		});
 
-		evnt.listen('show:me', function(){
+		evnt.on('show:me', function(){
 			console.log('show it');
 		});
 
 		evnt.emit('show:me');
 		assert.strictEqual(text, 2);
 
-		evnt.silence('show:me', function(){
+		evnt.off('show:me', function(){
 			console.log('show it');
 		});
 
@@ -314,22 +299,22 @@ describe('The Event Module: eventMe', function(){
 	it('should silence only a specific function in a local event stack through silence when passed the event and function', function(){
 		var text = 0;
 
-		console.log = function(textIn){
+		console.log = function(){
 			text++;
 		};
 
-		evnt.listenLocal('show:me', function(){
+		evnt.onLocal('show:me', function(){
 			console.log('show');
 		});
 
-		evnt.listenLocal('show:me', function(){
+		evnt.onLocal('show:me', function(){
 			console.log('show it');
 		});
 
 		evnt.emitLocal('show:me');
 		assert.strictEqual(text, 2);
 
-		evnt.silenceLocal('show:me', function(){
+		evnt.offLocal('show:me', function(){
 			console.log('show it');
 		});
 
@@ -341,25 +326,25 @@ describe('The Event Module: eventMe', function(){
 		var text = 0
 			, scope = {};
 
-		console.log = function(textIn){
+		console.log = function(){
 			text++;
 		};
 
 
 		assert.strictEqual(text, 0);
 
-		evnt.listen('show:me', function(){
+		evnt.on('show:me', function(){
 			console.log('show');
 		}, scope);
 
-		evnt.listen('show:me', function(){
+		evnt.on('show:me', function(){
 			console.log('show it');
 		});
 
 		evnt.emit('show:me');
 		assert.strictEqual(text, 2);
 
-		evnt.silence('show:me', function(){
+		evnt.off('show:me', function(){
 			console.log('show it');
 		}, scope);
 
@@ -371,22 +356,22 @@ describe('The Event Module: eventMe', function(){
 		var text = 0
 			, scope = {};
 
-		console.log = function(textIn){
+		console.log = function(){
 			text++;
 		};
 
-		evnt.listenLocal('show:me', function(){
+		evnt.onLocal('show:me', function(){
 			console.log('show');
 		}, scope);
 
-		evnt.listenLocal('show:me', function(){
+		evnt.onLocal('show:me', function(){
 			console.log('show it');
 		}, scope);
 
 		evnt.emitLocal('show:me');
 		assert.strictEqual(text, 2);
 
-		evnt.silenceLocal('show:me', function(){
+		evnt.offLocal('show:me', function(){
 			console.log('show it');
 		}, scope);
 
@@ -401,7 +386,7 @@ describe('The Event Module: eventMe', function(){
             }
         };
 
-        evnt.listen('test', function(){
+        evnt.on('test', function(){
             console.log('test failed');
         });
 
