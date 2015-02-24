@@ -33,15 +33,35 @@ describe('The Event Module: eventMe', function(){
 
 	it('should add events to an empty object', function(){
 		assert.isFunction(evnt.listen);
+		assert.isFunction(evnt.on);
+		assert.strictEqual(evnt.on, evnt.listen);
+
 		assert.isFunction(evnt.emit);
+
 		assert.isFunction(evnt.listenLocal);
+		assert.isFunction(evnt.onLocal);
+		assert.strictEqual(evnt.onLocal, evnt.listenLocal);
+		
 		assert.isFunction(evnt.emitLocal);
+
 		assert.isFunction(evnt.listenOnce);
+		assert.isFunction(evnt.once);
+		assert.strictEqual(evnt.once, evnt.listenOnce);
+
 		assert.isFunction(evnt.listenOnceLocal);
+		assert.isFunction(evnt.onceLocal);
+		assert.strictEqual(evnt.onceLocal, evnt.listenOnceLocal);
+		
 		assert.isFunction(evnt.silence);
+		assert.isFunction(evnt.off);
+		assert.strictEqual(evnt.off, evnt.silence);
+
 		assert.isFunction(evnt.silenceLocal);
-		assert.isFunction(evnt.requiredEvent);
-		assert.isFunction(evnt.stateReady);
+		assert.isFunction(evnt.offLocal);
+		assert.strictEqual(evnt.offLocal, evnt.silenceLocal);
+
+		assert.isFunction(evnt.required);
+
 		assert.isObject(evnt.eventStore);
 	});
 
@@ -71,21 +91,15 @@ describe('The Event Module: eventMe', function(){
 		assert.strictEqual(evnt.global2, true);
 	});
 
-	it('should fire stateReady() when all required events are heard', function(){
+	it('should fire callback function when all required events are heard', function(){
 		var evnt = action.eventMe({
 			init: function(){
 				var that = this;
 
-				that.requiredEvent('event1', function(){
-					that.event1 = true;
+				that.required(['event1', 'event2'], function (eventData) {
+					that.event1 = eventData[0];
+					that.event2 = eventData[1];
 				});
-
-				that.requiredEvent('event2', function(){
-					that.event2 = true;
-				});
-			}
-			, stateReady: function(){
-				this.something = 'Ready!';
 			}
 		});
 
@@ -93,18 +107,15 @@ describe('The Event Module: eventMe', function(){
 		assert.isUndefined(evnt.event2);
 		assert.isUndefined(evnt.ready);
 
-		action.emit('event1');
+		action.emit('event1', true);
 
-		assert.strictEqual(evnt.event1, true);
+		assert.isUndefined(evnt.event1);
 		assert.isUndefined(evnt.event2);
-		assert.isUndefined(evnt.ready);
 
-		action.emit('event2');
+		action.emit('event2', true);
 
 		assert.strictEqual(evnt.event1, true);
 		assert.strictEqual(evnt.event2, true);
-		assert.strictEqual(evnt.triggeredStateReady, true);
-		assert.strictEqual(evnt.something, 'Ready!');
 	});
 
 	it('should return the same object that it accepted', function(){

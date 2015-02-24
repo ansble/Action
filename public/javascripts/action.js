@@ -1,4 +1,38 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var required = function (eventsArrayIn, callback, scope) {
+		var that = this
+			, scope = scope || {}
+			, eventData = []
+			, called = false
+			, listen = that.once || that.one || that.on //use once if available, one, if available, and lastly on if available.
+
+			, updateState = function (eventName) {
+				return function (data) {
+					eventData[eventsArrayIn.indexOf(eventName)] = data;
+					stateCheck();
+				};
+			}
+
+			, stateCheck = function () {
+				var ready = true;
+				
+				eventsArrayIn.forEach(function (event) {
+					ready = ready && (typeof eventData[eventsArrayIn.indexOf(event)] !== 'undefined');
+				});
+
+				if(ready && !called){
+					called = true;
+					callback.apply(scope, [eventData]);
+				}
+			};
+
+		eventsArrayIn.forEach(function (event) {
+			listen.apply(that, [event, updateState(event)]);
+		});
+	};
+
+module.exports = required;
+},{}],2:[function(require,module,exports){
 var ajaxMe =  function (objectIn) {
     'use strict';
 
@@ -45,8 +79,9 @@ var ajaxMe =  function (objectIn) {
 };
 
 module.exports = ajaxMe;
-},{}],2:[function(require,module,exports){
-var eventMe = function (objectIn) {
+},{}],3:[function(require,module,exports){
+var required = require('event-state')
+    , eventMe = function (objectIn) {
     'use strict';
 
     var returnObject = objectIn
@@ -92,7 +127,7 @@ var eventMe = function (objectIn) {
         that.emit(eventNameIn, eventDataIn, true);
     };
 
-    returnObject.listen = function(eventNameIn, handlerIn, scopeIn, onceIn, localFlagIn){
+    returnObject.on = function(eventNameIn, handlerIn, scopeIn, onceIn, localFlagIn){
         var that = this
             , newCheck = true
 
@@ -146,6 +181,8 @@ var eventMe = function (objectIn) {
 
         myEvents.push({eventName: eventName, once: once, call: handler, scope: scope, local:local});
     };
+    //Old API backward compat
+    returnObject.listen = returnObject.on;
 
     returnObject.listenLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
         var that = this;
@@ -165,7 +202,7 @@ var eventMe = function (objectIn) {
         }
     };
 
-    returnObject.listenOnce = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
+    returnObject.once = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
         //same thing as .listen() but is only triggered once
         var that = this;
 
@@ -181,8 +218,10 @@ var eventMe = function (objectIn) {
             });
         }
     };
+    //Old API backward compat
+    returnObject.listenOnce = returnObject.once;
 
-    returnObject.listenOnceLocal = function(eventNameIn, handlerIn, scopeIn){
+    returnObject.onceLocal = function(eventNameIn, handlerIn, scopeIn){
         var that = this;
 
         //same thing as .listen() but is only triggered once
@@ -200,8 +239,10 @@ var eventMe = function (objectIn) {
             });
         }
     };
+    //Old API backward compat
+    returnObject.listenOnceLocal = returnObject.onceLocal;
 
-    returnObject.silence = function(eventNameIn, handlerIn, onceIn, localFlagIn, scopeIn){
+    returnObject.off = function(eventNameIn, handlerIn, onceIn, localFlagIn, scopeIn){
         //localize variables
         var that = this
             , i
@@ -255,6 +296,8 @@ var eventMe = function (objectIn) {
             store.eventStore[eventName] = [];
         }
     };
+    //move towards new API while supporting old API
+    returnObject.silence = returnObject.off;
 
     returnObject.silenceLocal = function(eventNameIn, handlerIn, onceIn, scopeIn){
         var that = this;
@@ -275,50 +318,7 @@ var eventMe = function (objectIn) {
     };
 
     //Event Based state machine
-    returnObject.requiredEvent = function(name, callback, context, fireMultipleIn){
-        var that = this
-
-            , stateUpdate = function(nameIn, stateEventsIn){
-                var name = nameIn
-                    , stateEvents = stateEventsIn;
-
-                return function(){
-                    var truthy = true
-                        , key;
-
-                    if(typeof stateEvents[name] !== 'undefined'){
-                        stateEvents[name] = true;
-
-                        for(key in stateEvents){
-                            truthy = truthy && stateEvents[key];
-                        }
-
-                        if(truthy && (!that.triggeredStateReady || that.fireMultiple)){
-                            //feels like a little bit of a hack.
-                            //  lets the data finish propogating before triggering the call
-                            setTimeout(that.stateReady.apply(that), 100);
-                            that.triggeredStateReady = true;
-                        }
-                    }
-                };
-            };
-
-        that.fireMultiple = (typeof fireMultipleIn !== 'undefined') ? fireMultipleIn : false;
-
-        //init some hidden storage if needed
-        if(typeof that.stateEvents === 'undefined'){
-            that.stateEvents = {};
-        }
-
-        if(typeof that.triggeredStateReady === 'undefined'){
-            that.triggeredStateReady = false;
-        }
-
-        that.stateEvents[name] = false;
-
-        that.listen(name, callback, context);
-        that.listen(name, stateUpdate(name, that.stateEvents), that);
-    };
+    returnObject.required = required;
 
     returnObject.tearDown = function(){
         //this needs to destroy the listeners... which is important
@@ -329,14 +329,6 @@ var eventMe = function (objectIn) {
             action.silence(listener)
         });
     };
-
-    if(typeof returnObject.stateReady === 'undefined'){
-        returnObject.stateReady = function(){
-            //this is a default action when all required events have been completed.
-            //  needs to be overridden if you want to do something real
-            console.log('ready!');
-        };
-    }
 
     returnObject.listen('system:trace', function(emitterIdIn){
         var that = this;
@@ -356,7 +348,7 @@ var eventMe = function (objectIn) {
 
 module.exports = eventMe;
 
-},{}],3:[function(require,module,exports){
+},{"event-state":1}],4:[function(require,module,exports){
 var eventMe = require('./action.events')
     , utils = require('./action.utils')
     , ajaxMe = require('./action.ajax');
@@ -557,7 +549,7 @@ var modelMe = function (objectIn) {
 };
 
 module.exports = modelMe;
-},{"./action.ajax":1,"./action.events":2,"./action.utils":5}],4:[function(require,module,exports){
+},{"./action.ajax":2,"./action.events":3,"./action.utils":6}],5:[function(require,module,exports){
 var eventMe = require('./action.events')
 
     , routeMe = function () {
@@ -594,7 +586,7 @@ var eventMe = require('./action.events')
     };
 
 module.exports = routeMe
-},{"./action.events":2}],5:[function(require,module,exports){
+},{"./action.events":3}],6:[function(require,module,exports){
 var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
         'use strict';
 
@@ -668,7 +660,7 @@ var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
     };
 
 module.exports = {Error: Error, clone: clone, compose: compose};
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var modelMe = require('./action.model')
     , utils = require('./action.utils')
 
@@ -820,7 +812,7 @@ var modelMe = require('./action.model')
 
 module.exports = viewMe;
 
-},{"./action.model":3,"./action.utils":5}],7:[function(require,module,exports){
+},{"./action.model":4,"./action.utils":6}],8:[function(require,module,exports){
 var eventMe = require('./action.events')
 	, viewMe = require('./action.view')
 	, modelMe = require('./action.model')
@@ -882,4 +874,4 @@ window.action = {
 
 window.action = eventMe(window.action);
 
-},{"./action.ajax":1,"./action.events":2,"./action.model":3,"./action.route":4,"./action.utils":5,"./action.view":6}]},{},[7])
+},{"./action.ajax":2,"./action.events":3,"./action.model":4,"./action.route":5,"./action.utils":6,"./action.view":7}]},{},[8])
