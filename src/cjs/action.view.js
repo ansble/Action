@@ -43,11 +43,6 @@ var modelMe = require('./action.model')
             newView.stateEvents = [newView.stateEvents];
         }
 
-        if(typeof newView.render === 'function'){
-            //now with a renderStack to allow multiple things to be done on render
-            renderStack.push(newView.render);
-        }
-
        renderStack.push(function(){
             var that = this;
 
@@ -58,9 +53,22 @@ var modelMe = require('./action.model')
             });
         });
 
+        if(typeof newView.render === 'function'){
+            //now with a renderStack to allow multiple things to be done on render
+            renderStack.push(newView.render);
+        }
+
+        if(Array.isArray(newView.render)){
+            //an array of render functions... cool
+            renderStack = renderStack.concat(newView.render);
+        }
+
+
         newView.render = function () {
             renderStack.forEach(function (renderer) {
-                renderer.apply(newView, []);
+                if(typeof renderer === 'function'){
+                    renderer.apply(newView, []);
+                }
             });
         };
 
