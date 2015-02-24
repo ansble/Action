@@ -19,3 +19,7 @@ That means that where you passed handlers for each event to the individual `acti
 We are also deprecating and removing `.requiredEvent` for the more clear `.required`. Tangentially this means that the `stateReady` function is no longer present or needed. Hopefully this makes for a better api in the future, sorry for the breaking change for your old code.
 
 example of change: http://recordit.co/YZQLHxYPli
+
+`.required` now retusn a function that can be used to cancel the state for which it will trigger. So if you decide based on another state that maybe you don't want it to trigger if it hasn't already, then simply execute the function it returns and it will dissapear.
+
+These new features are because of the replacement of the builtin .require with [event-state](https://github.com/ansble/event-state)
