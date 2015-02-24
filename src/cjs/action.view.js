@@ -5,22 +5,18 @@ var modelMe = require('./action.model')
         'use strict';
 
         var that = this
-            , stateReady = (typeof objectIn.stateReady === 'function')
             , newView = modelMe(objectIn)
             , children = []
 
             , isMyState = function (stateId) {
-                var chk = newView.stateEvents.filter(function(evnt){
+                var chk = newView.stateEvents.filter(function (evnt) {
                     return evnt === stateId || evnt === stateId.replace('/', '');
                 });
 
                 return (chk.length > 0);
-            };
+            }
 
-        if(typeof newView.render === 'undefined'){
-            that.emit('global:error', new utils.Error('required param', 'render() is required for a view', that));
-            return;
-        }
+            , renderStack = [];
 
         if(typeof newView.templateId === 'undefined'){
             that.emit('global:error', new utils.Error('required param', 'templateId is required for a view', that));
@@ -47,67 +43,72 @@ var modelMe = require('./action.model')
             newView.stateEvents = [newView.stateEvents];
         }
 
-        //TODO: should require a stateEvent which can be either
-        //  a string or an array of strings containing the event
-        //  or events that this view cares about
+       renderStack.push(function(){
+            var that = this;
 
-        if(stateReady){
-            newView.super.stateReady = function(){
-                newView.render.apply(newView);
-            };
-        } else {
-            newView.stateReady = function(){
-                newView.render.apply(newView);
-            };
-        }
-
-        newView.super.render = newView.render;
-
-        //TODO: maybe render is no longer required. It defaults to executing the template on the
-        //  data and targeting the element. Instead the template, data and target (or a target elem)
-        //  events are required.
-
-        newView.render = function(){
-            newView.super.render.apply(newView);
-            newView.emit('rendered:' + newView.viewId);
+            that.emit('rendered:' + that.viewId);
 
             children.forEach(function (child) {
-                newView.emit('target:set:' + child.viewId, document.querySelector(child.selector));
+                that.emit('target:set:' + child.viewId, document.querySelector(child.selector));
+            });
+        });
+
+        if(typeof newView.render === 'function'){
+            //now with a renderStack to allow multiple things to be done on render
+            renderStack.push(newView.render);
+        } else if(Array.isArray(newView.render)){
+            //an array of render functions... cool
+            renderStack = renderStack.concat(newView.render);
+        }
+
+        //overwrite the existing render so that it renders the full render stack
+        newView.render = function () {
+            renderStack.forEach(function (renderer) {
+                if(typeof renderer === 'function'){
+                    renderer.apply(newView, []);
+                }
             });
         };
 
-        //require event for the data
-        newView.requiredEvent('data:set:' + newView.dataId, function(dataIn){
-            this.set(dataIn);
-        }, newView, true);
-
-        //required event for the template
-        newView.requiredEvent('template:set:' + newView.templateId, function(templateIn){
-            this.template = templateIn;
-        }, newView, true);
 
         if(newView.getElement){
-            newView.requiredEvent('target:set:' + newView.viewId, function(elementIn){
-                this.element = elementIn;
-            });
-
+            //hook up the destroy method for this view
             newView.listen('destroy:' + newView.viewId, function(){
-                this.destroy();
+                newView.destroy();
             }, newView);
+
+            newView.required([
+                        'data:set:' + newView.dataId
+                        , 'template:set:' + newView.templateId
+                        , 'target:set:' + newView.viewId
+                    ], function (eventData) {
+                this.set(eventData[0]);
+                this.template = eventData[1];
+
+                this.render.apply(this);
+            }, newView, true);
+        } else {
+            newView.required(['data:set:' + newView.dataId, 'template:set:' + newView.templateId], function (eventData) {
+                this.set(eventData[0]);
+                this.template = eventData[1];
+                this.element = eventData[2];
+
+                this.render.apply(newView);
+            }, newView, true);
         }
 
         if(typeof newView.destroy === 'undefined'){
             newView.destroy = function(){
                 //deal with events outside the DOM
-                this.tearDown()
+                newView.tearDown();
 
                 //notify children to tear themselves down
                 children.forEach(function (child) {
-                    this.emit('destroy:' + child.viewId);
+                    newView.emit('destroy:' + child.viewId);
                 });
 
                 //deal with the DOM
-                this.element.remove();
+                newView.element.remove();
             };
         }
 
@@ -133,7 +134,10 @@ var modelMe = require('./action.model')
 
         newView.listen('state:change', function(stateId){
             if(isMyState(stateId)){
-                newView.emit('template:get', newView.templateId);
+                if(typeof newView.template !== 'function'){
+                    newView.emit('template:get', newView.templateId);
+                }
+
                 newView.emit('data:get:' + newView.dataId);
             } else if (typeof newView.element !== 'undefined' && newView.element.style.display !== 'none') {
                 newView.element.style.display = 'none';

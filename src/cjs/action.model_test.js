@@ -1,6 +1,9 @@
 var assert = chai.assert;
 
 describe('The Model Module: modelMe', function(){
+	'use strict';
+
+	var data, model;
 
 	beforeEach(function(){
 		data = {
@@ -52,15 +55,26 @@ describe('The Model Module: modelMe', function(){
 
 		//event side of things
 		assert.isFunction(model.listen);
+		assert.isFunction(model.on);
+		assert.strictEqual(model.on, model.listen);
 		assert.isFunction(model.emit);
 		assert.isFunction(model.listenLocal);
+		assert.isFunction(model.onLocal);
+		assert.strictEqual(model.onLocal, model.listenLocal);
 		assert.isFunction(model.emitLocal);
 		assert.isFunction(model.listenOnce);
+		assert.isFunction(model.once);
+		assert.strictEqual(model.once, model.listenOnce);
 		assert.isFunction(model.listenOnceLocal);
+		assert.isFunction(model.onceLocal);
+		assert.strictEqual(model.onceLocal, model.listenOnceLocal);
 		assert.isFunction(model.silence);
+		assert.isFunction(model.off);
+		assert.strictEqual(model.off, model.silence);
 		assert.isFunction(model.silenceLocal);
-		assert.isFunction(model.requiredEvent);
-		assert.isFunction(model.stateReady);
+		assert.isFunction(model.offLocal);
+		assert.strictEqual(model.offLocal, model.silenceLocal);
+		assert.isFunction(model.required);
 		assert.isObject(model.eventStore);
 	});
 
@@ -173,18 +187,21 @@ describe('The Model Module: modelMe', function(){
         assert.isUndefined(model.get('sam'));
     });
 
-    it('should save itself to the url provided with .save()', function(){
+    it('should save itself to the url provided with .save()'//, function(){
         //TODO: make this real
-        assert.isFunction(model.save);
-    });
+       // assert.isFunction(model.save);
+    //});
+    );
 
-    it('should get itself from the url provided with fetch()', function(){
+    it('should get itself from the url provided with fetch()'//, function(){
         //TODO: make this real
-        assert.isFunction(model.fetch);
-    });
+        // assert.isFunction(model.fetch);
+    // });
+    );
 
-    it('should get data from the server with ajaxGet', function(){
+    it('should get data from the server with ajaxGet'//, function(){
         //TODO: make this real
-        assert.isFunction(model.ajaxGet);
-    });
+        // assert.isFunction(model.ajaxGet);
+    // });
+    );
 });

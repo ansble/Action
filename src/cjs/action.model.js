@@ -6,8 +6,7 @@ var modelMe = function (objectIn) {
     'use strict';
 
     //this is the module for creating a data model object
-    var that = this
-        , newModel = utils.compose(eventMe, ajaxMe)
+    var newModel = utils.compose(eventMe, ajaxMe)
         , attributes = {}
         , changes = [];
 
@@ -141,32 +140,31 @@ var modelMe = function (objectIn) {
         } else {
             that.emit('global:error', new utils.Error('http', 'No URL defined', that));
         }
-    }
+    };
 
     newModel.clearChanges = function () {
         changes = [];
-    }
+    };
 
     newModel.getChanges = function () {
         return changes;
-    }
+    };
 
     newModel.clear = function () {
         attributes = {};
-    }
+    };
 
     newModel.super.tearDownEvents = newModel.tearDown;
 
     newModel.tearDown = function () {
-        var that = this
-            , key;
+        var that = this;
 
         that.super.tearDownEvents.apply(newModel); //this is a little bit messy
         that.clear();
         Object.getOwnPropertyNames(newModel).forEach(function (key) {
             newModel[key] = undefined;
         });
-    }
+    };
 
     if(typeof objectIn.data !== 'undefined'){
         newModel.set(objectIn.data); //set the inital attributes

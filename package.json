@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "ejs": "*",
+    "event-state": "^0.2.2",
     "express": "3.2.0",
     "portfinder": "^0.2.1"
   },

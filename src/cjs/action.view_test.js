@@ -1,6 +1,9 @@
 var assert = chai.assert;
 
 describe('The View Module: viewMe', function(){
+	'use strict';
+
+	var view, view2;
 
 	beforeEach(function(){
 		console = {
@@ -51,7 +54,7 @@ describe('The View Module: viewMe', function(){
             }
         });
 
-        action.templates = {'tom': {}};
+        action.templates = {'tom': function(){ return '<p>tom</p>';}};
 	});
 
 	it('should be defined', function(){
@@ -190,13 +193,17 @@ describe('The View Module: viewMe', function(){
 		assert.strictEqual(emitTest, false);
 	});
 
-	it('should hide itself when a different route triggers', function(){
-
+	it('should hide itself when a different route triggers', function(done){
+		//trigger the data event since there is no real model
+		action.emit('data:set:bicycle', {bike: true});
+        
         action.emit('state:change', 'route:daniel');
         action.emit('state:change', 'route:katie');
-
-        assert.isDefined(view.element);
-        assert.strictEqual(view.element.style, 'none');
+        
+        setTimeout(function(){
+        	assert.strictEqual(view.element.style.display, 'none');
+        	done();
+        }, 50);
     });
 
 	describe('Parent Views', function(){
