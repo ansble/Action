@@ -184,7 +184,7 @@ var required = require('event-state')
     //Old API backward compat
     returnObject.listen = returnObject.on;
 
-    returnObject.listenLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
+    returnObject.onLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
         var that = this;
 
         //convenience function for local listens
@@ -201,6 +201,8 @@ var required = require('event-state')
             });
         }
     };
+
+    returnObject.listenLocal = returnObject.onLocal;
 
     returnObject.once = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
         //same thing as .listen() but is only triggered once
@@ -299,7 +301,7 @@ var required = require('event-state')
     //move towards new API while supporting old API
     returnObject.silence = returnObject.off;
 
-    returnObject.silenceLocal = function(eventNameIn, handlerIn, onceIn, scopeIn){
+    returnObject.offLocal = function(eventNameIn, handlerIn, onceIn, scopeIn){
         var that = this;
 
         //essentially a convenience function.
@@ -316,6 +318,8 @@ var required = require('event-state')
             });
         }
     };
+
+    returnObject.silenceLocal = returnObject.offLocal;
 
     //Event Based state machine
     returnObject.required = required;
@@ -739,24 +743,27 @@ var modelMe = require('./action.model')
             });
         };
 
-        //require event for the data
-        newView.requiredEvent('data:set:' + newView.dataId, function(dataIn){
-            this.set(dataIn);
-        }, newView, true);
-
-        //required event for the template
-        newView.requiredEvent('template:set:' + newView.templateId, function(templateIn){
-            this.template = templateIn;
-        }, newView, true);
 
         if(newView.getElement){
-            newView.requiredEvent('target:set:' + newView.viewId, function(elementIn){
-                this.element = elementIn;
-            });
-
+            //hook up the destroy method for this view
             newView.listen('destroy:' + newView.viewId, function(){
                 this.destroy();
             }, newView);
+
+            newView.required([
+                        'data:set:' + newView.dataId
+                        , 'template:set:' + newView.templateId
+                        , 'target:set:' + newView.viewId
+                    ], function (eventData) {
+                this.set(eventData[0]);
+                this.template = eventData[1];
+            }, newView, true);
+        } else {
+            newView.required(['data:set:' + newView.dataId, 'template:set:' + newView.templateId], function (eventData) {
+                this.set(eventData[0]);
+                this.template = eventData[1];
+                this.element = eventData[2];
+            }, newView, true);
         }
 
         if(typeof newView.destroy === 'undefined'){

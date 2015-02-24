@@ -76,24 +76,27 @@ var modelMe = require('./action.model')
             });
         };
 
-        //require event for the data
-        newView.requiredEvent('data:set:' + newView.dataId, function(dataIn){
-            this.set(dataIn);
-        }, newView, true);
-
-        //required event for the template
-        newView.requiredEvent('template:set:' + newView.templateId, function(templateIn){
-            this.template = templateIn;
-        }, newView, true);
 
         if(newView.getElement){
-            newView.requiredEvent('target:set:' + newView.viewId, function(elementIn){
-                this.element = elementIn;
-            });
-
+            //hook up the destroy method for this view
             newView.listen('destroy:' + newView.viewId, function(){
                 this.destroy();
             }, newView);
+
+            newView.required([
+                        'data:set:' + newView.dataId
+                        , 'template:set:' + newView.templateId
+                        , 'target:set:' + newView.viewId
+                    ], function (eventData) {
+                this.set(eventData[0]);
+                this.template = eventData[1];
+            }, newView, true);
+        } else {
+            newView.required(['data:set:' + newView.dataId, 'template:set:' + newView.templateId], function (eventData) {
+                this.set(eventData[0]);
+                this.template = eventData[1];
+                this.element = eventData[2];
+            }, newView, true);
         }
 
         if(typeof newView.destroy === 'undefined'){

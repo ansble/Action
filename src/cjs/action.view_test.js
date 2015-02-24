@@ -1,7 +1,7 @@
 var assert = chai.assert;
 
 describe('The View Module: viewMe', function(){
-
+	
 	beforeEach(function(){
 		console = {
 			log: function(stuff){

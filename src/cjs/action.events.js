@@ -102,7 +102,7 @@ var required = require('event-state')
     //Old API backward compat
     returnObject.listen = returnObject.on;
 
-    returnObject.listenLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
+    returnObject.onLocal = function(eventNameIn, handlerIn, scopeIn, onceIn){
         var that = this;
 
         //convenience function for local listens
@@ -119,6 +119,8 @@ var required = require('event-state')
             });
         }
     };
+
+    returnObject.listenLocal = returnObject.onLocal;
 
     returnObject.once = function(eventNameIn, handlerIn, scopeIn, localFlagIn){
         //same thing as .listen() but is only triggered once
@@ -217,7 +219,7 @@ var required = require('event-state')
     //move towards new API while supporting old API
     returnObject.silence = returnObject.off;
 
-    returnObject.silenceLocal = function(eventNameIn, handlerIn, onceIn, scopeIn){
+    returnObject.offLocal = function(eventNameIn, handlerIn, onceIn, scopeIn){
         var that = this;
 
         //essentially a convenience function.
@@ -234,6 +236,8 @@ var required = require('event-state')
             });
         }
     };
+
+    returnObject.silenceLocal = returnObject.offLocal;
 
     //Event Based state machine
     returnObject.required = required;
