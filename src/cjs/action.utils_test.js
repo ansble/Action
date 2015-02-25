@@ -5,11 +5,11 @@ describe('The Utilities Module', function(){
     
     describe('Error object constructor tests', function(){
         it('should return an Error constructor', function(){
-            assert.isFunction(action.Error);
+            assert.isFunction(action.errorObj);
         });
 
         it('should create an error object correctly', function(){
-            var err = new action.Error('test'
+            var err = new action.errorObj('test'
                 , 'an error occured yo'
                 , {}
                 , {}

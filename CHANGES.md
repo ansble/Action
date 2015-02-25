@@ -35,6 +35,12 @@ All deprecations will be removed completely in the next version (0.8.0) so start
 - `.offLocal` replaces `.silenceLocal`
 - `.requiredEvent` has been replaced by `.required`. Breaking syntax change and requiredEvent has been removed completely. See the section above outlining the changes.
 
+#### Teardown Stack
+Teardown functions now get pushed onto a stack and all of them get called. This allows for multiple teardown functions to be used.
+
+#### Render Stack
+Render functions now get pushed onto a render stack and all of them get called when .render() is called
+
 ### Non-breaking changes
 
 - Parents now teardown their child views correctly

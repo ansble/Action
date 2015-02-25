@@ -471,7 +471,9 @@ var modelMe = function (objectIn) {
         , changes = []
         , eventTeardown = newModel.tearDown
         , tearDownStack = [eventTeardown, function () {
-            newModel.clear();
+            tearDownStack = undefined;
+            changes = undefined;
+            attributes = undefined;
 
             Object.getOwnPropertyNames(newModel).forEach(function (key) {
                 newModel[key] = undefined;
@@ -614,18 +616,12 @@ var modelMe = function (objectIn) {
         attributes = {};
     };
 
-
-    if(typeof newModel.tearDown === 'function'){
-        tearDownStack.push(newModel.tearDown);
-    }
-
     newModel.tearDown = function(){
         console.log(tearDownStack, newModel);
 
         tearDownStack.forEach( function (teardownFunc) {
             if(typeof teardownFunc === 'function'){
-                console.log(teardownFunc, newModel);
-                // teardownFunc.apply(newModel, []);
+                teardownFunc.apply(newModel, []);
             }
         });
     };

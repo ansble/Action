@@ -9,14 +9,16 @@ var modelMe = function (objectIn) {
     var newModel = utils.compose(eventMe, ajaxMe)
         , attributes = {}
         , changes = []
-        , teardown = function () {
-            newModel.tearDown.apply(newModel); //this is a little bit messy
-            newModel.clear();
+        , eventTeardown = newModel.tearDown
+        , tearDownStack = [eventTeardown, function () {
+            tearDownStack = undefined;
+            changes = undefined;
+            attributes = undefined;
 
             Object.getOwnPropertyNames(newModel).forEach(function (key) {
                 newModel[key] = undefined;
             });
-        };
+        }];
 
     newModel.super = {};
 
@@ -154,12 +156,15 @@ var modelMe = function (objectIn) {
         attributes = {};
     };
 
+    newModel.tearDown = function(){
+        console.log(tearDownStack, newModel);
 
-    if(typeof newModel.tearDown === 'function'){
-        newModel.super.tearDown = teardown;
-    } else {
-        newModel.tearDown = teardown;
-    }
+        tearDownStack.forEach( function (teardownFunc) {
+            if(typeof teardownFunc === 'function'){
+                teardownFunc.apply(newModel, []);
+            }
+        });
+    };
 
     if(typeof objectIn.data !== 'undefined'){
         newModel.set(objectIn.data); //set the inital attributes
@@ -168,11 +173,15 @@ var modelMe = function (objectIn) {
 
     //iterate over the passed in object and set the values on the returned object
     Object.getOwnPropertyNames(objectIn).forEach(function (key) {
-        if(typeof newModel[key] !== 'undefined'){
+        if(typeof newModel[key] !== 'undefined' && key !== 'tearDown'){
             newModel.super[key] = newModel[key];
         }
 
-        newModel[key] = objectIn[key];
+        if(key === 'tearDown'){
+            tearDownStack.push(objectIn[key]);
+        } else {
+            newModel[key] = objectIn[key];
+        }
     });
 
     newModel.onLocal('attribute:changed', function (nameIn) {
