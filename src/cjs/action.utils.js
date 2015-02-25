@@ -6,7 +6,7 @@ var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
             , message: messageIn
             , createdBy: objectIn
             , errorObject: errorObjectIn
-        }
+        };
     }
 
     //a clone function
@@ -48,19 +48,21 @@ var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
         var obj = {}
             , i = 0
             , currObj = {}
-            , that = this;
+            , that = this
+
+            , setProperty = function (property) {
+                if(typeof currObj[property] === 'object'){
+                    obj[property] = that.clone(currObj[property]);
+                } else {
+                    obj[property] = currObj[property];
+                }
+            };
 
         for(i = 0; i < arguments.length; i++){
             if(typeof arguments[i] === 'object' && !Array.isArray(arguments[i])){
                 currObj = arguments[i];
 
-                Object.getOwnPropertyNames(currObj).forEach(function(property){
-                    if(typeof currObj[property] === 'object'){
-                        obj[property] = that.clone(currObj[property]);
-                    } else {
-                        obj[property] = currObj[property];
-                    }
-                });
+                Object.getOwnPropertyNames(currObj).forEach(setProperty);
             } else if (typeof arguments[i] === 'function') {
                 //this is a function apply it
                 arguments[i].call(obj, obj);

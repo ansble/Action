@@ -1,14 +1,16 @@
 var model = require('./action.model.js')
 	, eventMe = require('./action.events')
 	, utils = require('./action.utils')
-	
+    , ajaxMe = require('./action.ajax')
+
 	, collectionMe = function (urlIn, dataIn) {
 		'use strict';
 
 		var url
-			, collection = eventMe({
-				storage: []
-			});
+			, collection =[];
+
+		collection.events = eventMe({});
+		collection.ajax = ajaxMe({});
 
 		//three possible signatures for the function
 		//	(url, data)
@@ -16,7 +18,7 @@ var model = require('./action.model.js')
 		//	(data)
 		//	({url, data})
 		if(typeof urlIn === 'object' && Array.isArray(urlIn)){
-			collection.storage = urlIn;
+			collection = collection.concat(urlIn);
 		} else if(typeof urlIn === 'object'){
 			url = urlIn.url;
 			collection.storage = urlIn.collection;
@@ -36,3 +38,5 @@ var model = require('./action.model.js')
 	};
 
 module.exports = collectionMe;
+
+// action.collectionMe([], '/api/users');

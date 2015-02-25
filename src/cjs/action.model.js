@@ -8,7 +8,15 @@ var modelMe = function (objectIn) {
     //this is the module for creating a data model object
     var newModel = utils.compose(eventMe, ajaxMe)
         , attributes = {}
-        , changes = [];
+        , changes = []
+        , teardown = function () {
+            newModel.tearDown.apply(newModel); //this is a little bit messy
+            newModel.clear();
+            
+            Object.getOwnPropertyNames(newModel).forEach(function (key) {
+                newModel[key] = undefined;
+            });
+        };
 
     newModel.super = {};
 
@@ -17,54 +25,46 @@ var modelMe = function (objectIn) {
     };
 
     newModel.set = function (attributeName, attributeValue) {
-        var that = this
-            , key;
+        var that = this;
 
         if(typeof attributeName === 'object'){
             //well... this is an object... iterate and rock on
-            for(key in attributeName){
-                if(attributeName.hasOwnProperty(key)){
-                    //this attribute does not belong to the prototype. Good.
-
-                    //TODO: maybe make this do a deep copy to prevent
-                    //  pass by reference or switch to clone()
-                    if(key !== 'tearDown' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
-                        if(typeof attributeValue === 'object'){
-                            attributes[attributeName] = (Array.isArray(attributeName[key])) ? [] : {};
-                            utils.clone(attributes[attributeName], attributeName[key]);
-                        }else{
-                            attributes[key] = attributeName[key];
-                        }
-                        that.emitLocal('attribute:changed', key);
-                    } else {
-                        if(typeof that[key] === 'function' && !that.super[key]){
-                            //wrap the super version in a closure so that we can
-                            //  still execute it correctly
-                            that.super[key] = that[key].bind(that);
-                        }
-
-                        that[key] = attributeName[key];
+            Object.getOwnPropertyNames(attributeName).forEach(function (key) {
+                if(key !== 'tearDown' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
+                    if(typeof attributeValue === 'object'){
+                        attributes[attributeName] = (Array.isArray(attributeName[key])) ? [] : {};
+                        utils.clone(attributes[attributeName], attributeName[key]);
+                    }else{
+                        attributes[key] = attributeName[key];
                     }
-                }
-            }
-        } else{
-            if(attributeName !== 'tearDown' && attributeName !== 'fetch' && attributeName !== 'save'){
-                if(typeof attributeValue === 'object'){
-                    attributes[attributeName] = (Array.isArray(attributeValue)) ? [] : {};
-                    utils.clone(attributes[attributeName], attributeValue);
-                }else{
-                    attributes[attributeName] = attributeValue;
-                }
 
-                that.emitLocal('attribute:changed', attributeName);
-            } else {
-                if(typeof that[attributeName] === 'function'){
-                    //wrap the super version in a closure so that we can
-                    //  still execute it correctly
-                    that.super[attributeName] = that[attributeName].bind(that);
+                    that.emitLocal('attribute:changed', key);
+                } else {
+                    if(typeof that[key] === 'function' && !that.super[key]){
+                        //wrap the super version in a closure so that we can
+                        //  still execute it correctly
+                        that.super[key] = that[key].bind(that);
+                    }
+
+                    that[key] = attributeName[key];
                 }
-                that[attributeName] = attributeValue;
+            });
+        } else if(attributeName !== 'tearDown' && attributeName !== 'fetch' && attributeName !== 'save'){
+            if(typeof attributeValue === 'object'){
+                attributes[attributeName] = (Array.isArray(attributeValue)) ? [] : {};
+                utils.clone(attributes[attributeName], attributeValue);
+            }else{
+                attributes[attributeName] = attributeValue;
             }
+
+            that.emitLocal('attribute:changed', attributeName);
+        } else {
+            if(typeof that[attributeName] === 'function'){
+                //wrap the super version in a closure so that we can
+                //  still execute it correctly
+                that.super[attributeName] = that[attributeName].bind(that);
+            }
+            that[attributeName] = attributeValue;
         }
     };
 
@@ -154,17 +154,12 @@ var modelMe = function (objectIn) {
         attributes = {};
     };
 
-    newModel.super.tearDownEvents = newModel.tearDown;
 
-    newModel.tearDown = function () {
-        var that = this;
-
-        that.super.tearDownEvents.apply(newModel); //this is a little bit messy
-        that.clear();
-        Object.getOwnPropertyNames(newModel).forEach(function (key) {
-            newModel[key] = undefined;
-        });
-    };
+    if(typeof newModel.tearDown === 'function'){
+        newModel.super.tearDown = teardown;
+    } else {
+        newModel.tearDown = teardown;
+    }
 
     if(typeof objectIn.data !== 'undefined'){
         newModel.set(objectIn.data); //set the inital attributes

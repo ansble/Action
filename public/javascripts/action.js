@@ -477,54 +477,46 @@ var modelMe = function (objectIn) {
     };
 
     newModel.set = function (attributeName, attributeValue) {
-        var that = this
-            , key;
+        var that = this;
 
         if(typeof attributeName === 'object'){
             //well... this is an object... iterate and rock on
-            for(key in attributeName){
-                if(attributeName.hasOwnProperty(key)){
-                    //this attribute does not belong to the prototype. Good.
-
-                    //TODO: maybe make this do a deep copy to prevent
-                    //  pass by reference or switch to clone()
-                    if(key !== 'tearDown' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
-                        if(typeof attributeValue === 'object'){
-                            attributes[attributeName] = (Array.isArray(attributeName[key])) ? [] : {};
-                            utils.clone(attributes[attributeName], attributeName[key]);
-                        }else{
-                            attributes[key] = attributeName[key];
-                        }
-                        that.emitLocal('attribute:changed', key);
-                    } else {
-                        if(typeof that[key] === 'function' && !that.super[key]){
-                            //wrap the super version in a closure so that we can
-                            //  still execute it correctly
-                            that.super[key] = that[key].bind(that);
-                        }
-
-                        that[key] = attributeName[key];
+            Object.getOwnPropertyNames(attributeName).forEach(function (key) {
+                if(key !== 'tearDown' && key !== 'fetch' && key !== 'save' && typeof attributeName[key] !== 'function'){
+                    if(typeof attributeValue === 'object'){
+                        attributes[attributeName] = (Array.isArray(attributeName[key])) ? [] : {};
+                        utils.clone(attributes[attributeName], attributeName[key]);
+                    }else{
+                        attributes[key] = attributeName[key];
                     }
-                }
-            }
-        } else{
-            if(attributeName !== 'tearDown' && attributeName !== 'fetch' && attributeName !== 'save'){
-                if(typeof attributeValue === 'object'){
-                    attributes[attributeName] = (Array.isArray(attributeValue)) ? [] : {};
-                    utils.clone(attributes[attributeName], attributeValue);
-                }else{
-                    attributes[attributeName] = attributeValue;
-                }
 
-                that.emitLocal('attribute:changed', attributeName);
-            } else {
-                if(typeof that[attributeName] === 'function'){
-                    //wrap the super version in a closure so that we can
-                    //  still execute it correctly
-                    that.super[attributeName] = that[attributeName].bind(that);
+                    that.emitLocal('attribute:changed', key);
+                } else {
+                    if(typeof that[key] === 'function' && !that.super[key]){
+                        //wrap the super version in a closure so that we can
+                        //  still execute it correctly
+                        that.super[key] = that[key].bind(that);
+                    }
+
+                    that[key] = attributeName[key];
                 }
-                that[attributeName] = attributeValue;
+            });
+        } else if(attributeName !== 'tearDown' && attributeName !== 'fetch' && attributeName !== 'save'){
+            if(typeof attributeValue === 'object'){
+                attributes[attributeName] = (Array.isArray(attributeValue)) ? [] : {};
+                utils.clone(attributes[attributeName], attributeValue);
+            }else{
+                attributes[attributeName] = attributeValue;
             }
+
+            that.emitLocal('attribute:changed', attributeName);
+        } else {
+            if(typeof that[attributeName] === 'function'){
+                //wrap the super version in a closure so that we can
+                //  still execute it correctly
+                that.super[attributeName] = that[attributeName].bind(that);
+            }
+            that[attributeName] = attributeValue;
         }
     };
 
@@ -702,7 +694,7 @@ var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
             , message: messageIn
             , createdBy: objectIn
             , errorObject: errorObjectIn
-        }
+        };
     }
 
     //a clone function
@@ -744,19 +736,21 @@ var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
         var obj = {}
             , i = 0
             , currObj = {}
-            , that = this;
+            , that = this
+
+            , setProperty = function (property) {
+                if(typeof currObj[property] === 'object'){
+                    obj[property] = that.clone(currObj[property]);
+                } else {
+                    obj[property] = currObj[property];
+                }
+            };
 
         for(i = 0; i < arguments.length; i++){
             if(typeof arguments[i] === 'object' && !Array.isArray(arguments[i])){
                 currObj = arguments[i];
 
-                Object.getOwnPropertyNames(currObj).forEach(function(property){
-                    if(typeof currObj[property] === 'object'){
-                        obj[property] = that.clone(currObj[property]);
-                    } else {
-                        obj[property] = currObj[property];
-                    }
-                });
+                Object.getOwnPropertyNames(currObj).forEach(setProperty);
             } else if (typeof arguments[i] === 'function') {
                 //this is a function apply it
                 arguments[i].call(obj, obj);
