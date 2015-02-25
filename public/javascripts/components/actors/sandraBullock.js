@@ -1,4 +1,4 @@
-sandraBullock = action.modelMe({
+action.modelMe({
     data: {
         name: 'Sandra Bullock'
         , role: 'actress'
@@ -10,7 +10,7 @@ sandraBullock = action.modelMe({
         
         var that = this;
 
-        that.listen('actor:cast', function(){
+        that.on('actor:cast', function(){
             that.emit('actor:me', that);
         });
     }

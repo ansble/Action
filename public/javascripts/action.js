@@ -170,12 +170,12 @@ var ajaxMe =  function (objectIn) {
                     }else if(this.status.match(/^[4][0-9][0-9]$/)){
 
                     }else if(this.status.match(/^[5][0-9][0-9]$/)){
-                        that.emit('global:error', new action.Error('http', 'Error in request', that));
+                        that.emit('global:error', new action.errorObj('http', 'Error in request', that));
                     }
                 };
 
         oReq.onerror = function(xhr, errorType, error){
-                    that.emit('global:error', new action.Error('http', 'Error in request type: ' + errorType, that, error));
+                    that.emit('global:error', new action.errorObj('http', 'Error in request type: ' + errorType, that, error));
                 };
 
         oReq.open('get', requestUrl, true);
@@ -468,7 +468,15 @@ var modelMe = function (objectIn) {
     //this is the module for creating a data model object
     var newModel = utils.compose(eventMe, ajaxMe)
         , attributes = {}
-        , changes = [];
+        , changes = []
+        , eventTeardown = newModel.tearDown
+        , tearDownStack = [eventTeardown, function () {
+            newModel.clear();
+
+            Object.getOwnPropertyNames(newModel).forEach(function (key) {
+                newModel[key] = undefined;
+            });
+        }];
 
     newModel.super = {};
 
@@ -556,7 +564,7 @@ var modelMe = function (objectIn) {
                 that.ajaxGet(setVariableName, successFunction);
             }
         } else {
-            that.emit('global:error', new utils.Error('http', 'No URL defined', that));
+            that.emit('global:error', new utils.errorObj('http', 'No URL defined', that));
             if(typeof errorFunction === 'function'){
                 errorFunction.apply(that);
             }
@@ -581,7 +589,7 @@ var modelMe = function (objectIn) {
                     that.emit(that.get('dataEvent'), data);
 
                 }else if(this.status === 500 || this.status === 400){
-                    that.emit('global:error', new utils.Error('http', 'Error in request', that));
+                    that.emit('global:error', new utils.errorObj('http', 'Error in request', that));
                 }
             };
 
@@ -590,7 +598,7 @@ var modelMe = function (objectIn) {
             oReq.open(type, requestUrl, true);
             oReq.send();
         } else {
-            that.emit('global:error', new utils.Error('http', 'No URL defined', that));
+            that.emit('global:error', new utils.errorObj('http', 'No URL defined', that));
         }
     };
 
@@ -606,15 +614,19 @@ var modelMe = function (objectIn) {
         attributes = {};
     };
 
-    newModel.super.tearDownEvents = newModel.tearDown;
 
-    newModel.tearDown = function () {
-        var that = this;
+    if(typeof newModel.tearDown === 'function'){
+        tearDownStack.push(newModel.tearDown);
+    }
 
-        that.super.tearDownEvents.apply(newModel); //this is a little bit messy
-        that.clear();
-        Object.getOwnPropertyNames(newModel).forEach(function (key) {
-            newModel[key] = undefined;
+    newModel.tearDown = function(){
+        console.log(tearDownStack, newModel);
+
+        tearDownStack.forEach( function (teardownFunc) {
+            if(typeof teardownFunc === 'function'){
+                console.log(teardownFunc, newModel);
+                // teardownFunc.apply(newModel, []);
+            }
         });
     };
 
@@ -625,11 +637,15 @@ var modelMe = function (objectIn) {
 
     //iterate over the passed in object and set the values on the returned object
     Object.getOwnPropertyNames(objectIn).forEach(function (key) {
-        if(typeof newModel[key] !== 'undefined'){
+        if(typeof newModel[key] !== 'undefined' && key !== 'tearDown'){
             newModel.super[key] = newModel[key];
         }
 
-        newModel[key] = objectIn[key];
+        if(key === 'tearDown'){
+            tearDownStack.push(objectIn[key]);
+        } else {
+            newModel[key] = objectIn[key];
+        }
     });
 
     newModel.onLocal('attribute:changed', function (nameIn) {
@@ -686,7 +702,7 @@ var eventMe = require('./action.events')
 
 module.exports = routeMe;
 },{"./action.events":4}],7:[function(require,module,exports){
-var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
+var errorObj =  function (typeIn, messageIn, objectIn, errorObjectIn) {
         'use strict';
 
         return {
@@ -760,7 +776,7 @@ var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
         return obj;
     };
 
-module.exports = {Error: Error, clone: clone, compose: compose};
+module.exports = {errorObj: errorObj, clone: clone, compose: compose};
 },{}],8:[function(require,module,exports){
 var modelMe = require('./action.model')
     , utils = require('./action.utils')
@@ -783,22 +799,22 @@ var modelMe = require('./action.model')
             , renderStack = [];
 
         if(typeof newView.templateId === 'undefined'){
-            that.emit('global:error', new utils.Error('required param', 'templateId is required for a view', that));
+            that.emit('global:error', new utils.errorObj('required param', 'templateId is required for a view', that));
             return;
         }
 
         if(typeof newView.dataId === 'undefined'){
-            that.emit('global:error', new utils.Error('required param', 'dataId is required for a view', that));
+            that.emit('global:error', new utils.errorObj('required param', 'dataId is required for a view', that));
             return;
         }
 
         if(typeof newView.viewId === 'undefined'){
-            that.emit('global:error', new utils.Error('required param', 'viewId is required for a view', that));
+            that.emit('global:error', new utils.errorObj('required param', 'viewId is required for a view', that));
             return;
         }
 
         if(typeof newView.stateEvents !== 'string' && !Array.isArray(newView.stateEvents)){
-            that.emit('global:error', new utils.Error('required param', 'stateEvents is required for a view and must be an array', that));
+            that.emit('global:error', new utils.errorObj('required param', 'stateEvents is required for a view and must be an array', that));
             return;
         }
 
@@ -930,18 +946,18 @@ window.action = {
     , modelMe: modelMe
 	, clone: utils.clone
     , compose: utils.compose
-	, Error: utils.Error
+	, errorObj: utils.errorObj
     , ajaxMe: ajaxMe
     , init: function(){
         'use strict';
 
         var that = this;
 
-        that.listen('template:get', function(templateID){
+        that.on('template:get', function(templateID){
             that.emit('template:set:' + templateID, that.templates[templateID]);
         }, that);
 
-        that.listen('global:error', function(errorIn) {
+        that.on('global:error', function(errorIn) {
             
             console.group('An Error occured in an object with emitterid: ' + errorIn.createdBy.emitterId);
             console.log('It was a ' + errorIn.type + 'error.');

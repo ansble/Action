@@ -1,5 +1,5 @@
 //do some setup for testing
-angLee = action.modelMe({
+action.modelMe({
     data: {
         name: 'Ang Lee'
         , role: 'Director'
@@ -10,7 +10,7 @@ angLee = action.modelMe({
 
         var that = this;
 
-        that.listen('cast:movie', function () {
+        that.on('cast:movie', function () {
             that.castingCall();
 
             //wait a little while...
@@ -31,7 +31,7 @@ angLee = action.modelMe({
     }
 });
 
-currentActor = action.eventMe({
+action.eventMe({
     actors: []
 
     , init: function(){
@@ -39,7 +39,7 @@ currentActor = action.eventMe({
 
         var that = this;
 
-        that.listen('actor:me', function(actor){
+        that.on('actor:me', function(actor){
             var i = 0
                 , fresh = true;
 
@@ -52,7 +52,7 @@ currentActor = action.eventMe({
             }
         });
 
-        that.listen('actor:choose', function(){
+        that.on('actor:choose', function(){
             var rand = Math.floor(Math.random() * (that.actors.length ));
 
             that.emit('actor:change', that.actors[rand]);
@@ -60,7 +60,7 @@ currentActor = action.eventMe({
     }
 });
 
-action.listen('actor:change', function(actor){
+action.on('actor:change', function(actor){
     'use strict';
     
     $('.currentActorName').text(actor.get('name'));
