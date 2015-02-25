@@ -21,11 +21,11 @@ window.action = {
 
         var that = this;
 
-        that.listen('template:get', function(templateID){
+        that.on('template:get', function(templateID){
             that.emit('template:set:' + templateID, that.templates[templateID]);
         }, that);
 
-        that.listen('global:error', function(errorIn) {
+        that.on('global:error', function(errorIn) {
             
             console.group('An Error occured in an object with emitterid: ' + errorIn.createdBy.emitterId);
             console.log('It was a ' + errorIn.type + 'error.');
