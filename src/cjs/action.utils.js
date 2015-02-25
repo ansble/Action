@@ -1,4 +1,4 @@
-var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
+var errorObj =  function (typeIn, messageIn, objectIn, errorObjectIn) {
         'use strict';
 
         return {
@@ -72,4 +72,4 @@ var Error =  function (typeIn, messageIn, objectIn, errorObjectIn) {
         return obj;
     };
 
-module.exports = {Error: Error, clone: clone, compose: compose};
+module.exports = {errorObj: errorObj, clone: clone, compose: compose};

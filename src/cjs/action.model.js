@@ -12,7 +12,7 @@ var modelMe = function (objectIn) {
         , teardown = function () {
             newModel.tearDown.apply(newModel); //this is a little bit messy
             newModel.clear();
-            
+
             Object.getOwnPropertyNames(newModel).forEach(function (key) {
                 newModel[key] = undefined;
             });
@@ -104,7 +104,7 @@ var modelMe = function (objectIn) {
                 that.ajaxGet(setVariableName, successFunction);
             }
         } else {
-            that.emit('global:error', new utils.Error('http', 'No URL defined', that));
+            that.emit('global:error', new utils.errorObj('http', 'No URL defined', that));
             if(typeof errorFunction === 'function'){
                 errorFunction.apply(that);
             }
@@ -129,7 +129,7 @@ var modelMe = function (objectIn) {
                     that.emit(that.get('dataEvent'), data);
 
                 }else if(this.status === 500 || this.status === 400){
-                    that.emit('global:error', new utils.Error('http', 'Error in request', that));
+                    that.emit('global:error', new utils.errorObj('http', 'Error in request', that));
                 }
             };
 
@@ -138,7 +138,7 @@ var modelMe = function (objectIn) {
             oReq.open(type, requestUrl, true);
             oReq.send();
         } else {
-            that.emit('global:error', new utils.Error('http', 'No URL defined', that));
+            that.emit('global:error', new utils.errorObj('http', 'No URL defined', that));
         }
     };
 

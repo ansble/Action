@@ -31,7 +31,7 @@ var model = require('./action.model.js')
 		} else {
 			//this is not handled because we gotta have something!
 
-			collection.emit('global:error', new utils.Error('required param', 'collections require an array of data, or a url to be created', collection));
+			collection.emit('global:error', new utils.errorObj('required param', 'collections require an array of data, or a url to be created', collection));
             return;
 		}
 

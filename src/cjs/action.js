@@ -14,7 +14,7 @@ window.action = {
     , modelMe: modelMe
 	, clone: utils.clone
     , compose: utils.compose
-	, Error: utils.Error
+	, errorObj: utils.errorObj
     , ajaxMe: ajaxMe
     , init: function(){
         'use strict';

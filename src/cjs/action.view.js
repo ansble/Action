@@ -19,22 +19,22 @@ var modelMe = require('./action.model')
             , renderStack = [];
 
         if(typeof newView.templateId === 'undefined'){
-            that.emit('global:error', new utils.Error('required param', 'templateId is required for a view', that));
+            that.emit('global:error', new utils.errorObj('required param', 'templateId is required for a view', that));
             return;
         }
 
         if(typeof newView.dataId === 'undefined'){
-            that.emit('global:error', new utils.Error('required param', 'dataId is required for a view', that));
+            that.emit('global:error', new utils.errorObj('required param', 'dataId is required for a view', that));
             return;
         }
 
         if(typeof newView.viewId === 'undefined'){
-            that.emit('global:error', new utils.Error('required param', 'viewId is required for a view', that));
+            that.emit('global:error', new utils.errorObj('required param', 'viewId is required for a view', that));
             return;
         }
 
         if(typeof newView.stateEvents !== 'string' && !Array.isArray(newView.stateEvents)){
-            that.emit('global:error', new utils.Error('required param', 'stateEvents is required for a view and must be an array', that));
+            that.emit('global:error', new utils.errorObj('required param', 'stateEvents is required for a view and must be an array', that));
             return;
         }
 

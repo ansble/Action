@@ -27,12 +27,12 @@ var ajaxMe =  function (objectIn) {
                     }else if(this.status.match(/^[4][0-9][0-9]$/)){
 
                     }else if(this.status.match(/^[5][0-9][0-9]$/)){
-                        that.emit('global:error', new action.Error('http', 'Error in request', that));
+                        that.emit('global:error', new action.errorObj('http', 'Error in request', that));
                     }
                 };
 
         oReq.onerror = function(xhr, errorType, error){
-                    that.emit('global:error', new action.Error('http', 'Error in request type: ' + errorType, that, error));
+                    that.emit('global:error', new action.errorObj('http', 'Error in request type: ' + errorType, that, error));
                 };
 
         oReq.open('get', requestUrl, true);
